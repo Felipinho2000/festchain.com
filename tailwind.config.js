@@ -50,18 +50,18 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			violet: {
-  				DEFAULT: '#7C3AED',
-  				light: '#A78BFA',
-  				dark: '#5B21B6'
-  			},
-  			amber: {
-  				DEFAULT: '#F59E0B',
-  				light: '#FCD34D',
-  				dark: '#D97706'
-  			},
-  			bone: '#FAF9F6',
-  			warmgray: '#6B6661',
+  			orange: {
+  					DEFAULT: '#FF5500',
+  					light: '#FF7733',
+  					dark: '#CC4400'
+  				},
+  				amber: {
+  					DEFAULT: '#FF5500',
+  					light: '#FF7733',
+  					dark: '#CC4400'
+  				},
+  				bone: '#141414',
+  				warmgray: '#888888',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

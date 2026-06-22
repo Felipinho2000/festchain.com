@@ -11,13 +11,17 @@ const genreLabels = {
   rock: "Rock", sertanejo: "Sertanejo", other: "Other"
 };
 
+// 1 FTC ≈ R$0.50 — so FTC price = BRL / 0.5 = BRL * 2
+const brlToFtc = (brl) => Math.round(brl * 2);
+
 export default function EventCard({ event }) {
   const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
-  const soldOutPercent = Math.round(((event.tickets_sold || 0) / event.total_capacity) * 100);
+  const soldPct = Math.min(100, Math.round(((event.tickets_sold || 0) / event.total_capacity) * 100));
+  const ftcPrice = event.festcoin_price || brlToFtc(event.ticket_price);
 
   return (
     <Link to={`/events/${event.id}`} className="group block">
-      <div className="bg-white border border-border rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_24px_-8px_rgba(45,42,38,0.12)] hover:border-primary/30 hover:-translate-y-1">
+      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_20px_-4px_rgba(255,85,0,0.2)]">
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
           {event.image_url ? (
@@ -27,7 +31,7 @@ export default function EventCard({ event }) {
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+            <div className="w-full h-full flex items-center justify-center bg-[#1f1f1f]">
               <Music className="w-10 h-10 text-primary/30" strokeWidth={1.5} />
             </div>
           )}
@@ -38,7 +42,7 @@ export default function EventCard({ event }) {
             </div>
           )}
           {event.genre && (
-            <Badge variant="secondary" className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-foreground text-xs">
+            <Badge className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs border-0">
               {genreLabels[event.genre] || event.genre}
             </Badge>
           )}
@@ -46,38 +50,53 @@ export default function EventCard({ event }) {
 
         {/* Content */}
         <div className="p-4">
-          <h3 className="font-heading font-semibold text-base text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="font-heading font-semibold text-base text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">
             {event.title}
           </h3>
 
           <div className="flex flex-col gap-1.5 mb-3">
-            <div className="flex items-center gap-2 text-warmgray text-sm">
+            <div className="flex items-center gap-2 text-[#888] text-sm">
               <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
               <span>{moment(event.date).format("MMM D, YYYY · h:mm A")}</span>
             </div>
-            <div className="flex items-center gap-2 text-warmgray text-sm">
+            <div className="flex items-center gap-2 text-[#888] text-sm">
               <MapPin className="w-3.5 h-3.5" strokeWidth={1.5} />
               <span className="truncate">{event.location_name}</span>
             </div>
           </div>
 
-          {/* Bottom row */}
-          <div className="flex items-center justify-between pt-3 border-t border-border">
-            <div className="flex flex-col">
-              <span className="text-xs text-warmgray">From</span>
-              <span className="font-heading font-bold text-foreground">
-                R$ {event.ticket_price?.toFixed(2)}
-              </span>
+          {/* Capacity bar */}
+          <div className="mb-3">
+            <div className="flex justify-between text-[10px] text-[#666] mb-1">
+              <span>{event.tickets_sold || 0} sold</span>
+              <span>{spotsLeft > 0 ? `${spotsLeft} left` : "Sold out"}</span>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1 text-amber" title="FestCoin reward">
-                <Zap className="w-3.5 h-3.5" strokeWidth={1.5} />
-                <span className="font-semibold">+{event.festcoin_reward || 50}</span>
+            <div className="h-1 bg-[#252525] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${soldPct}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Pricing row */}
+          <div className="flex items-end justify-between pt-3 border-t border-border">
+            <div>
+              <span className="text-[10px] text-[#555] block mb-0.5">From</span>
+              <div className="flex items-center gap-2">
+                <span className="font-heading font-bold text-white text-sm">
+                  R$ {event.ticket_price?.toFixed(2)}
+                </span>
+                <span className="text-[10px] text-[#555]">or</span>
+                <span className="flex items-center gap-0.5 font-heading font-bold text-primary text-sm">
+                  <Zap className="w-3 h-3" strokeWidth={2} />
+                  {ftcPrice.toLocaleString()} FTC
+                </span>
               </div>
-              <div className="flex items-center gap-1 text-warmgray">
-                <Users className="w-3.5 h-3.5" strokeWidth={1.5} />
-                <span>{spotsLeft > 0 ? `${spotsLeft} left` : "Sold out"}</span>
-              </div>
+            </div>
+            <div className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-lg">
+              <Zap className="w-3 h-3" strokeWidth={2} />
+              +{event.festcoin_reward || 50}
             </div>
           </div>
         </div>

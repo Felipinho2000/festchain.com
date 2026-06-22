@@ -1,46 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 40 33% 98%;
-    --foreground: 60 5% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 60 5% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 60 5% 10%;
-    --primary: 263 84% 58%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 25 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 40 12% 95%;
-    --secondary-foreground: 60 5% 10%;
-    --muted: 40 12% 95%;
-    --muted-foreground: 30 5% 42%;
-    --accent: 38 92% 50%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 25 100% 50%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 30 10% 90%;
-    --input: 30 10% 90%;
-    --ring: 263 84% 58%;
-    --chart-1: 263 84% 58%;
-    --chart-2: 38 92% 50%;
-    --chart-3: 30 5% 42%;
-    --chart-4: 263 50% 75%;
-    --chart-5: 38 70% 70%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 25 100% 50%;
+    --chart-1: 25 100% 50%;
+    --chart-2: 25 80% 65%;
+    --chart-3: 0 0% 55%;
+    --chart-4: 25 60% 40%;
+    --chart-5: 0 0% 35%;
     --radius: 0.75rem;
     --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 60 5% 10%;
-    --sidebar-primary: 263 84% 58%;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 25 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 12% 95%;
-    --sidebar-accent-foreground: 60 5% 10%;
-    --sidebar-border: 30 10% 90%;
-    --sidebar-ring: 263 84% 58%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 80%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 25 100% 50%;
   }
 }
 
@@ -50,6 +52,7 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased;
+    background-color: #141414;
   }
 }
 

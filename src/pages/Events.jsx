@@ -43,23 +43,30 @@ export default function Events() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading font-bold text-3xl text-foreground mb-1">Discover Events</h1>
-        <p className="text-warmgray text-sm">Find your next party, buy NFT tickets, and earn FestCoin rewards.</p>
+        <h1 className="font-heading font-bold text-3xl text-white mb-1">Discover Events</h1>
+        <p className="text-[#888] text-sm">Find your next party, buy NFT tickets, and earn FestCoin rewards.</p>
+      </div>
+
+      {/* Sponsor banner */}
+      <div className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3">
+        <span className="text-xl">🍺</span>
+        <p className="text-[#888] text-sm flex-1"><span className="text-white font-semibold">Heineken</span> — Scan your ticket at Heineken bars at any event for a free beer</p>
+        <span className="text-[10px] text-[#555] uppercase tracking-wider">Sponsored</span>
       </div>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-warmgray" strokeWidth={1.5} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" strokeWidth={1.5} />
           <Input
             placeholder="Search events or venues..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 h-11 rounded-xl bg-white border-border"
+            className="pl-9 h-11 rounded-xl bg-card border-border text-white placeholder:text-[#555]"
           />
         </div>
         <Select value={genre} onValueChange={setGenre}>
-          <SelectTrigger className="w-full sm:w-[180px] h-11 rounded-xl bg-white border-border">
+          <SelectTrigger className="w-full sm:w-[180px] h-11 rounded-xl bg-card border-border text-white">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -74,7 +81,7 @@ export default function Events() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1,2,3,4,5,6].map(i => (
-            <div key={i} className="bg-white border border-border rounded-xl overflow-hidden">
+            <div key={i} className="bg-card border border-border rounded-xl overflow-hidden">
               <div className="aspect-[16/10] bg-secondary animate-pulse" />
               <div className="p-4 space-y-2">
                 <div className="h-4 bg-secondary rounded animate-pulse w-3/4" />
@@ -88,9 +95,9 @@ export default function Events() {
           {filtered.map(event => <EventCard key={event.id} event={event} />)}
         </div>
       ) : (
-        <div className="bg-white border border-border rounded-xl p-12 text-center">
-          <Calendar className="w-10 h-10 text-warmgray/40 mx-auto mb-3" strokeWidth={1.5} />
-          <p className="text-warmgray text-sm">No events found. Check back soon or adjust your filters.</p>
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
+          <Calendar className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
+          <p className="text-[#666] text-sm">No events found. Check back soon or adjust your filters.</p>
         </div>
       )}
     </div>
