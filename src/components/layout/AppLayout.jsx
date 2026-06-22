@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Ticket, Zap, LayoutDashboard, Calendar, Camera, Wallet,
-  LogOut, Home, ShoppingCart, ChevronRight
+  LogOut, Home, ShoppingCart, User
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -16,6 +16,7 @@ const navItems = [
   { icon: ShoppingCart, label: "Buy FTC", path: "/buy-ftc" },
   { icon: Camera, label: "Moments", path: "/moments" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+  { icon: User, label: "Profile", path: "/profile" },
 ];
 
 const mobileNavItems = [
@@ -24,6 +25,7 @@ const mobileNavItems = [
   { icon: ShoppingCart, label: "Buy FTC", path: "/buy-ftc" },
   { icon: Wallet, label: "Wallet", path: "/festcoin" },
   { icon: Camera, label: "Moments", path: "/moments" },
+  { icon: User, label: "Profile", path: "/profile" },
 ];
 
 // Sponsor banner shown in sidebar

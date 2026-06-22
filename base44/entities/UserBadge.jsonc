@@ -1,0 +1,30 @@
+{
+  "name": "UserBadge",
+  "type": "object",
+  "properties": {
+    "badge_key": {
+      "type": "string",
+      "description": "unique slug e.g. first_event, ten_events, night_owl"
+    },
+    "badge_name": {
+      "type": "string"
+    },
+    "badge_description": {
+      "type": "string"
+    },
+    "badge_emoji": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "badge_key",
+    "badge_name",
+    "badge_emoji"
+  ]
+}

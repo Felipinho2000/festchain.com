@@ -23,6 +23,7 @@ import FestCoin from '@/pages/FestCoin';
 import Moments from '@/pages/Moments';
 import Dashboard from '@/pages/Dashboard';
 import BuyFTC from '@/pages/BuyFTC';
+import Profile from '@/pages/Profile';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
           <Route path="/moments" element={<Moments />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
 
