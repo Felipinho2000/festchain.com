@@ -1,0 +1,93 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "genre": {
+      "type": "string",
+      "enum": [
+        "techno",
+        "house",
+        "trance",
+        "drum_and_bass",
+        "hip_hop",
+        "reggaeton",
+        "funk",
+        "pop",
+        "rock",
+        "sertanejo",
+        "other"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "location_name": {
+      "type": "string"
+    },
+    "location_address": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "ticket_price": {
+      "type": "number"
+    },
+    "festcoin_price": {
+      "type": "number"
+    },
+    "festcoin_reward": {
+      "type": "number",
+      "default": 50
+    },
+    "total_capacity": {
+      "type": "number"
+    },
+    "tickets_sold": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "live",
+        "ended",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "has_poap": {
+      "type": "boolean",
+      "default": true
+    },
+    "dj_lineup": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "organizer_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "date",
+    "location_name",
+    "ticket_price",
+    "total_capacity"
+  ]
+}

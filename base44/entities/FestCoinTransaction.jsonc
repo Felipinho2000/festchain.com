@@ -1,0 +1,37 @@
+{
+  "name": "FestCoinTransaction",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "earned",
+        "spent",
+        "staked",
+        "unstaked",
+        "transferred_in",
+        "transferred_out"
+      ]
+    },
+    "amount": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "balance_after": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "type",
+    "amount",
+    "description"
+  ]
+}

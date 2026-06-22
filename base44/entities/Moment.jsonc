@@ -1,0 +1,36 @@
+{
+  "name": "Moment",
+  "type": "object",
+  "properties": {
+    "image_url": {
+      "type": "string"
+    },
+    "caption": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "is_anonymous": {
+      "type": "boolean",
+      "default": true
+    },
+    "author_alias": {
+      "type": "string"
+    },
+    "likes": {
+      "type": "number",
+      "default": 0
+    },
+    "festcoin_tips": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "image_url"
+  ]
+}

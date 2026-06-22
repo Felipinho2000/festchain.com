@@ -1,0 +1,78 @@
+{
+  "name": "Ticket",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "event_image": {
+      "type": "string"
+    },
+    "event_location": {
+      "type": "string"
+    },
+    "ticket_type": {
+      "type": "string",
+      "enum": [
+        "general",
+        "vip",
+        "backstage"
+      ],
+      "default": "general"
+    },
+    "price_paid": {
+      "type": "number"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "pix",
+        "credit_card",
+        "festcoin"
+      ]
+    },
+    "qr_code": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "used",
+        "transferred",
+        "expired",
+        "refunded"
+      ],
+      "default": "active"
+    },
+    "checked_in": {
+      "type": "boolean",
+      "default": false
+    },
+    "checked_in_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "festcoin_earned": {
+      "type": "number",
+      "default": 0
+    },
+    "poap_minted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "event_id",
+    "event_title",
+    "price_paid",
+    "payment_method"
+  ]
+}

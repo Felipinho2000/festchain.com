@@ -50,6 +50,18 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
+  			violet: {
+  				DEFAULT: '#7C3AED',
+  				light: '#A78BFA',
+  				dark: '#5B21B6'
+  			},
+  			amber: {
+  				DEFAULT: '#F59E0B',
+  				light: '#FCD34D',
+  				dark: '#D97706'
+  			},
+  			bone: '#FAF9F6',
+  			warmgray: '#6B6661',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
@@ -69,20 +81,12 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
   			}
   		},
   		animation: {
