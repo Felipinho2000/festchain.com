@@ -101,49 +101,79 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Friend Requests notification */}
-      {friendRequests.length > 0 && (
-        <div className="bg-card border border-primary/30 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <Bell className="w-4 h-4 text-primary" />
-            <span className="font-semibold text-white text-sm">{friendRequests.length} Connection Request{friendRequests.length > 1 ? "s" : ""}</span>
-          </div>
-          {friendRequests.map(req => (
-            <div key={req.id} className="flex items-center justify-between bg-[#1a1a1a] rounded-xl p-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                  <span className="text-primary font-bold text-xs">?</span>
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{req.from_alias || "Anonymous Raver"}</p>
-                  {req.message && <p className="text-[#666] text-xs">"{req.message}"</p>}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleAccept(req)} className="w-8 h-8 rounded-lg bg-emerald-900/40 text-emerald-400 flex items-center justify-center hover:bg-emerald-800/50 transition-colors">
-                  <Check className="w-4 h-4" />
-                </button>
-                <button onClick={() => handleDecline(req)} className="w-8 h-8 rounded-lg bg-red-900/30 text-red-400 flex items-center justify-center hover:bg-red-800/40 transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <Tabs defaultValue="badges" className="space-y-4">
+      <Tabs defaultValue="social" className="space-y-4">
         <TabsList className="bg-card border border-border p-1 rounded-xl h-auto gap-1 w-full">
+          <TabsTrigger value="social" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
+            Social
+          </TabsTrigger>
           <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
-            Badges ({earnedKeys.size}/{BADGE_DEFS.length})
+            Badges
           </TabsTrigger>
           <TabsTrigger value="history" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
-            Event History
-          </TabsTrigger>
-          <TabsTrigger value="connections" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
-            Connections
+            Events
           </TabsTrigger>
         </TabsList>
+
+        {/* Social */}
+        <TabsContent value="social" className="space-y-4">
+          {friendRequests.length > 0 && (
+            <div className="bg-card border border-primary/30 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Bell className="w-4 h-4 text-primary" />
+                <span className="font-semibold text-white text-sm">{friendRequests.length} Connection Request{friendRequests.length > 1 ? "s" : ""}</span>
+              </div>
+              {friendRequests.map(req => (
+                <div key={req.id} className="flex items-center justify-between bg-[#1a1a1a] rounded-xl p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <span className="text-primary font-bold text-xs">?</span>
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{req.from_alias || "Anonymous Raver"}</p>
+                      {req.message && <p className="text-[#666] text-xs">"{req.message}"</p>}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleAccept(req)} className="w-8 h-8 rounded-lg bg-emerald-900/40 text-emerald-400 flex items-center justify-center hover:bg-emerald-800/50 transition-colors">
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDecline(req)} className="w-8 h-8 rounded-lg bg-red-900/30 text-red-400 flex items-center justify-center hover:bg-red-800/40 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {connections.length === 0 && friendRequests.length === 0 ? (
+            <div className="bg-card border border-border rounded-xl p-10 text-center">
+              <Users className="w-8 h-8 text-[#444] mx-auto mb-2" />
+              <p className="text-[#666] text-sm">No connections yet.</p>
+              <p className="text-[#555] text-xs mt-1">Send friend requests from Moments to connect anonymously.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {connections.map(c => {
+                const isMe = c.from_user_id === currentUser.id;
+                const alias = isMe ? (c.to_alias || "Anonymous Raver") : (c.from_alias || "Anonymous Raver");
+                return (
+                  <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Users className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-white text-sm font-medium">{alias}</p>
+                      <p className="text-[#555] text-xs">Connected {moment(c.updated_date).fromNow()}</p>
+                    </div>
+                    <div className="ml-auto">
+                      <Badge className="bg-emerald-900/40 text-emerald-400 border-0 text-[10px]">Connected</Badge>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
 
         {/* Badges */}
         <TabsContent value="badges">
@@ -205,37 +235,6 @@ export default function Profile() {
           )}
         </TabsContent>
 
-        {/* Connections */}
-        <TabsContent value="connections">
-          {connections.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-10 text-center">
-              <Users className="w-8 h-8 text-[#444] mx-auto mb-2" />
-              <p className="text-[#666] text-sm">No connections yet.</p>
-              <p className="text-[#555] text-xs mt-1">Send friend requests from Moments to connect anonymously.</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {connections.map(c => {
-                const isMe = c.from_user_id === currentUser.id;
-                const alias = isMe ? (c.to_alias || "Anonymous Raver") : (c.from_alias || "Anonymous Raver");
-                return (
-                  <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Users className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-white text-sm font-medium">{alias}</p>
-                      <p className="text-[#555] text-xs">Connected {moment(c.updated_date).fromNow()}</p>
-                    </div>
-                    <div className="ml-auto">
-                      <Badge className="bg-emerald-900/40 text-emerald-400 border-0 text-[10px]">Connected</Badge>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
       </Tabs>
     </div>
   );

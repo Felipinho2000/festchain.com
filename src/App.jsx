@@ -24,6 +24,8 @@ import Moments from '@/pages/Moments';
 import Dashboard from '@/pages/Dashboard';
 import BuyFTC from '@/pages/BuyFTC';
 import Profile from '@/pages/Profile';
+import Staking from '@/pages/Staking';
+import Landing from '@/pages/Landing';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -53,6 +55,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/landing" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -69,6 +72,7 @@ const AuthenticatedApp = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/staking" element={<Staking />} />
         </Route>
       </Route>
 

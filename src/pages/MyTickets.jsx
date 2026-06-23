@@ -8,18 +8,18 @@ import FestCoinBadge from "@/components/shared/FestCoinBadge";
 import moment from "moment";
 
 const statusColors = {
-  active: "bg-emerald-50 text-emerald-700",
-  used: "bg-warmgray/10 text-warmgray",
-  transferred: "bg-blue-50 text-blue-700",
-  expired: "bg-red-50 text-red-600",
-  refunded: "bg-orange-50 text-orange-600"
+  active: "bg-emerald-900/40 text-emerald-400",
+  used: "bg-[#222] text-[#888]",
+  transferred: "bg-blue-900/30 text-blue-400",
+  expired: "bg-red-900/30 text-red-400",
+  refunded: "bg-orange-900/30 text-orange-400"
 };
 
 function TicketCard({ ticket }) {
   const [showQR, setShowQR] = useState(false);
 
   return (
-    <div className="bg-white border border-border rounded-xl overflow-hidden hover:shadow-[0_4px_20px_-4px_rgba(45,42,38,0.08)] transition-all">
+    <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all">
       <div className="flex">
         {/* Left: Image */}
         <div className="w-28 sm:w-36 flex-shrink-0 bg-secondary relative">
@@ -41,7 +41,7 @@ function TicketCard({ ticket }) {
         <div className="flex-1 p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-heading font-semibold text-foreground text-sm line-clamp-1">{ticket.event_title}</h3>
+              <h3 className="font-heading font-semibold text-white text-sm line-clamp-1">{ticket.event_title}</h3>
               <Badge className={`text-[10px] px-2 py-0.5 ${statusColors[ticket.status] || ""} border-0 flex-shrink-0`}>
                 {ticket.status}
               </Badge>
@@ -62,7 +62,7 @@ function TicketCard({ ticket }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-3 pt-2 border-t border-border">
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#222]">
             <div className="flex items-center gap-3">
               <FestCoinBadge amount={`+${ticket.festcoin_earned || 0}`} size="sm" />
               {ticket.poap_minted && (
@@ -82,9 +82,9 @@ function TicketCard({ ticket }) {
           </div>
 
           {showQR && (
-            <div className="mt-3 pt-3 border-t border-border text-center">
-              <div className="inline-flex flex-col items-center gap-2 bg-white border-2 border-dashed border-border rounded-xl p-4">
-                <QrCode className="w-16 h-16 text-foreground" strokeWidth={1} />
+            <div className="mt-3 pt-3 border-t border-[#222] text-center">
+              <div className="inline-flex flex-col items-center gap-2 bg-[#111] border-2 border-dashed border-[#333] rounded-xl p-4">
+                <QrCode className="w-16 h-16 text-white" strokeWidth={1} />
                 <span className="text-[10px] font-mono text-warmgray break-all">{ticket.qr_code}</span>
               </div>
             </div>
@@ -120,11 +120,11 @@ export default function MyTickets() {
       {loading ? (
         <div className="space-y-4">
           {[1,2,3].map(i => (
-            <div key={i} className="bg-white border border-border rounded-xl h-28 animate-pulse" />
+            <div key={i} className="bg-card border border-border rounded-xl h-28 animate-pulse" />
           ))}
         </div>
       ) : tickets.length === 0 ? (
-        <div className="bg-white border border-border rounded-xl p-12 text-center">
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
           <Ticket className="w-10 h-10 text-warmgray/40 mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-warmgray text-sm mb-1">No tickets yet</p>
           <p className="text-warmgray text-xs">Browse events and secure your first NFT ticket.</p>

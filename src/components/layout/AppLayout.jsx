@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Ticket, Zap, LayoutDashboard, Calendar, Camera, Wallet,
-  LogOut, Home, ShoppingCart, User
+  LogOut, Home, ShoppingCart, User, Lock
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -15,6 +15,7 @@ const navItems = [
   { icon: Wallet, label: "FestCoin", path: "/festcoin" },
   { icon: ShoppingCart, label: "Buy FTC", path: "/buy-ftc" },
   { icon: Camera, label: "Moments", path: "/moments" },
+  { icon: Lock, label: "Staking", path: "/staking" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: User, label: "Profile", path: "/profile" },
 ];

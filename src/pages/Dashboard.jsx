@@ -17,11 +17,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import moment from "moment";
 
 const statusColors = {
-  draft: "bg-warmgray/10 text-warmgray",
-  published: "bg-emerald-50 text-emerald-700",
-  live: "bg-red-50 text-red-600",
-  ended: "bg-secondary text-warmgray",
-  cancelled: "bg-red-50 text-red-500"
+  draft: "bg-[#222] text-[#888]",
+  published: "bg-emerald-900/40 text-emerald-400",
+  live: "bg-red-900/30 text-red-400",
+  ended: "bg-[#222] text-[#666]",
+  cancelled: "bg-red-900/30 text-red-400"
 };
 
 const defaultForm = {
@@ -235,26 +235,26 @@ export default function Dashboard() {
           { label: "Active Events", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-blue-600 bg-blue-50" },
           { label: "Total Capacity", value: events.reduce((s, e) => s + (e.total_capacity || 0), 0), icon: Users, color: "text-amber bg-amber/10" }
         ].map((kpi, i) => (
-          <div key={i} className="bg-white border border-border rounded-xl p-4">
+          <div key={i} className="bg-card border border-border rounded-xl p-4">
             <div className={`w-9 h-9 rounded-lg ${kpi.color} flex items-center justify-center mb-3`}>
               <kpi.icon className="w-4 h-4" strokeWidth={1.5} />
             </div>
-            <p className="font-heading font-bold text-2xl text-foreground">{kpi.value}</p>
-            <p className="text-xs text-warmgray">{kpi.label}</p>
+            <p className="font-heading font-bold text-2xl text-white">{kpi.value}</p>
+            <p className="text-xs text-[#888]">{kpi.label}</p>
           </div>
         ))}
       </div>
 
       {/* Sales Velocity Chart */}
-      <div className="bg-white border border-border rounded-xl p-5">
-        <h3 className="font-heading font-semibold text-foreground mb-4">Sales Velocity (7 days)</h3>
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-white mb-4">Sales Velocity (7 days)</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(30 10% 90%)" />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#6B6661" }} />
-              <YAxis tick={{ fontSize: 11, fill: "#6B6661" }} />
-              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(30 10% 90%)", fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#888" }} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #333", background: "#1a1a1a", color: "#fff", fontSize: 12 }} />
               <Line type="monotone" dataKey="tickets" stroke="#7C3AED" strokeWidth={2} dot={{ r: 4, fill: "#7C3AED" }} />
             </LineChart>
           </ResponsiveContainer>
@@ -263,13 +263,13 @@ export default function Dashboard() {
 
       {/* Events List */}
       <div>
-        <h3 className="font-heading font-semibold text-lg text-foreground mb-4">Your Events</h3>
+        <h3 className="font-heading font-semibold text-lg text-white mb-4">Your Events</h3>
         {loading ? (
           <div className="space-y-3">
-            {[1,2,3].map(i => <div key={i} className="bg-white border border-border rounded-xl h-20 animate-pulse" />)}
+            {[1,2,3].map(i => <div key={i} className="bg-card border border-border rounded-xl h-20 animate-pulse" />)}
           </div>
         ) : events.length === 0 ? (
-          <div className="bg-white border border-border rounded-xl p-12 text-center">
+          <div className="bg-card border border-border rounded-xl p-12 text-center">
             <Calendar className="w-10 h-10 text-warmgray/40 mx-auto mb-3" strokeWidth={1.5} />
             <p className="text-warmgray text-sm">No events yet. Create your first event to get started.</p>
           </div>
@@ -278,7 +278,7 @@ export default function Dashboard() {
             {events.map(event => {
               const soldPct = event.total_capacity ? Math.round(((event.tickets_sold || 0) / event.total_capacity) * 100) : 0;
               return (
-                <div key={event.id} className="bg-white border border-border rounded-xl p-4 flex items-center gap-4">
+                <div key={event.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4 hover:border-primary/30 transition-all">
                   <div className="w-14 h-14 rounded-xl bg-secondary flex-shrink-0 overflow-hidden">
                     {event.image_url ? (
                       <img src={event.image_url} alt="" className="w-full h-full object-cover" />
@@ -290,7 +290,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-heading font-semibold text-sm text-foreground truncate">{event.title}</h4>
+                      <h4 className="font-heading font-semibold text-sm text-white truncate">{event.title}</h4>
                       <Badge className={`text-[10px] px-2 py-0 border-0 ${statusColors[event.status]}`}>{event.status}</Badge>
                     </div>
                     <p className="text-xs text-warmgray">{moment(event.date).format("MMM D, YYYY")} · {event.location_name}</p>
