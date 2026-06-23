@@ -94,10 +94,15 @@ export default function BuyFTC() {
         <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest mb-3">
           <Zap className="w-3.5 h-3.5" /> FestCoin Economy
         </div>
-        <h1 className="font-heading font-bold text-4xl text-white mb-2">Buy FestCoin</h1>
+        <h1 className="font-heading font-bold text-4xl text-white mb-2">Load Your FTC Wallet</h1>
         <p className="text-[#888] text-base max-w-xl">
-          The native currency of the decentralized party ecosystem. Use it to buy tickets, tip DJs, unlock VIP — and ride the growth.
+          FTC is a <span className="text-white font-semibold">utility token and payment rail</span> — use it to buy tickets, pay for drinks and VIP tables inside the venue, earn loyalty rewards, and skip every queue.
         </p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {["10% venue discount", "Skip bar queues", "Pre-order drinks & tables", "Earn on every event", "Stake for yield"].map(tag => (
+            <span key={tag} className="bg-primary/10 border border-primary/20 text-primary text-xs px-3 py-1 rounded-full">{tag}</span>
+          ))}
+        </div>
       </div>
 
       {/* Price ticker */}

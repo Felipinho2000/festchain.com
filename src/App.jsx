@@ -26,6 +26,7 @@ import BuyFTC from '@/pages/BuyFTC';
 import Profile from '@/pages/Profile';
 import Staking from '@/pages/Staking';
 import Landing from '@/pages/Landing';
+import VenueStore from '@/pages/VenueStore';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/staking" element={<Staking />} />
+          <Route path="/venue-store" element={<VenueStore />} />
         </Route>
       </Route>
 

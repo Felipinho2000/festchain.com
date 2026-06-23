@@ -247,6 +247,99 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── IN-VENUE PAYMENTS ── */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">Beyond Ticketing</p>
+            <h2 className="font-heading font-bold text-3xl lg:text-4xl text-white mb-4">
+              FTC is the payment rail<br />inside the venue
+            </h2>
+            <p className="text-[#888] text-lg max-w-2xl mx-auto">
+              Most clubs make the majority of their money from drinks, bottles, and VIP tables — not tickets. FestChain powers every transaction inside the venue too.
+            </p>
+          </div>
+
+          {/* Flow diagram */}
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-12">
+            {[
+              { emoji: "🎟️", step: "Buy ticket", sub: "on FestChain" },
+              { emoji: "👛", step: "Get wallet", sub: "automatically" },
+              { emoji: "💰", step: "Load FTC", sub: "or earn it" },
+              { emoji: "🛍️", step: "Pre-order", sub: "drinks & tables" },
+              { emoji: "📱", step: "Scan QR", sub: "at the bar" },
+              { emoji: "✅", step: "Collect", sub: "no queue" },
+            ].map((s, i) => (
+              <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-xl p-4 text-center relative">
+                <div className="text-3xl mb-2">{s.emoji}</div>
+                <p className="text-white text-xs font-semibold">{s.step}</p>
+                <p className="text-[#666] text-[10px]">{s.sub}</p>
+                {i < 5 && <div className="hidden lg:block absolute -right-2 top-1/2 -translate-y-1/2 text-[#333] text-lg z-10">›</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* Revenue comparison */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6">
+              <p className="text-[#666] text-sm font-semibold uppercase tracking-wide mb-4">Without FestChain</p>
+              <div className="space-y-3">
+                {[
+                  { label: "Avg spend per attendee", value: "R$35", color: "text-[#666]" },
+                  { label: "Queue time at bar", value: "12–18 min", color: "text-[#666]" },
+                  { label: "Organizer data", value: "None", color: "text-red-400" },
+                  { label: "Payment processing", value: "2–4%", color: "text-[#666]" },
+                ].map((r, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span className="text-[#888]">{r.label}</span>
+                    <span className={r.color + " font-semibold"}>{r.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-primary/10 border border-primary/30 rounded-2xl p-6">
+              <p className="text-primary text-sm font-semibold uppercase tracking-wide mb-4">With FestChain Wallet</p>
+              <div className="space-y-3">
+                {[
+                  { label: "Avg spend per attendee", value: "R$48–60", color: "text-emerald-400" },
+                  { label: "Queue time at bar", value: "~0 min", color: "text-emerald-400" },
+                  { label: "Organizer data", value: "Full CRM + spend habits", color: "text-emerald-400" },
+                  { label: "Payment processing", value: "0.5–1% FTC fee", color: "text-emerald-400" },
+                ].map((r, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span className="text-[#888]">{r.label}</span>
+                    <span className={r.color + " font-semibold"}>{r.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue model math */}
+          <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6 lg:p-8">
+            <h3 className="font-heading font-bold text-white text-xl mb-6 text-center">The business becomes much bigger than ticketing</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+              <div>
+                <p className="text-[#666] text-xs uppercase tracking-wide mb-2">Ticket Revenue (2%)</p>
+                <p className="text-white font-bold text-lg">100K tickets × R$80</p>
+                <p className="text-primary font-bold text-2xl mt-1">= R$160K</p>
+              </div>
+              <div className="border-x border-[#1f1f1f]">
+                <p className="text-[#666] text-xs uppercase tracking-wide mb-2">In-Venue Processing (1%)</p>
+                <p className="text-white font-bold text-lg">100K attendees × R$50 spend</p>
+                <p className="text-primary font-bold text-2xl mt-1">= R$50K</p>
+              </div>
+              <div>
+                <p className="text-[#666] text-xs uppercase tracking-wide mb-2">Combined GMV</p>
+                <p className="text-white font-bold text-lg">Tickets + In-venue</p>
+                <p className="text-emerald-400 font-bold text-2xl mt-1">= R$210K/event</p>
+              </div>
+            </div>
+            <p className="text-[#555] text-xs text-center mt-4">Example based on a 100K-attendee festival. Gross margin ~82%.</p>
+          </div>
+        </div>
+      </section>
+
       {/* ── TRACTION ── */}
       <section id="traction" className="py-20 px-6 bg-[#111]">
         <div className="max-w-5xl mx-auto">

@@ -1,0 +1,93 @@
+{
+  "name": "VenueMenuItem",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "drinks",
+        "vip_table",
+        "bottle_service",
+        "merchandise",
+        "food",
+        "other"
+      ],
+      "default": "drinks"
+    },
+    "price_ftc": {
+      "type": "number"
+    },
+    "price_brl": {
+      "type": "number"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": true
+    },
+    "stock": {
+      "type": "number"
+    },
+    "emoji": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "name",
+    "price_ftc"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
