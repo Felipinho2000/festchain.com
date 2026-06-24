@@ -6,8 +6,8 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ status: 'error', message: 'Unauthorized' }, { status: 401 });
 
-    const isStaff = ['organizer', 'admin'].includes(user.role);
-    if (!isStaff) return Response.json({ status: 'error', message: 'Forbidden' }, { status: 403 });
+    const isStaff = user.active_mode === 'organizer' || user.role === 'admin';
+    if (!isStaff) return Response.json({ status: 'error', message: 'Forbidden — switch to Organizer mode' }, { status: 403 });
 
     let body = {};
     try { body = await req.json(); } catch (_) {}

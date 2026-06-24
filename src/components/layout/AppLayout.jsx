@@ -26,15 +26,10 @@ const mobileNavItems = [
   { icon: User,            label: "Profile",   path: "/profile" },
 ];
 
-// Organizer-only nav gating (Dashboard, Scan)
-const isOrganizerRole = (role) => ["organizer", "admin"].includes(role);
-
-
-
 export default function AppLayout() {
   const location = useLocation();
   const { currentUser } = useAuth();
-  const isOrganizer = isOrganizerRole(currentUser?.role);
+  const isOrganizer = (currentUser?.active_mode === "organizer") || currentUser?.role === "admin";
 
   const initials = currentUser?.full_name
     ? currentUser.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)

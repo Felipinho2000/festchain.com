@@ -10,7 +10,7 @@ import moment from "moment";
 
 export default function Scan() {
   const { currentUser } = useAuth();
-  const isOrganizer = ["organizer", "admin"].includes(currentUser?.role);
+  const isOrganizer = (currentUser?.active_mode === "organizer") || currentUser?.role === "admin";
   const html5Ref = useRef(null);
   const lockedRef = useRef(false);
   const [result, setResult] = useState(null);

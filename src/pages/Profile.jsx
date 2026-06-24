@@ -6,6 +6,7 @@ import { Zap, Award, Ticket, Camera, Users, Bell, Check, X, ArrowRight } from "l
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import ModeSwitcher from "@/components/profile/ModeSwitcher";
 import moment from "moment";
 
 // All possible badges definition
@@ -100,6 +101,8 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      <ModeSwitcher />
 
       <Tabs defaultValue="social" className="space-y-4">
         <TabsList className="bg-card border border-border p-1 rounded-xl h-auto gap-1 w-full">

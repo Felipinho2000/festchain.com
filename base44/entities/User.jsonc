@@ -10,6 +10,33 @@
         "organizer"
       ],
       "default": "attendee"
+    },
+    "active_mode": {
+      "type": "string",
+      "description": "Current UI mode: partygoer or organizer",
+      "enum": [
+        "partygoer",
+        "organizer"
+      ],
+      "default": "partygoer"
+    },
+    "organizer_profile": {
+      "type": "object",
+      "description": "One-time organizer onboarding profile",
+      "properties": {
+        "organizer_name": {
+          "type": "string"
+        },
+        "brand_name": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [

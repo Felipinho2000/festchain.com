@@ -28,7 +28,6 @@ import Scan from '@/pages/Scan';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
-import OrganizerRoute from '@/components/OrganizerRoute';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -72,10 +71,8 @@ const AuthenticatedApp = () => {
           <Route path="/moments" element={<Navigate to="/" replace />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
-          <Route element={<OrganizerRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/scan" element={<Scan />} />
-          </Route>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/scan" element={<Scan />} />
         </Route>
       </Route>
 
