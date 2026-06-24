@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
-import { Zap, Award, Ticket, Camera, Users, Bell, Check, X, ArrowRight } from "lucide-react";
+import { Award, Ticket, Camera, Users, Bell, Check, X, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import ModeSwitcher from "@/components/profile/ModeSwitcher";
 import moment from "moment";
 

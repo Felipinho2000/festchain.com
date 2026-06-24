@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Calendar, Search, SlidersHorizontal } from "lucide-react";
+import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EventCard from "@/components/events/EventCard";
 
@@ -44,14 +43,7 @@ export default function Events() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading font-bold text-3xl text-white mb-1">Discover Events</h1>
-        <p className="text-[#888] text-sm">Find your next party, buy NFT tickets, and earn FestCoin rewards.</p>
-      </div>
-
-      {/* Sponsor banner */}
-      <div className="flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3">
-        <span className="text-xl">🍺</span>
-        <p className="text-[#888] text-sm flex-1"><span className="text-white font-semibold">Heineken</span> — Scan your ticket at Heineken bars at any event for a free beer</p>
-        <span className="text-[10px] text-[#555] uppercase tracking-wider">Sponsored</span>
+        <p className="text-[#888] text-sm">Find your next pilot event, get a secure QR ticket, and earn FestCoin pilot credits.</p>
       </div>
 
       {/* Filters */}
