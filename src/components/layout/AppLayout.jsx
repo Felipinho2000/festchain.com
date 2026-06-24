@@ -29,7 +29,7 @@ const mobileNavItems = [
 export default function AppLayout() {
   const location = useLocation();
   const { currentUser } = useAuth();
-  const isOrganizer = (currentUser?.active_mode === "organizer") || currentUser?.role === "admin";
+  const isOrganizer = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
 
   const initials = currentUser?.full_name
     ? currentUser.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
@@ -43,7 +43,10 @@ export default function AppLayout() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="font-heading font-bold text-lg text-white tracking-tight">FestChain</span>
+          <div className="flex items-center gap-2">
+            <span className="font-heading font-bold text-lg text-white tracking-tight">FestChain</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
+          </div>
         </Link>
 
         <nav className="flex-1 flex flex-col gap-0.5">
@@ -93,6 +96,7 @@ export default function AppLayout() {
             <Zap className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="font-heading font-bold text-base text-white">FestChain</span>
+          <span className="text-[8px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1 py-0.5 rounded">Pilot</span>
         </Link>
         <div className="flex items-center gap-2">
           <Link to="/wallet" className="flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-primary text-xs font-bold px-3 py-1.5 rounded-lg">

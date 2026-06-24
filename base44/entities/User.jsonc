@@ -1,4 +1,6 @@
 {
+  "name": "User",
+  "type": "object",
   "properties": {
     "role": {
       "type": "string",
@@ -7,18 +9,25 @@
         "admin",
         "user",
         "attendee",
-        "organizer"
+        "organizer",
+        "staff",
+        "guest"
       ],
       "default": "attendee"
     },
     "active_mode": {
       "type": "string",
-      "description": "Current UI mode: partygoer or organizer",
+      "description": "Current UI view preference: partygoer or organizer. Does NOT grant permissions.",
       "enum": [
         "partygoer",
         "organizer"
       ],
       "default": "partygoer"
+    },
+    "approved_organizer": {
+      "type": "boolean",
+      "description": "Granted manually by admin. Required (or role=admin) to access organizer dashboard & scanner.",
+      "default": false
     },
     "organizer_profile": {
       "type": "object",
@@ -41,7 +50,5 @@
   },
   "required": [
     "role"
-  ],
-  "name": "User",
-  "type": "object"
+  ]
 }

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   Zap, Ticket, Shield, TrendingUp, Globe, Heart, ChevronRight,
-  ExternalLink, Mail, MapPin, Send, Check, Lock, Users, DollarSign,
+  Mail, MapPin, Send, Check, Lock, Users, DollarSign,
   BarChart3, Fingerprint, ArrowRight, Quote, Star, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,8 @@ import { useToast } from "@/components/ui/use-toast";
 const PAIN_POINTS = [
   { before: "10–15% ticketing fees", after: "2% flat fee on FestChain", icon: DollarSign },
   { before: "Zero attendee data", after: "Full CRM + behavioral data", icon: BarChart3 },
-  { before: "Rampant ticket fraud", after: "Blockchain-verified NFT tickets", icon: Shield },
-  { before: "No secondary market control", after: "Organizer-set resale rules", icon: Fingerprint },
+  { before: "Rampant ticket fraud", after: "Secure QR-verified tickets", icon: Shield },
+  { before: "No secondary market control", after: "Resale & transfer controls (pilot)", icon: Fingerprint },
 ];
 
 const KILLER_FEATURES = [
@@ -29,8 +29,8 @@ const KILLER_FEATURES = [
   {
     icon: "🔐",
     title: "Fraud-Proof Tickets",
-    subtitle: "NFT ownership on-chain",
-    desc: "Every ticket is a unique blockchain asset. Fakes are mathematically impossible. Chargebacks eliminated.",
+    subtitle: "Secure QR, single-use",
+    desc: "Every ticket carries a unique QR code issued server-side. Fakes and double scans are blocked at the door.",
     badge: "Zero Fraud"
   },
   {
@@ -42,10 +42,10 @@ const KILLER_FEATURES = [
   },
   {
     icon: "🔄",
-    title: "Programmable Resale",
-    subtitle: "Set rules. Earn royalties.",
-    desc: "Cap resale prices. Earn a % on every secondary sale. Completely eliminate scalpers if you want to.",
-    badge: "Organizer Control"
+    title: "Resale & Transfer",
+    subtitle: "Coming soon",
+    desc: "Organizer-set resale caps and ticket transfers are on our roadmap — not live in the private pilot.",
+    badge: "Coming soon"
   },
 ];
 
@@ -82,10 +82,10 @@ const TEAM = [
 ];
 
 const TRACTION = [
-  { value: "12", label: "Pilot events completed" },
-  { value: "4,800+", label: "Real tickets issued" },
-  { value: "R$380K", label: "Gross ticket volume" },
-  { value: "94%", label: "Organizer retention rate" },
+  { value: "Private", label: "MVP pilot in progress" },
+  { value: "QR", label: "Ticket issuing & check-in" },
+  { value: "Test", label: "Pilot loyalty credits" },
+  { value: "None", label: "Public token sale (not live)" },
 ];
 
 const CHARITY_PROJECTS = [
@@ -169,13 +169,13 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 bg-emerald-900/40 border border-emerald-700/50 text-emerald-400 text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-            12 pilot events · 4,800+ tickets sold · R$380K in volume
+            Private MVP Pilot · Invite-only · Secure QR tickets
           </div>
           <h1 className="font-heading font-bold text-5xl lg:text-7xl leading-[1.05] tracking-tight mb-6">
             Buy tickets, pay inside<br />the venue, <span className="text-primary">skip the queue</span>
           </h1>
           <p className="text-[#aaa] text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
-            FestChain is the all-in-one ticketing and in-venue payment platform for event organizers. <span className="text-white font-semibold">2% flat fee</span> — versus 10–15% on Sympla and Eventbrite.
+            FestChain is a ticketing and check-in platform for event organizers — currently in a private MVP pilot focused on secure QR tickets and event management.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <Link to="/register">
@@ -193,7 +193,7 @@ export default function Landing() {
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-[#666]">
             <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> No credit card to start</span>
             <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> Setup in under 10 minutes</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> Card, Pix & wallet payments</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> Secure QR ticket check-in</span>
           </div>
         </div>
       </section>
@@ -565,36 +565,22 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── WHITEPAPER ── */}
+      {/* ── PRIVATE PILOT ── */}
       <section id="whitepaper" className="py-20 px-6 bg-[#111]">
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] border border-primary/20 rounded-3xl p-8 lg:p-12 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/8 rounded-full blur-3xl" />
-            <div className="relative flex flex-col lg:flex-row items-center gap-8">
-              <div className="flex-1">
-                <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
-                  📄 Whitepaper v2.1
-                </div>
-                <h2 className="font-heading font-bold text-3xl text-white mb-3">The FestChain Technical Whitepaper</h2>
-                <p className="text-[#888] leading-relaxed mb-6">
-                  Token economics, NFT ticket architecture, staking protocol, governance model, charity fund mechanics, and our full roadmap to global scale.
-                </p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {["Token Economics", "NFT Architecture", "Staking Protocol", "Governance", "Roadmap"].map(tag => (
-                    <span key={tag} className="bg-[#1f1f1f] border border-[#2a2a2a] text-[#888] text-xs px-3 py-1 rounded-full">{tag}</span>
-                  ))}
-                </div>
-                <a href="/whitepaper.pdf" target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold px-6 py-3 rounded-xl transition-colors">
-                  <ExternalLink className="w-4 h-4" /> Download Whitepaper
-                </a>
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
+                🧪 Private MVP Pilot
               </div>
-              <div className="flex-shrink-0 w-32 h-40 bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl flex flex-col items-center justify-center gap-3 text-center">
-                <span className="text-4xl">📄</span>
-                <p className="text-white font-semibold text-sm">FestChain</p>
-                <p className="text-[#666] text-xs">Whitepaper</p>
-                <p className="text-[#555] text-[10px]">v2.1 · 48 pages</p>
-              </div>
+              <h2 className="font-heading font-bold text-3xl text-white mb-3">FestChain is in private pilot</h2>
+              <p className="text-[#888] leading-relaxed mb-6 max-w-2xl">
+                We're in a closed MVP pilot focused on event discovery, secure QR ticket issuing and check-in, an organizer dashboard, and pilot loyalty credits. No token sale, staking, NFT marketplace, or public payments are live yet.
+              </p>
+              <Link to="/legal" className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold px-6 py-3 rounded-xl transition-colors">
+                <ArrowRight className="w-4 h-4" /> Read the Pilot Disclaimer
+              </Link>
             </div>
           </div>
         </div>
@@ -746,10 +732,9 @@ export default function Landing() {
             </div>
             <span className="font-heading font-bold text-white">FestChain</span>
           </div>
-          <p className="text-[#555] text-sm text-center">© 2026 FestChain. All rights reserved. Built for the culture.</p>
+          <p className="text-[#555] text-sm text-center">© 2026 FestChain · Private MVP Pilot. FestCoin is an in-app test credit, not an investment.</p>
           <div className="flex items-center gap-4 text-[#555] text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <Link to="/legal" className="hover:text-white transition-colors">Legal & Pilot</Link>
             <Link to="/login" className="hover:text-white transition-colors">App</Link>
           </div>
         </div>

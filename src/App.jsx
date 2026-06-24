@@ -25,6 +25,7 @@ import BuyFTC from '@/pages/BuyFTC';
 import Profile from '@/pages/Profile';
 import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
+import Legal from '@/pages/Legal';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/legal" element={<Legal />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>

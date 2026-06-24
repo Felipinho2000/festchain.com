@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, LayoutDashboard, PartyPopper, Cog } from "lucide-react";
+import { Sparkles, LayoutDashboard, PartyPopper, Cog, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,8 +14,10 @@ export default function ModeSwitcher() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const mode = currentUser?.active_mode || "partygoer";
+  const canOrganize = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
   const hasProfile = !!currentUser?.organizer_profile && !!currentUser.organizer_profile.brand_name;
-  const [open, setOpen] = useState(false);
+  const [onbOpen, setOnbOpen] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [switching, setSwitching] = useState(false);
   const [form, setForm] = useState({ organizer_name: "", brand_name: "", instagram: "", city: "" });
@@ -27,10 +29,10 @@ export default function ModeSwitcher() {
       if (opts.profile) payload.organizer_profile = opts.profile;
       await base44.auth.updateMe(payload);
       await refreshUser?.();
-      toast({ title: newMode === "organizer" ? "🎛 Organizer mode" : "🎉 Partygoer mode", description: opts.profile ? "Organizer profile saved." : undefined });
+      toast({ title: newMode === "organizer" ? "🎛 Organizer view" : "🎉 Partygoer view", description: opts.profile ? "Organizer profile saved." : undefined });
       if (newMode === "organizer" && opts.goDashboard) navigate("/dashboard");
     } catch (e) {
-      toast({ title: "Could not switch mode", description: e.message, variant: "destructive" });
+      toast({ title: "Could not switch view", description: e.message, variant: "destructive" });
     } finally {
       setSwitching(false);
     }
@@ -39,8 +41,9 @@ export default function ModeSwitcher() {
   const selectPartygoer = () => { if (mode !== "partygoer") switchTo("partygoer"); };
 
   const selectOrganizer = () => {
-    if (hasProfile) switchTo("organizer", { goDashboard: true });
-    else setOpen(true);
+    if (!canOrganize) { setAccessOpen(true); return; }
+    if (!hasProfile) { setOnbOpen(true); return; }
+    switchTo("organizer", { goDashboard: true });
   };
 
   const completeOnboarding = async () => {
@@ -49,7 +52,7 @@ export default function ModeSwitcher() {
       return;
     }
     setSaving(true);
-    setOpen(false);
+    setOnbOpen(false);
     await switchTo("organizer", { profile: { ...form }, goDashboard: true });
     setSaving(false);
   };
@@ -58,49 +61,43 @@ export default function ModeSwitcher() {
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center gap-2 mb-1">
         <Cog className="w-4 h-4 text-[#888]" strokeWidth={1.5} />
-        <h2 className="font-heading font-semibold text-white text-sm">Switch Mode</h2>
+        <h2 className="font-heading font-semibold text-white text-sm">Switch View</h2>
       </div>
-      <p className="text-[#666] text-xs mb-4">One account, two experiences. Switch instantly — no second login.</p>
+      <p className="text-[#666] text-xs mb-4">One account, two views. Switching your view never grants organizer permissions — those require admin approval.</p>
 
       <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={selectPartygoer}
-          disabled={switching}
-          className={`text-left rounded-xl border p-4 transition-all ${
-            mode === "partygoer" ? "border-primary bg-primary/10" : "border-border bg-[#111] hover:border-[#444]"
-          }`}
-        >
+        <button onClick={selectPartygoer} disabled={switching}
+          className={`text-left rounded-xl border p-4 transition-all ${mode === "partygoer" ? "border-primary bg-primary/10" : "border-border bg-[#111] hover:border-[#444]"}`}>
           <PartyPopper className={`w-5 h-5 mb-2 ${mode === "partygoer" ? "text-primary" : "text-[#666]"}`} strokeWidth={1.5} />
           <p className="font-semibold text-white text-sm">🎉 Partygoer</p>
-          <p className="text-[10px] text-[#666] mt-0.5">Attend, buy, pre-order</p>
+          <p className="text-[10px] text-[#666] mt-0.5">Attend, wallet, tickets</p>
         </button>
 
-        <button
-          onClick={selectOrganizer}
-          disabled={switching}
-          className={`text-left rounded-xl border p-4 transition-all ${
-            mode === "organizer" ? "border-primary bg-primary/10" : "border-border bg-[#111] hover:border-[#444]"
-          }`}
-        >
-          <LayoutDashboard className={`w-5 h-5 mb-2 ${mode === "organizer" ? "text-primary" : "text-[#666]"}`} strokeWidth={1.5} />
+        <button onClick={selectOrganizer} disabled={switching}
+          className={`text-left rounded-xl border p-4 transition-all ${mode === "organizer" && canOrganize ? "border-primary bg-primary/10" : "border-border bg-[#111] hover:border-[#444]"}`}>
+          <LayoutDashboard className={`w-5 h-5 mb-2 ${mode === "organizer" && canOrganize ? "text-primary" : "text-[#666]"}`} strokeWidth={1.5} />
           <p className="font-semibold text-white text-sm">🎛 Organizer</p>
-          <p className="text-[10px] text-[#666] mt-0.5">Create, sell, verify</p>
+          <p className="text-[10px] text-[#666] mt-0.5">{canOrganize ? "Create, sell, verify" : "Requires approval"}</p>
         </button>
       </div>
 
-      {mode === "organizer" && hasProfile && (
+      {mode === "organizer" && canOrganize && hasProfile && (
         <p className="text-[10px] text-[#555] mt-3">
           Brand: <span className="text-[#888]">{currentUser.organizer_profile.brand_name}</span>
           {currentUser.organizer_profile.city ? ` · ${currentUser.organizer_profile.city}` : ""}
         </p>
       )}
+      {mode === "organizer" && !canOrganize && (
+        <p className="text-[10px] text-amber-400 mt-3">Organizer access pending admin approval. Tools remain hidden until approved.</p>
+      )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* Onboarding (only reachable if canOrganize) */}
+      <Dialog open={onbOpen} onOpenChange={setOnbOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Want to host your own event?</DialogTitle>
+            <DialogTitle className="font-heading flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> Set up your organizer profile</DialogTitle>
           </DialogHeader>
-          <p className="text-[#888] text-sm -mt-2 mb-3">Quick onboarding — set it once. Switch back to Partygoer anytime.</p>
+          <p className="text-[#888] text-sm -mt-2 mb-3">Saved once. You can edit later. FestChain is in private pilot.</p>
           <div className="space-y-3">
             <div>
               <Label className="text-[#888] mb-1.5">Organizer Name</Label>
@@ -121,9 +118,21 @@ export default function ModeSwitcher() {
               </div>
             </div>
             <Button onClick={completeOnboarding} disabled={saving} className="w-full bg-primary hover:bg-primary/90 text-white h-11">
-              {saving ? "Saving..." : "Become an Organizer"}
+              {saving ? "Saving..." : "Open Organizer Dashboard"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Access required */}
+      <Dialog open={accessOpen} onOpenChange={setAccessOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-primary" /> Organizer access required</DialogTitle>
+          </DialogHeader>
+          <p className="text-[#888] text-sm -mt-2 mb-3">Organizer tools (dashboard &amp; scanner) are gated for the private MVP pilot. Access is granted manually by the FestChain admin team — switching your view here doesn't unlock it.</p>
+          <p className="text-[#666] text-xs mb-4">To request access, contact the project owner who invited you to the pilot.</p>
+          <Button onClick={() => setAccessOpen(false)} className="w-full bg-primary hover:bg-primary/90 text-white h-11">Got it</Button>
         </DialogContent>
       </Dialog>
     </div>

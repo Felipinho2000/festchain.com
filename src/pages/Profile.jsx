@@ -104,6 +104,14 @@ export default function Profile() {
 
       <ModeSwitcher />
 
+      <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p className="text-white text-sm font-medium">Legal &amp; Pilot Info</p>
+          <p className="text-[#666] text-xs">Terms, privacy, refunds &amp; pilot disclaimer.</p>
+        </div>
+        <Link to="/legal" className="text-primary text-sm font-medium hover:underline">View</Link>
+      </div>
+
       <Tabs defaultValue="social" className="space-y-4">
         <TabsList className="bg-card border border-border p-1 rounded-xl h-auto gap-1 w-full">
           <TabsTrigger value="social" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">

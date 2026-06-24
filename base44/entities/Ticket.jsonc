@@ -35,8 +35,10 @@
       "enum": [
         "pix",
         "credit_card",
-        "festcoin"
-      ]
+        "festcoin",
+        "test"
+      ],
+      "default": "test"
     },
     "qr_code": {
       "type": "string"
@@ -48,7 +50,9 @@
         "used",
         "transferred",
         "expired",
-        "refunded"
+        "refunded",
+        "burned",
+        "listed"
       ],
       "default": "active"
     },
@@ -59,6 +63,13 @@
     "checked_in_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "scanned_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scanned_by": {
+      "type": "string"
     },
     "festcoin_earned": {
       "type": "number",

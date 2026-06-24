@@ -4,8 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
   Ticket, QrCode, Calendar, MapPin, Check, Music,
-  Zap, TrendingUp, TrendingDown, Plus, Wallet,
-  ArrowUpRight, ArrowDownLeft, Gift
+  ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Info
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,16 +17,16 @@ const ticketStatusColors = {
   used: "bg-[#222] text-[#888]",
   transferred: "bg-blue-900/30 text-blue-400",
   expired: "bg-red-900/30 text-red-400",
-  refunded: "bg-orange-900/30 text-orange-400"
+  refunded: "bg-orange-900/30 text-orange-400",
+  burned: "bg-red-900/40 text-red-400",
+  listed: "bg-amber-900/30 text-amber-400"
 };
 
 const txTypeConfig = {
   earned:         { icon: ArrowDownLeft, color: "text-emerald-400", bg: "bg-emerald-900/30", label: "Earned" },
   spent:          { icon: ArrowUpRight,  color: "text-red-400",     bg: "bg-red-900/20",    label: "Spent" },
   transferred_in: { icon: ArrowDownLeft, color: "text-blue-400",    bg: "bg-blue-900/20",   label: "Received" },
-  transferred_out:{ icon: ArrowUpRight,  color: "text-orange-400",  bg: "bg-orange-900/20", label: "Sent" },
-  staked:         { icon: Zap,           color: "text-primary",     bg: "bg-primary/10",    label: "Staked" },
-  unstaked:       { icon: Zap,           color: "text-primary",     bg: "bg-primary/10",    label: "Unstaked" },
+  transferred_out:{ icon: ArrowUpRight,  color: "text-orange-400",  bg: "bg-orange-900/20", label: "Sent" }
 };
 
 function TicketCard({ ticket }) {
@@ -78,7 +77,7 @@ function TicketCard({ ticket }) {
             </div>
           </div>
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#222]">
-            <span className="text-xs text-[#666]">R${ticket.price_paid?.toFixed(2)}</span>
+            <span className="text-xs text-[#666]">{ticket.payment_method === "test" ? "Pilot ticket" : `R$${ticket.price_paid?.toFixed(2)}`}</span>
             <button
               onClick={() => setShowQR(!showQR)}
               className="text-primary text-xs font-medium hover:underline flex items-center gap-1"
@@ -90,7 +89,7 @@ function TicketCard({ ticket }) {
           {showQR && (
             <div className="mt-3 pt-3 border-t border-[#222] text-center">
               <div className="flex flex-col items-center gap-2">
-                <Qr value={qrCode} size={160} />
+                <div className="bg-white p-2 rounded-lg"><Qr value={qrCode} size={160} /></div>
                 <span className="text-[10px] font-mono text-[#555] break-all max-w-[200px]">{qrCode || "—"}</span>
               </div>
               {cachedQR && <p className="text-[10px] text-emerald-500 mt-1.5">✓ Works offline</p>}
@@ -118,15 +117,15 @@ export default function WalletPage() {
     }).finally(() => setLoading(false));
   }, [currentUser]);
 
-  const balance = transactions.reduce((s, t) => {
-    if (["earned", "transferred_in", "unstaked"].includes(t.type)) return s + (t.amount || 0);
-    if (["spent", "transferred_out", "staked"].includes(t.type)) return s - (t.amount || 0);
+  // Wallet balance counts only confirmed/valid transactions (excludes cancelled/failed).
+  const validTx = transactions.filter(t => !["cancelled", "failed"].includes(t.status));
+  const balance = validTx.reduce((s, t) => {
+    if (["earned", "transferred_in"].includes(t.type)) return s + (t.amount || 0);
+    if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
     return s;
   }, 0);
-  const balanceBRL = (balance * 0.5).toFixed(2);
-
-  const totalEarned = transactions.filter(t => ["earned", "transferred_in"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
-  const totalSpent  = transactions.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
+  const totalEarned = validTx.filter(t => ["earned", "transferred_in"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
+  const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
 
   const activeTickets = tickets.filter(t => t.status === "active");
   const pastTickets   = tickets.filter(t => t.status !== "active");
@@ -137,35 +136,42 @@ export default function WalletPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-heading font-bold text-3xl text-white mb-1">Wallet</h1>
-          <p className="text-[#888] text-sm">Your tickets, balance, and transaction history.</p>
+          <p className="text-[#888] text-sm">Your pilot tickets &amp; loyalty credits.</p>
         </div>
         <Link to="/buy-ftc">
-          <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-4 h-10 rounded-xl text-sm">
-            <Plus className="w-4 h-4 mr-1.5" /> Add Balance
+          <Button variant="outline" className="border-border text-white font-bold px-4 h-10 rounded-xl text-sm">
+            <Info className="w-4 h-4 mr-1.5" /> Pilot Credits
           </Button>
         </Link>
+      </div>
+
+      {/* Pilot disclaimer */}
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-[#bbb]">
+        <span className="text-primary font-semibold">Private MVP pilot.</span> FestCoin is an in-app loyalty/test credit — no cash value, not an investment, not tradable. <Link to="/legal" className="text-primary hover:underline">Learn more</Link>.
       </div>
 
       {/* Balance summary card */}
       <div className="bg-gradient-to-br from-[#1f1f1f] to-card border border-border rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
         <div className="relative">
-          <p className="text-xs text-[#666] uppercase tracking-wider mb-1">Available Balance</p>
-          <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-heading font-bold text-5xl text-white tracking-tight">R${balanceBRL}</span>
+          <p className="text-xs text-[#666] uppercase tracking-wider mb-1">Pilot Credit Balance (FestCoin)</p>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="font-heading font-bold text-5xl text-white tracking-tight">{balance.toLocaleString()}</span>
+            <span className="text-[#888] text-sm">FTC</span>
           </div>
+          <p className="text-[10px] text-[#555] mb-4">Test credits · no cash value · not an investment</p>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-[#111] border border-[#222] rounded-xl p-3">
               <p className="text-[10px] text-[#555] uppercase tracking-wider mb-1">Active Tickets</p>
               <p className="font-heading font-bold text-xl text-white">{activeTickets.length}</p>
             </div>
             <div className="bg-emerald-900/20 border border-emerald-800/30 rounded-xl p-3">
-              <div className="flex items-center gap-1 mb-1"><TrendingUp className="w-3 h-3 text-emerald-400" /><p className="text-[10px] text-emerald-400 uppercase tracking-wider">Loaded</p></div>
-              <p className="font-heading font-bold text-xl text-emerald-400">R${(totalEarned * 0.5).toFixed(0)}</p>
+              <p className="text-[10px] text-emerald-400/80 uppercase tracking-wider mb-1">Earned</p>
+              <p className="font-heading font-bold text-xl text-emerald-400">{totalEarned.toLocaleString()}</p>
             </div>
             <div className="bg-red-900/20 border border-red-800/30 rounded-xl p-3">
-              <div className="flex items-center gap-1 mb-1"><TrendingDown className="w-3 h-3 text-red-400" /><p className="text-[10px] text-red-400 uppercase tracking-wider">Spent</p></div>
-              <p className="font-heading font-bold text-xl text-red-400">R${(totalSpent * 0.5).toFixed(0)}</p>
+              <p className="text-[10px] text-red-400/80 uppercase tracking-wider mb-1">Spent</p>
+              <p className="font-heading font-bold text-xl text-red-400">{totalSpent.toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -194,7 +200,7 @@ export default function WalletPage() {
             <div className="bg-card border border-border rounded-xl p-12 text-center">
               <Ticket className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
               <p className="text-[#666] text-sm mb-1">No tickets yet</p>
-              <p className="text-[#555] text-xs mb-4">Browse events and get your first ticket.</p>
+              <p className="text-[#555] text-xs mb-4">Browse events and get your first pilot ticket.</p>
               <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl">Browse Events</Button></Link>
             </div>
           ) : (
@@ -221,26 +227,27 @@ export default function WalletPage() {
             <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="bg-card border border-border rounded-xl h-16 animate-pulse" />)}</div>
           ) : transactions.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-12 text-center">
-              <Wallet className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-              <p className="text-[#666] text-sm mb-4">No transactions yet. Add balance to get started.</p>
-              <Link to="/buy-ftc"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl">Add Balance</Button></Link>
+              <WalletIcon className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
+              <p className="text-[#666] text-sm mb-4">No transactions yet. Earn pilot credits by getting tickets to pilot events.</p>
+              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl">Browse Events</Button></Link>
             </div>
           ) : (
             <div className="space-y-2">
               {transactions.map(tx => {
                 const cfg = txTypeConfig[tx.type] || txTypeConfig.earned;
-                const isPositive = ["earned", "transferred_in", "unstaked"].includes(tx.type);
+                const Icon = cfg.icon;
+                const isPositive = ["earned", "transferred_in"].includes(tx.type);
                 return (
                   <div key={tx.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-lg ${cfg.bg} flex items-center justify-center flex-shrink-0`}>
-                      <cfg.icon className={`w-4 h-4 ${cfg.color}`} strokeWidth={1.5} />
+                      <Icon className={`w-4 h-4 ${cfg.color}`} strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-white truncate">{tx.description}</p>
-                      <p className="text-xs text-[#666]">{moment(tx.created_date).fromNow()}</p>
+                      <p className="text-xs text-[#666]">{moment(tx.created_date).fromNow()}{tx.status && tx.status !== "confirmed" ? ` · ${tx.status}` : ""}</p>
                     </div>
                     <span className={`font-heading font-bold text-sm ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
-                      {isPositive ? "+" : "-"}R${(tx.amount * 0.5).toFixed(2)}
+                      {isPositive ? "+" : "-"}{(tx.amount || 0).toLocaleString()} FTC
                     </span>
                   </div>
                 );
@@ -257,14 +264,14 @@ export default function WalletPage() {
                 <Ticket className="w-5 h-5 text-primary" strokeWidth={1.5} />
               </div>
               <p className="font-bold text-white text-2xl">{tickets.length}</p>
-              <p className="text-xs text-[#666] mt-0.5">Events attended</p>
+              <p className="text-xs text-[#666] mt-0.5">Tickets issued</p>
             </div>
             <div className="bg-card border border-border rounded-xl p-5 text-center">
               <div className="w-10 h-10 bg-emerald-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <TrendingUp className="w-5 h-5 text-emerald-400" strokeWidth={1.5} />
+                <ArrowDownLeft className="w-5 h-5 text-emerald-400" strokeWidth={1.5} />
               </div>
-              <p className="font-bold text-white text-2xl">R${(totalEarned * 0.5).toFixed(0)}</p>
-              <p className="text-xs text-[#666] mt-0.5">Total rewards earned</p>
+              <p className="font-bold text-white text-2xl">{totalEarned.toLocaleString()}</p>
+              <p className="text-xs text-[#666] mt-0.5">Pilot credits earned (FTC)</p>
             </div>
             <div className="bg-card border border-border rounded-xl p-5 text-center">
               <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto mb-3">

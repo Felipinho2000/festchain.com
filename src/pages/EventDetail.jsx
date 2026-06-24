@@ -2,17 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import {
-  Calendar, MapPin, Users, Zap, Music, ArrowLeft, Ticket,
-  CreditCard, QrCode
-} from "lucide-react";
+import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import EventPreOrder from "@/components/events/EventPreOrder";
 import moment from "moment";
 
 const genreLabels = {
@@ -24,12 +18,10 @@ const genreLabels = {
 
 export default function EventDetail() {
   const { id } = useParams();
-  const { currentUser } = useAuth();
   const { toast } = useToast();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [buyOpen, setBuyOpen] = useState(false);
-  const [payMethod, setPayMethod] = useState("credit_card");
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
@@ -41,57 +33,31 @@ export default function EventDetail() {
 
   const handlePurchase = async () => {
     setPurchasing(true);
-    const price = payMethod === "festcoin" ? (event.festcoin_price || event.ticket_price * 0.8) : event.ticket_price;
-    const qrCode = `FC-${event.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    
-    const ticket = await base44.entities.Ticket.create({
-      event_id: event.id,
-      event_title: event.title,
-      event_date: event.date,
-      event_image: event.image_url,
-      event_location: event.location_name,
-      price_paid: price,
-      payment_method: payMethod,
-      qr_code: qrCode,
-      festcoin_earned: event.festcoin_reward || 50
-    });
-
-    // Cache QR locally so it works offline at the door
     try {
-      const cached = JSON.parse(localStorage.getItem("fc_tickets") || "{}");
-      cached[ticket.id] = { qr_code: qrCode, event_title: event.title, event_date: event.date, event_location: event.location_name };
-      localStorage.setItem("fc_tickets", JSON.stringify(cached));
-    } catch (_) {}
-
-    await base44.entities.Event.update(event.id, {
-      tickets_sold: (event.tickets_sold || 0) + 1
-    });
-
-    await base44.entities.FestCoinTransaction.create({
-      type: "earned",
-      amount: event.festcoin_reward || 50,
-      description: `Ticket purchase: ${event.title}`,
-      event_id: event.id,
-      event_title: event.title
-    });
-
-    if (payMethod === "festcoin") {
-      await base44.entities.FestCoinTransaction.create({
-        type: "spent",
-        amount: price,
-        description: `Payment for ticket: ${event.title}`,
-        event_id: event.id,
-        event_title: event.title
-      });
+      const res = await base44.functions.invoke("reserveTicket", { event_id: event.id, payment_method: "test" });
+      const data = res.data || res;
+      if (data.status === "success") {
+        try {
+          const cached = JSON.parse(localStorage.getItem("fc_tickets") || "{}");
+          cached[data.ticket.id] = {
+            qr_code: data.ticket.qr_code,
+            event_title: data.ticket.event_title,
+            event_date: data.ticket.event_date,
+            event_location: data.ticket.event_location
+          };
+          localStorage.setItem("fc_tickets", JSON.stringify(cached));
+        } catch (_) {}
+        setBuyOpen(false);
+        toast({ title: "Ticket secured!", description: `Your ticket for ${event.title} is in your wallet. QR saved for offline check-in.` });
+        setEvent(prev => ({ ...prev, tickets_sold: (prev.tickets_sold || 0) + 1 }));
+      } else {
+        toast({ title: "Could not issue ticket", description: data.message || "Try again", variant: "destructive" });
+      }
+    } catch (e) {
+      toast({ title: "Could not issue ticket", description: e.message, variant: "destructive" });
+    } finally {
+      setPurchasing(false);
     }
-
-    setPurchasing(false);
-    setBuyOpen(false);
-    toast({
-      title: "Ticket secured!",
-      description: `Your ticket for ${event.title} is ready. QR code saved.`
-    });
-    setEvent(prev => ({ ...prev, tickets_sold: (prev.tickets_sold || 0) + 1 }));
   };
 
   if (loading) {
@@ -114,7 +80,6 @@ export default function EventDetail() {
   }
 
   const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
-  const festcoinPrice = event.festcoin_price || Math.round(event.ticket_price * 0.8);
 
   return (
     <div className="space-y-6">
@@ -148,7 +113,6 @@ export default function EventDetail() {
               {event.genre && (
                 <Badge variant="secondary" className="text-xs">{genreLabels[event.genre]}</Badge>
               )}
-  
             </div>
             <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-2">{event.title}</h1>
             {event.organizer_name && (
@@ -183,7 +147,7 @@ export default function EventDetail() {
                 <Users className="w-5 h-5 text-primary" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="font-medium text-foreground text-sm">{event.tickets_sold || 0} / {event.total_capacity} tickets sold</p>
+                <p className="font-medium text-foreground text-sm">{event.tickets_sold || 0} / {event.total_capacity} tickets issued</p>
                 <p className="text-warmgray text-sm">{spotsLeft > 0 ? `${spotsLeft} spots remaining` : "Sold out"}</p>
               </div>
             </div>
@@ -210,15 +174,10 @@ export default function EventDetail() {
             </div>
           )}
 
-          {/* Pre-order Menu */}
+          {/* Pre-order menu — coming soon for pilot (no alcohol ordering) */}
           <div className="bg-card border border-border rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-heading font-semibold text-foreground">Pre-order Menu</h3>
-                <p className="text-xs text-[#666] mt-0.5">Order now, skip the bar queue. 10% off vs. cash prices.</p>
-              </div>
-            </div>
-            <EventPreOrder eventId={event.id} eventTitle={event.title} />
+            <h3 className="font-heading font-semibold text-foreground mb-1">Pre-order Menu</h3>
+            <p className="text-xs text-[#666]">Coming soon · not available in the private pilot.</p>
           </div>
         </div>
 
@@ -226,19 +185,9 @@ export default function EventDetail() {
         <div className="lg:col-span-1">
           <div className="bg-card border border-border rounded-xl p-5 sticky top-8 space-y-5">
             <div>
-              <p className="text-xs text-warmgray mb-1">Ticket Price</p>
+              <p className="text-xs text-warmgray mb-1">Ticket</p>
               <p className="font-heading font-bold text-3xl text-foreground">R$ {event.ticket_price?.toFixed(2)}</p>
-              <p className="text-xs text-warmgray mt-1">
-                or <span className="text-amber font-semibold">{festcoinPrice} FestCoin</span> (20% off)
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-4 py-3">
-              <Zap className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              <div>
-                <p className="font-semibold text-sm text-foreground">Pay with wallet balance</p>
-                <p className="text-xs text-warmgray">20% off when you use your balance</p>
-              </div>
+              <p className="text-xs text-warmgray mt-1">Secure QR · issued instantly · check-in at the door</p>
             </div>
 
             <Button
@@ -247,51 +196,24 @@ export default function EventDetail() {
               disabled={spotsLeft <= 0}
             >
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
-              {spotsLeft > 0 ? "Buy Ticket" : "Sold Out"}
+              {spotsLeft > 0 ? "Get Ticket" : "Sold Out"}
             </Button>
-            <p className="text-xs text-warmgray text-center">Instant delivery • QR check-in</p>
+            <p className="text-[10px] text-[#666] text-center">Private MVP pilot · no real payment is processed</p>
+            <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
           </div>
         </div>
       </div>
 
-      {/* Purchase Dialog */}
+      {/* Confirm Ticket Dialog */}
       <Dialog open={buyOpen} onOpenChange={setBuyOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading">Choose Payment Method</DialogTitle>
+            <DialogTitle className="font-heading">Confirm your ticket</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <RadioGroup value={payMethod} onValueChange={setPayMethod} className="space-y-3">
-              <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${payMethod === "credit_card" ? "border-primary bg-primary/5" : "border-border"}`}>
-                <RadioGroupItem value="credit_card" />
-                <CreditCard className="w-5 h-5 text-warmgray" strokeWidth={1.5} />
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Credit Card</p>
-                  <p className="text-xs text-warmgray">R$ {event.ticket_price?.toFixed(2)}</p>
-                </div>
-              </label>
-              <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${payMethod === "pix" ? "border-primary bg-primary/5" : "border-border"}`}>
-                <RadioGroupItem value="pix" />
-                <QrCode className="w-5 h-5 text-warmgray" strokeWidth={1.5} />
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Pix</p>
-                  <p className="text-xs text-warmgray">R$ {event.ticket_price?.toFixed(2)} • Instant</p>
-                </div>
-              </label>
-              <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${payMethod === "festcoin" ? "border-primary bg-primary/5" : "border-border"}`}>
-                <RadioGroupItem value="festcoin" />
-                <Zap className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Wallet Balance</p>
-                  <p className="text-xs text-primary font-semibold">R${festcoinPrice?.toFixed(2)} • 20% off</p>
-                </div>
-              </label>
-            </RadioGroup>
-
-            <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray space-y-1">
-            <p>You'll receive a ticket with QR code instantly. Saved for offline use at the door.</p>
+            <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray">
+              <p>You'll receive a secure QR ticket in your wallet. <strong className="text-foreground">No real payment is processed during the private pilot</strong> — tickets are issued for testing and check-in.</p>
             </div>
-
             <Button
               className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl"
               onClick={handlePurchase}
@@ -300,12 +222,13 @@ export default function EventDetail() {
               {purchasing ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
+                  Issuing...
                 </span>
               ) : (
-                `Pay ${payMethod === "festcoin" ? `R$${festcoinPrice?.toFixed(2)} (wallet)` : `R$ ${event.ticket_price?.toFixed(2)}`}`
+                `Get Ticket · R$ ${event.ticket_price?.toFixed(2)}`
               )}
             </Button>
+            <p className="text-[10px] text-[#555] text-center">By getting a ticket you accept the <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.</p>
           </div>
         </DialogContent>
       </Dialog>

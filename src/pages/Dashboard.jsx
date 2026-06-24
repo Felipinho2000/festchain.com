@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Plus, Calendar, Users, TrendingUp,
-  Ticket, Music, Pencil, Trash2
+  Ticket, Music, Pencil, Trash2, Lock
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -56,6 +57,21 @@ export default function Dashboard() {
   };
 
   useEffect(() => { loadData(); }, [currentUser]);
+
+  const canOrganize = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
+  if (!canOrganize) {
+    return (
+      <div className="max-w-md mx-auto text-center py-20">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+          <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
+        </div>
+        <h2 className="font-heading font-bold text-2xl text-white mb-2">Organizers only</h2>
+        <p className="text-[#888] text-sm mb-2">This area is for approved organizers and admins.</p>
+        <p className="text-[#555] text-xs mb-6">Organizer approval is granted manually by the admin team during the private pilot — switching your profile view does not unlock it.</p>
+        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Back to Home</Link>
+      </div>
+    );
+  }
 
   const totalRevenue = tickets.reduce((s, t) => s + (t.price_paid || 0), 0);
   const totalAttendees = tickets.length;
@@ -136,7 +152,9 @@ export default function Dashboard() {
           <p className="text-warmgray text-sm mb-1">
             Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, {currentUser?.full_name || "Organizer"}
           </p>
-          <h1 className="font-heading font-bold text-3xl text-foreground">Command Center</h1>
+          <h1 className="font-heading font-bold text-3xl text-foreground flex items-center gap-2">
+            Command Center <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
+          </h1>
         </div>
         <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) { setEditingId(null); setForm(defaultForm); } }}>
           <DialogTrigger asChild>
