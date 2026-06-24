@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Plus, Calendar, Users, TrendingUp,
-  Ticket, Music, Pencil, Trash2, Lock
+  Ticket, Music, Pencil, Trash2, Lock, Settings
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -155,6 +155,11 @@ export default function Dashboard() {
           <h1 className="font-heading font-bold text-3xl text-foreground flex items-center gap-2">
             Command Center <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
           </h1>
+          {currentUser?.role === "admin" && (
+            <Link to="/pilot-setup" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
+              <Settings className="w-3.5 h-3.5" /> Pilot Setup checklist
+            </Link>
+          )}
         </div>
         <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) { setEditingId(null); setForm(defaultForm); } }}>
           <DialogTrigger asChild>

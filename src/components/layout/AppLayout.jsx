@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Zap, LayoutDashboard, Calendar, Wallet,
-  LogOut, Home, User, ScanLine
+  LogOut, Home, User, ScanLine, FileText
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -79,6 +79,10 @@ export default function AppLayout() {
               <p className="text-xs text-[#666] truncate">{currentUser?.email}</p>
             </div>
           </div>
+          <Link to="/legal" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#888] hover:bg-[#252525] hover:text-white transition-all w-full mb-1">
+            <FileText className="w-4 h-4" strokeWidth={1.5} />
+            <span>Legal &amp; Pilot</span>
+          </Link>
           <button
             onClick={() => base44.auth.logout("/")}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[#888] hover:bg-red-900/30 hover:text-red-400 transition-all w-full"
@@ -101,6 +105,9 @@ export default function AppLayout() {
         <div className="flex items-center gap-2">
           <Link to="/wallet" className="flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-primary text-xs font-bold px-3 py-1.5 rounded-lg">
             <Wallet className="w-3 h-3" /> Wallet
+          </Link>
+          <Link to="/legal" className="p-2 text-[#888] hover:text-white" title="Legal & Pilot">
+            <FileText className="w-4 h-4" />
           </Link>
           <button onClick={() => base44.auth.logout("/")} className="p-2 text-[#888]">
             <LogOut className="w-4 h-4" />

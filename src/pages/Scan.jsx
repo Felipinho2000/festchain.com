@@ -4,8 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
-  CheckCircle2, XCircle, AlertTriangle, RotateCcw, Camera, ShieldAlert,
-  Ticket as TicketIcon, Lock, Ban
+  CheckCircle2, XCircle, AlertTriangle, RotateCcw, Camera, Lock, Ban,
+  Ticket as TicketIcon, User, Mail, Clock, Keyboard
 } from "lucide-react";
 import moment from "moment";
 
@@ -19,6 +19,8 @@ export default function Scan() {
   const [events, setEvents] = useState([]);
   const [eventId, setEventId] = useState("");
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [manual, setManual] = useState("");
+  const [validating, setValidating] = useState(false);
 
   useEffect(() => {
     if (!canScan) { setLoadingEvents(false); return; }
@@ -29,7 +31,6 @@ export default function Scan() {
       .finally(() => setLoadingEvents(false));
   }, [canScan, currentUser]);
 
-  // Cleanup camera on unmount / when changing event
   useEffect(() => {
     return () => {
       const inst = html5Ref.current;
@@ -47,37 +48,47 @@ export default function Scan() {
     let mounted = true;
     const html5 = new Html5Qrcode("reader");
     html5Ref.current = html5;
-
     const onScan = async (decoded) => {
       if (lockedRef.current) return;
       lockedRef.current = true;
       try { await html5.pause(); } catch (_) {}
-      try {
-        const res = await base44.functions.invoke("validateTicket", { qr_code: decoded, event_id: eventId });
-        setResult(res.data || { status: "error", message: "No response" });
-      } catch (e) {
-        setResult({ status: "error", message: "Could not validate ticket" });
-      }
+      await runValidation(decoded);
     };
-
     html5.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: { width: 230, height: 230 } },
-      onScan,
-      () => {}
-    ).catch(() => { if (mounted) setCamError("Camera unavailable — check browser permissions and ensure you're on HTTPS."); });
+      onScan, () => {}
+    ).catch(() => { if (mounted) setCamError("Camera unavailable — check browser permissions and ensure you're on HTTPS. You can still enter the code manually below."); });
+  };
+
+  const runValidation = async (qr) => {
+    setValidating(true);
+    try {
+      const res = await base44.functions.invoke("validateTicket", { qr_code: qr, event_id: eventId });
+      setResult(res.data || { status: "error", message: "No response" });
+    } catch (e) {
+      setResult({ status: "error", message: "Could not validate ticket" });
+    } finally {
+      setValidating(false);
+    }
   };
 
   const resume = async () => {
     setResult(null);
     lockedRef.current = false;
+    setManual("");
     try { if (html5Ref.current) await html5Ref.current.resume(); } catch (_) {}
   };
 
-  const changeEvent = () => {
-    stopCamera();
-    setResult(null);
-    setEventId("");
+  const changeEvent = () => { stopCamera(); setResult(null); setEventId(""); setManual(""); };
+
+  const submitManual = (e) => {
+    e.preventDefault();
+    const code = manual.trim();
+    if (!code) return;
+    lockedRef.current = true;
+    try { if (html5Ref.current) html5Ref.current.pause(); } catch (_) {}
+    runValidation(code);
   };
 
   if (!canScan) {
@@ -95,18 +106,20 @@ export default function Scan() {
   }
 
   const config = {
-    valid:        { icon: CheckCircle2, title: "Valid Ticket",       accent: "text-emerald-400 border-emerald-500/50", badge: "bg-emerald-500" },
-    used:         { icon: AlertTriangle, title: "Already Checked In", accent: "text-amber-400 border-amber-500/50",    badge: "bg-amber-500" },
-    invalid:      { icon: XCircle, title: "Invalid Ticket",          accent: "text-red-400 border-red-500/50",       badge: "bg-red-500" },
-    unauthorized: { icon: Ban, title: "Not Authorized",             accent: "text-red-400 border-red-500/50",       badge: "bg-red-500" },
-    error:        { icon: XCircle, title: "Error",                   accent: "text-red-400 border-red-500/50",       badge: "bg-red-500" },
+    valid:        { icon: CheckCircle2, title: "Valid Ticket",       text: "text-emerald-400", border: "border-emerald-500/50", badge: "bg-emerald-500" },
+    used:         { icon: AlertTriangle, title: "Already Checked In", text: "text-amber-400",    border: "border-amber-500/50",    badge: "bg-amber-500" },
+    invalid:      { icon: XCircle, title: "Invalid Ticket",          text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
+    unauthorized: { icon: Ban, title: "Not Authorized",             text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
+    error:        { icon: XCircle, title: "Error",                   text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
   }[result?.status] || {};
+
+  const selectedEvent = events.find(e => e.id === eventId);
 
   return (
     <div className="space-y-4">
       <div>
         <h1 className="font-heading font-bold text-3xl text-white mb-1">Ticket Scanner</h1>
-        <p className="text-[#888] text-sm">Select an event, then point the camera at a ticket QR.</p>
+        <p className="text-[#888] text-sm">Select an event to begin scanning.</p>
       </div>
 
       {!eventId ? (
@@ -144,7 +157,7 @@ export default function Scan() {
           <div className="flex items-center justify-between bg-card border border-border rounded-xl p-3">
             <div>
               <p className="text-[10px] text-[#666] uppercase tracking-wider">Scanning for</p>
-              <p className="text-white text-sm font-medium">{events.find(e => e.id === eventId)?.title}</p>
+              <p className="text-white text-sm font-medium">{selectedEvent?.title}</p>
             </div>
             <button onClick={changeEvent} className="text-primary text-xs font-medium hover:underline">Change event</button>
           </div>
@@ -166,27 +179,61 @@ export default function Scan() {
 
             {result && config.icon && (
               <div className="absolute inset-x-0 bottom-0 p-4">
-                <div className={`flex items-start gap-3 rounded-xl p-4 bg-[#1a1a1a] border ${config.accent.split(" ").find(c => c.startsWith("border-"))}`}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${config.badge}`}>
-                    <config.icon className="w-6 h-6 text-white" strokeWidth={1.8} />
+                <div className={`rounded-xl p-4 bg-[#1a1a1a] border ${config.border}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${config.badge}`}>
+                      <config.icon className="w-6 h-6 text-white" strokeWidth={1.8} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-bold text-sm ${config.text}`}>{config.title}</p>
+                      <p className="text-[#888] text-xs">{result.message}</p>
+                    </div>
+                    <button onClick={resume} className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-2 rounded-lg flex-shrink-0">
+                      <RotateCcw className="w-3.5 h-3.5" /> Next
+                    </button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-bold text-sm ${config.accent.split(" ").find(c => c.startsWith("text-"))}`}>{config.title}</p>
-                    <p className="text-[#888] text-xs">{result.message}</p>
-                    {result.ticket && (
-                      <p className="text-white text-xs font-medium mt-1 truncate">
-                        <TicketIcon className="w-3 h-3 inline mr-1" />{result.ticket.event_title}
-                        {result.ticket.event_date && <span className="text-[#666]"> · {moment(result.ticket.event_date).format("MMM D, h:mm A")}</span>}
-                      </p>
-                    )}
-                  </div>
-                  <button onClick={resume} className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-2 rounded-lg flex-shrink-0">
-                    <RotateCcw className="w-3.5 h-3.5" /> Next
-                  </button>
+
+                  {/* Attendee + details */}
+                  {result.ticket && (
+                    <div className="mt-3 pt-3 border-t border-[#222] space-y-1.5 text-xs">
+                      <p className="text-white font-medium truncate"><TicketIcon className="w-3 h-3 inline mr-1.5" />{result.ticket.event_title}</p>
+                      {result.attendee && (result.attendee.full_name || result.attendee.email) && (
+                        <>
+                          {result.attendee.full_name && <p className="text-[#aaa]"><User className="w-3 h-3 inline mr-1.5" />{result.attendee.full_name}</p>}
+                          <p className="text-[#aaa] truncate"><Mail className="w-3 h-3 inline mr-1.5" />{result.attendee.email}</p>
+                        </>
+                      )}
+                      {result.status === "valid" && result.scanned_at && (
+                        <p className="text-emerald-400"><Clock className="w-3 h-3 inline mr-1.5" />Checked in {moment(result.scanned_at).format("MMM D, h:mm:ss A")}</p>
+                      )}
+                      {result.status === "used" && result.previous_scan && (
+                        <>
+                          <p className="text-amber-400"><Clock className="w-3 h-3 inline mr-1.5" />Previously checked in {result.previous_scan.at ? moment(result.previous_scan.at).format("MMM D, h:mm A") : "—"}</p>
+                          {result.previous_scan.by_label && <p className="text-[#888]">By {result.previous_scan.by_label}</p>}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Manual entry fallback */}
+          <form onSubmit={submitManual} className="bg-card border border-border rounded-xl p-4 space-y-2">
+            <label className="text-xs text-[#888] flex items-center gap-1.5"><Keyboard className="w-3.5 h-3.5" /> Camera not working? Enter the ticket code manually</label>
+            <div className="flex gap-2">
+              <input
+                value={manual}
+                onChange={e => setManual(e.target.value)}
+                placeholder="FC-..."
+                className="flex-1 bg-[#111] border border-border rounded-lg px-3 py-2 text-sm text-white font-mono placeholder-[#444] focus:outline-none focus:border-primary"
+              />
+              <button type="submit" disabled={validating || !manual.trim()} className="px-4 rounded-lg bg-primary hover:bg-primary/90 text-white text-sm font-semibold disabled:opacity-50">
+                {validating ? "…" : "Validate"}
+              </button>
+            </div>
+          </form>
 
           {!result && !camError && (
             <p className="text-center text-[#555] text-xs">Align the ticket QR inside the frame. Each ticket is validated exactly once.</p>

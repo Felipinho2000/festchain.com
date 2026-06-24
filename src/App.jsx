@@ -26,6 +26,7 @@ import Profile from '@/pages/Profile';
 import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
 import Legal from '@/pages/Legal';
+import PilotSetup from '@/pages/PilotSetup';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/scan" element={<Scan />} />
+          <Route path="/pilot-setup" element={<PilotSetup />} />
         </Route>
       </Route>
 

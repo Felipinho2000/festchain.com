@@ -92,7 +92,8 @@ function TicketCard({ ticket }) {
                 <div className="bg-white p-2 rounded-lg"><Qr value={qrCode} size={160} /></div>
                 <span className="text-[10px] font-mono text-[#555] break-all max-w-[200px]">{qrCode || "—"}</span>
               </div>
-              {cachedQR && <p className="text-[10px] text-emerald-500 mt-1.5">✓ Works offline</p>}
+              <p className="text-[10px] text-primary font-medium mt-1.5">Show this QR at the entrance</p>
+              {cachedQR && <p className="text-[10px] text-emerald-500">✓ Works offline</p>}
             </div>
           )}
         </div>

@@ -1,8 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // Hardened ticket check-in for the private MVP pilot.
-// Requires admin / approved_organizer / the event's creator.
-// Validates the ticket belongs to the selected event and can only be used once.
+// Returns attendee info, scanned time, and previous-scan details on a double scan.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -16,7 +15,6 @@ Deno.serve(async (req) => {
     if (!qr_code) return Response.json({ status: 'invalid', message: 'No QR code provided' });
     if (!event_id) return Response.json({ status: 'invalid', message: 'Select an event before scanning' });
 
-    // Permission: admin OR approved_organizer OR creator of this event.
     const isAdmin = user.role === 'admin';
     let event = null;
     try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
@@ -26,21 +24,45 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'unauthorized', message: 'You are not authorized to scan for this event' }, { status: 403 });
     }
 
-    // Find ticket (service role bypasses Ticket read RLS for door staff)
     const tickets = await base44.asServiceRole.entities.Ticket.filter({ qr_code });
     if (!tickets || tickets.length === 0) {
       return Response.json({ status: 'invalid', message: 'Ticket not found' });
     }
     const ticket = tickets[0];
 
-    // Ticket must belong to the event being scanned
     if (ticket.event_id !== event_id) {
       return Response.json({ status: 'invalid', message: 'This ticket does not belong to this event' });
     }
 
+    // Resolve attendee (the ticket owner)
+    let attendee = null;
+    if (ticket.created_by_id) {
+      try {
+        const u = await base44.asServiceRole.entities.User.get(String(ticket.created_by_id));
+        attendee = { full_name: u.full_name || '', email: u.email || '' };
+      } catch (_) {}
+    }
+
     // Already used?
     if (ticket.status === 'used' || ticket.checked_in) {
-      return Response.json({ status: 'used', message: 'This ticket was already used for entry', ticket: { event_title: ticket.event_title, event_date: ticket.event_date } });
+      let scannedByUser = null;
+      if (ticket.scanned_by) {
+        try {
+          const su = await base44.asServiceRole.entities.User.get(String(ticket.scanned_by));
+          scannedByUser = { full_name: su.full_name || '', email: su.email || '' };
+        } catch (_) {}
+      }
+      return Response.json({
+        status: 'used',
+        message: 'This ticket was already used for entry',
+        ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location },
+        attendee,
+        previous_scan: {
+          at: ticket.scanned_at || ticket.checked_in_at || null,
+          by: ticket.scanned_by || null,
+          by_label: scannedByUser ? (scannedByUser.full_name || scannedByUser.email) : (ticket.scanned_by || null)
+        }
+      });
     }
 
     // Mark used exactly once
@@ -56,7 +78,9 @@ Deno.serve(async (req) => {
     return Response.json({
       status: 'valid',
       message: 'Entry approved',
-      ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location }
+      ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location },
+      attendee,
+      scanned_at: now
     });
   } catch (error) {
     return Response.json({ status: 'error', message: error.message }, { status: 500 });
