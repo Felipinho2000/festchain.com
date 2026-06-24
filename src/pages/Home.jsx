@@ -5,11 +5,11 @@ import { Calendar, Zap, Ticket, ShoppingBag, ArrowRight, TrendingUp, Clock, User
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/events/EventCard";
 
-const metrics = [
-  { value: "3×", label: "faster bar service", sub: "pre-orders skip the queue" },
-  { value: "40%", label: "higher spend/head", sub: "vs walk-up bar customers" },
-  { value: "0", label: "fake tickets", sub: "QR verified at the door" },
-  { value: "2%", label: "flat fee", sub: "vs 10–15% on Sympla / Eventbrite" },
+const pillars = [
+  { icon: ShoppingBag, label: "Pre-order drinks at the venue", desc: "Attendees order before they arrive. No cash, no queue." },
+  { icon: Ticket, label: "Tickets with offline QR", desc: "Works without signal at the door. Always scannable." },
+  { icon: Clock, label: "Express pickup at the bar", desc: "Staff fulfil pre-orders. Attendees collect in seconds." },
+  { icon: TrendingUp, label: "Revenue & order dashboard", desc: "Real-time pending orders and sales data for your team." },
 ];
 
 const flow = [
@@ -23,7 +23,7 @@ const flow = [
     step: "2",
     icon: Zap,
     title: "Load your wallet",
-    desc: "Top up FestCoin credits before you arrive. No cash, no card at the bar.",
+    desc: "Add balance before you arrive. No cash, no card at the bar.",
   },
   {
     step: "3",
@@ -64,9 +64,9 @@ export default function Home() {
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1c1c1c] to-[#111] border border-border p-8 lg:p-12">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/8 rounded-full blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none" />
         <div className="relative max-w-2xl">
-          <div className="inline-flex items-center gap-2 bg-emerald-900/40 border border-emerald-700/50 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
-            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-            Pilot: 4,800+ tickets · R$380K revenue
+          <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
+            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+            Seeking Founding Venue Partners · Launching in São Paulo
           </div>
           <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4">
             Pre-order drinks.<br />
@@ -74,7 +74,7 @@ export default function Home() {
             Sell more per head.
           </h1>
           <p className="text-[#888] text-lg leading-relaxed mb-8 max-w-xl">
-            FestChain lets attendees buy tickets and pre-order drinks before they arrive. Clubs see <strong className="text-white">3× faster bar service</strong> and <strong className="text-white">40% higher spend per head</strong>.
+            FestChain lets attendees buy tickets and pre-order drinks before they arrive — so your bar moves faster and your revenue per head goes up.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link to="/events">
@@ -93,13 +93,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── METRICS STRIP ── */}
+      {/* ── PILLARS ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {metrics.map((m, i) => (
-          <div key={i} className="bg-card border border-border rounded-xl p-5 text-center hover:border-primary/30 transition-colors">
-            <p className="font-heading font-bold text-3xl text-primary mb-1">{m.value}</p>
-            <p className="text-white text-sm font-semibold">{m.label}</p>
-            <p className="text-[#555] text-[11px] mt-0.5">{m.sub}</p>
+        {pillars.map((p, i) => (
+          <div key={i} className="bg-card border border-border rounded-xl p-5 hover:border-primary/30 transition-colors">
+            <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center mb-3">
+              <p.icon className="w-4 h-4 text-primary" strokeWidth={1.5} />
+            </div>
+            <p className="text-white text-sm font-semibold mb-1">{p.label}</p>
+            <p className="text-[#555] text-[11px] leading-relaxed">{p.desc}</p>
           </div>
         ))}
       </div>

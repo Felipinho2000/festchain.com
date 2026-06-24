@@ -12,7 +12,7 @@ const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: Calendar, label: "Events", path: "/events" },
   { icon: Ticket, label: "My Tickets", path: "/tickets" },
-  { icon: Wallet, label: "FestCoin", path: "/festcoin" },
+  { icon: Wallet, label: "Wallet", path: "/festcoin" },
   { icon: ShoppingCart, label: "Add Balance", path: "/buy-ftc" },
   { icon: Store, label: "Pre-order", path: "/venue-store" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },

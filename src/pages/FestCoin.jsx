@@ -49,11 +49,11 @@ export default function FestCoin() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-heading font-bold text-3xl text-white mb-1">FestCoin Wallet</h1>
-          <p className="text-[#888] text-sm">Your universal party currency — earn, spend, and grow.</p>
+          <h1 className="font-heading font-bold text-3xl text-white mb-1">My Wallet</h1>
+          <p className="text-[#888] text-sm">Your event balance — use it to buy tickets and pre-order at the venue.</p>
         </div>
         <a href="/buy-ftc" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
-          <Zap className="w-4 h-4" /> Buy FTC
+          <Zap className="w-4 h-4" /> Add Balance
         </a>
       </div>
 
@@ -90,7 +90,7 @@ export default function FestCoin() {
 
       {/* Holder tier progress bars */}
       <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-        <p className="text-sm font-semibold text-white">Holder Tier Progress</p>
+        <p className="text-sm font-semibold text-white">Balance Perks</p>
         {tierThresholds.map((t, i) => {
           const pct = Math.min(100, Math.round((balance / t.target) * 100));
           const achieved = balance >= t.target;
@@ -131,8 +131,8 @@ export default function FestCoin() {
             <Wallet className="w-4 h-4 text-primary" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="font-medium text-sm text-white">Pay with FestCoin</p>
-            <p className="text-xs text-[#666]">20% discount on tickets</p>
+            <p className="font-medium text-sm text-white">Pay with wallet balance</p>
+            <p className="text-xs text-[#666]">10% off at venue bar</p>
           </div>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 flex items-start gap-3">
@@ -140,8 +140,8 @@ export default function FestCoin() {
             <Lock className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="font-medium text-sm text-white">Stake for VIP</p>
-            <p className="text-xs text-[#666]">Unlock perks & access</p>
+            <p className="font-medium text-sm text-white">Works offline</p>
+            <p className="text-xs text-[#666]">QR orders cached on device</p>
           </div>
         </div>
       </div>
@@ -158,9 +158,9 @@ export default function FestCoin() {
         ) : transactions.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-12 text-center">
             <Zap className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-[#666] text-sm">No transactions yet. Buy FTC or a ticket to get started.</p>
+            <p className="text-[#666] text-sm">No transactions yet. Add balance or buy a ticket to get started.</p>
             <a href="/buy-ftc" className="inline-flex items-center gap-1.5 mt-4 bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl">
-              <Zap className="w-3.5 h-3.5" /> Buy FTC
+              <Zap className="w-3.5 h-3.5" /> Add Balance
             </a>
           </div>
         ) : (
