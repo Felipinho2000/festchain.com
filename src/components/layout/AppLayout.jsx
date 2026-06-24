@@ -16,7 +16,6 @@ const navItems = [
   { icon: ShoppingCart, label: "Buy FTC", path: "/buy-ftc" },
   { icon: Camera, label: "Moments", path: "/moments" },
   { icon: Store, label: "Venue Store", path: "/venue-store" },
-  { icon: Lock, label: "Staking", path: "/staking" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: User, label: "Profile", path: "/profile" },
 ];

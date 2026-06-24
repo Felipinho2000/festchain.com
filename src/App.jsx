@@ -73,7 +73,7 @@ const AuthenticatedApp = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/staking" element={<Staking />} />
+          <Route path="/staking" element={<Navigate to="/" replace />} />
           <Route path="/venue-store" element={<VenueStore />} />
         </Route>
       </Route>

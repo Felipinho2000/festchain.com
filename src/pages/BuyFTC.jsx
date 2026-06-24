@@ -33,6 +33,7 @@ export default function BuyFTC() {
   const [method, setMethod] = useState("pix");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { currentUser } = useAuth();
   const { toast } = useToast();
 
@@ -239,10 +240,21 @@ export default function BuyFTC() {
                 <span className="text-white font-bold">R${(totalBrl || 0).toFixed(2)}</span>
               </div>
             </div>
+            {/* Disclosure + Terms */}
+            <div className="bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl p-3 text-xs text-[#666] leading-relaxed">
+              <p className="font-semibold text-[#888] mb-1">⚠️ Important disclosure</p>
+              FestCoin (FTC) is a <strong className="text-white">utility token</strong> used to pay for tickets and venue services inside the FestChain platform. It is <strong className="text-white">not an investment</strong> and does not represent equity or guaranteed returns. Value may fluctuate.
+            </div>
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded accent-orange-500 cursor-pointer flex-shrink-0" />
+              <span className="text-[11px] text-[#666]">I understand FTC is a utility token, not a financial product. I accept the <span className="underline text-[#888]">Terms of Use</span>.</span>
+            </label>
+
             <Button
               className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-11"
               onClick={handleBuy}
-              disabled={loading || !totalBrl || totalBrl < 10}
+              disabled={loading || !totalBrl || totalBrl < 10 || !termsAccepted}
             >
               {loading ? "Processing..." : `Buy ${totalFtc?.toLocaleString() || 0} FTC`}
             </Button>

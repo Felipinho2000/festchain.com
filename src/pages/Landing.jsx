@@ -169,29 +169,32 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 bg-emerald-900/40 border border-emerald-700/50 text-emerald-400 text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-            12 pilot events · 4,800+ tickets issued · R$380K in volume
+            12 pilot events · 4,800+ tickets sold · R$380K in volume
           </div>
           <h1 className="font-heading font-bold text-5xl lg:text-7xl leading-[1.05] tracking-tight mb-6">
-            Ticket infrastructure<br />for <span className="text-primary">modern organizers</span>
+            Buy tickets, pay inside<br />the venue, <span className="text-primary">skip the queue</span>
           </h1>
-          {/* ONE-SENTENCE VALUE PROP */}
-          <p className="text-[#aaa] text-xl leading-relaxed mb-4 max-w-2xl mx-auto">
-            FestChain helps event organizers <span className="text-white font-semibold">reduce ticketing costs</span>, <span className="text-white font-semibold">own their customer data</span>, and <span className="text-white font-semibold">eliminate ticket fraud</span> — using blockchain as invisible infrastructure.
+          <p className="text-[#aaa] text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
+            FestChain is the all-in-one ticketing and in-venue payment platform for event organizers. <span className="text-white font-semibold">2% flat fee</span> — versus 10–15% on Sympla and Eventbrite.
           </p>
-          <p className="text-[#666] text-sm mb-10">For festival promoters, club owners, and independent DJs. No blockchain knowledge required.</p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
             <Link to="/register">
-              <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-8 rounded-xl font-bold text-base">
-                Start Free — No Credit Card <ChevronRight className="w-4 h-4 ml-1" />
+              <Button className="bg-primary hover:bg-primary/90 text-white h-13 px-10 rounded-xl font-bold text-lg">
+                Get Started Free <ChevronRight className="w-5 h-5 ml-1" />
               </Button>
             </Link>
             <a href="#demo">
-              <Button variant="outline" className="h-12 px-8 rounded-xl font-bold text-base border-[#333] text-white hover:bg-[#1a1a1a]">
-                See a Demo
+              <Button variant="outline" className="h-13 px-8 rounded-xl font-bold text-base border-[#333] text-white hover:bg-[#1a1a1a]">
+                Request a Demo
               </Button>
             </a>
           </div>
-          <p className="text-[#555] text-xs mt-5">2% flat fee · Cancel any time · Setup in under 10 minutes</p>
+          {/* 3 quick proof points */}
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-[#666]">
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> No credit card to start</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> Setup in under 10 minutes</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-500" /> Card, Pix & wallet payments</span>
+          </div>
         </div>
       </section>
 

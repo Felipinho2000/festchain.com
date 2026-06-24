@@ -44,7 +44,7 @@ export default function EventDetail() {
     const price = payMethod === "festcoin" ? (event.festcoin_price || event.ticket_price * 0.8) : event.ticket_price;
     const qrCode = `FC-${event.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     
-    await base44.entities.Ticket.create({
+    const ticket = await base44.entities.Ticket.create({
       event_id: event.id,
       event_title: event.title,
       event_date: event.date,
@@ -55,6 +55,13 @@ export default function EventDetail() {
       qr_code: qrCode,
       festcoin_earned: event.festcoin_reward || 50
     });
+
+    // Cache QR locally so it works offline at the door
+    try {
+      const cached = JSON.parse(localStorage.getItem("fc_tickets") || "{}");
+      cached[ticket.id] = { qr_code: qrCode, event_title: event.title, event_date: event.date, event_location: event.location_name };
+      localStorage.setItem("fc_tickets", JSON.stringify(cached));
+    } catch (_) {}
 
     await base44.entities.Event.update(event.id, {
       tickets_sold: (event.tickets_sold || 0) + 1
@@ -169,7 +176,7 @@ export default function EventDetail() {
             )}
           </div>
 
-          <div className="bg-white border border-border rounded-xl p-5 space-y-4">
+          <div className="bg-card border border-border rounded-xl p-5 space-y-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-5 h-5 text-primary" strokeWidth={1.5} />
@@ -203,14 +210,14 @@ export default function EventDetail() {
           </div>
 
           {event.description && (
-            <div className="bg-white border border-border rounded-xl p-5">
+            <div className="bg-card border border-border rounded-xl p-5">
               <h3 className="font-heading font-semibold text-foreground mb-2">About</h3>
               <p className="text-warmgray text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
             </div>
           )}
 
           {event.dj_lineup && event.dj_lineup.length > 0 && (
-            <div className="bg-white border border-border rounded-xl p-5">
+            <div className="bg-card border border-border rounded-xl p-5">
               <h3 className="font-heading font-semibold text-foreground mb-3">DJ Lineup</h3>
               <div className="flex flex-wrap gap-2">
                 {event.dj_lineup.map((dj, i) => (
@@ -226,7 +233,7 @@ export default function EventDetail() {
 
         {/* Purchase Card */}
         <div className="lg:col-span-1">
-          <div className="bg-white border border-border rounded-xl p-5 sticky top-8 space-y-5">
+          <div className="bg-card border border-border rounded-xl p-5 sticky top-8 space-y-5">
             <div>
               <p className="text-xs text-warmgray mb-1">Ticket Price</p>
               <p className="font-heading font-bold text-3xl text-foreground">R$ {event.ticket_price?.toFixed(2)}</p>
@@ -244,7 +251,7 @@ export default function EventDetail() {
             </div>
 
             <Button
-              className="w-full h-12 bg-foreground hover:bg-foreground/90 text-white font-semibold rounded-xl"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl"
               onClick={() => setBuyOpen(true)}
               disabled={spotsLeft <= 0}
             >
@@ -296,7 +303,7 @@ export default function EventDetail() {
             </div>
 
             <Button
-              className="w-full h-11 bg-foreground hover:bg-foreground/90 text-white font-semibold rounded-xl"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl"
               onClick={handlePurchase}
               disabled={purchasing}
             >

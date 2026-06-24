@@ -17,6 +17,11 @@ const statusColors = {
 
 function TicketCard({ ticket }) {
   const [showQR, setShowQR] = useState(false);
+  // Load QR from localStorage cache (works offline at door)
+  const cachedQR = (() => {
+    try { return JSON.parse(localStorage.getItem("fc_tickets") || "{}")[ticket.id]?.qr_code; } catch (_) { return null; }
+  })();
+  const qrCode = ticket.qr_code || cachedQR;
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all">
@@ -77,16 +82,17 @@ function TicketCard({ ticket }) {
               className="text-primary text-xs font-medium hover:underline flex items-center gap-1"
             >
               <QrCode className="w-3 h-3" strokeWidth={1.5} />
-              {showQR ? "Hide" : "QR Code"}
+              {showQR ? "Hide" : "Show QR"}
             </button>
           </div>
 
           {showQR && (
             <div className="mt-3 pt-3 border-t border-[#222] text-center">
-              <div className="inline-flex flex-col items-center gap-2 bg-[#111] border-2 border-dashed border-[#333] rounded-xl p-4">
-                <QrCode className="w-16 h-16 text-white" strokeWidth={1} />
-                <span className="text-[10px] font-mono text-warmgray break-all">{ticket.qr_code}</span>
+              <div className="inline-flex flex-col items-center gap-2 bg-white rounded-2xl p-5">
+                <QrCode className="w-24 h-24 text-[#0d0d0d]" strokeWidth={0.8} />
+                <span className="text-[10px] font-mono text-[#333] break-all max-w-[200px]">{qrCode || "—"}</span>
               </div>
+              {cachedQR && <p className="text-[10px] text-emerald-500 mt-1.5">✓ Works offline</p>}
             </div>
           )}
         </div>
