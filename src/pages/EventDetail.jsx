@@ -85,21 +85,6 @@ export default function EventDetail() {
       });
     }
 
-    // Award badges based on ticket history
-    const allTickets = await base44.entities.Ticket.filter({ created_by_id: currentUser?.id });
-    const existingBadges = await base44.entities.UserBadge.filter({ created_by_id: currentUser?.id });
-    const badgeKeys = new Set(existingBadges.map(b => b.badge_key));
-    const ticketCount = allTickets.length + 1; // +1 for the one just created
-
-    const toAward = [];
-    if (!badgeKeys.has("first_ticket")) toAward.push({ badge_key: "first_ticket", badge_name: "First Timer", badge_emoji: "🎟️", badge_description: "Bought your first ticket", event_id: event.id, event_title: event.title });
-    if (ticketCount >= 5 && !badgeKeys.has("five_events")) toAward.push({ badge_key: "five_events", badge_name: "Party Starter", badge_emoji: "🔥", badge_description: "Attended 5 events", event_id: event.id, event_title: event.title });
-    if (ticketCount >= 10 && !badgeKeys.has("ten_events")) toAward.push({ badge_key: "ten_events", badge_name: "Festival Veteran", badge_emoji: "💎", badge_description: "Attended 10 events", event_id: event.id, event_title: event.title });
-    if (ticketCount >= 20 && !badgeKeys.has("twenty_events")) toAward.push({ badge_key: "twenty_events", badge_name: "Party Royalty", badge_emoji: "👑", badge_description: "Attended 20 events", event_id: event.id, event_title: event.title });
-    if (event.genre === "techno" && !badgeKeys.has("genre_techno")) toAward.push({ badge_key: "genre_techno", badge_name: "Techno Head", badge_emoji: "🤖", badge_description: "Attended a techno event", event_id: event.id, event_title: event.title });
-    if (event.genre === "house" && !badgeKeys.has("genre_house")) toAward.push({ badge_key: "genre_house", badge_name: "House Lover", badge_emoji: "🏠", badge_description: "Attended a house event", event_id: event.id, event_title: event.title });
-    if (toAward.length > 0) await base44.entities.UserBadge.bulkCreate(toAward);
-
     setPurchasing(false);
     setBuyOpen(false);
     toast({

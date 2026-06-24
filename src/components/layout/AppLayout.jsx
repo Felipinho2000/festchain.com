@@ -1,45 +1,44 @@
-import React, { useState } from "react";
+import React from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Zap, LayoutDashboard, Calendar, Wallet,
-  LogOut, Home, User
+  LogOut, Home, User, ScanLine
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
-  { icon: Home,          label: "Home",      path: "/" },
-  { icon: Calendar,      label: "Events",    path: "/events" },
-  { icon: Wallet,        label: "Wallet",    path: "/wallet" },
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: User,          label: "Profile",   path: "/profile" },
+  { icon: Home,            label: "Home",      path: "/" },
+  { icon: Calendar,        label: "Events",    path: "/events" },
+  { icon: Wallet,          label: "Wallet",    path: "/wallet" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", staffOnly: true },
+  { icon: ScanLine,        label: "Scan",      path: "/scan",       staffOnly: true },
+  { icon: User,            label: "Profile",   path: "/profile" },
 ];
 
 const mobileNavItems = [
-  { icon: Home,     label: "Home",    path: "/" },
-  { icon: Calendar, label: "Events",  path: "/events" },
-  { icon: Wallet,   label: "Wallet",  path: "/wallet" },
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: User,     label: "Profile", path: "/profile" },
+  { icon: Home,            label: "Home",      path: "/" },
+  { icon: Calendar,        label: "Events",    path: "/events" },
+  { icon: Wallet,          label: "Wallet",    path: "/wallet" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", staffOnly: true },
+  { icon: ScanLine,        label: "Scan",      path: "/scan",       staffOnly: true },
+  { icon: User,            label: "Profile",   path: "/profile" },
 ];
 
-// Sponsor banner shown in sidebar
-const sponsors = [
-  { name: "RedBull Music", logo: "🔴", tagline: "Official Energy Partner" },
-  { name: "Beats by Dre", logo: "🎧", tagline: "Sound Partner" },
-];
+// Organizer-only nav gating (Dashboard, Scan)
+const isOrganizerRole = (role) => ["organizer", "admin"].includes(role);
+
+
 
 export default function AppLayout() {
-  const [sponsorIdx] = useState(0);
   const location = useLocation();
   const { currentUser } = useAuth();
+  const isOrganizer = isOrganizerRole(currentUser?.role);
 
   const initials = currentUser?.full_name
     ? currentUser.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "FC";
-
-  const sponsor = sponsors[sponsorIdx % sponsors.length];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -53,41 +52,24 @@ export default function AppLayout() {
         </Link>
 
         <nav className="flex-1 flex flex-col gap-0.5">
-          {navItems.map(item => {
+          {navItems.filter(i => !i.staffOnly || isOrganizer).map(item => {
             const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
-            const isBuyFtc = false;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                  isBuyFtc
-                    ? "bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30"
-                    : isActive
+                  isActive
                     ? "bg-primary text-white"
                     : "text-[#888] hover:bg-[#252525] hover:text-white"
                 }`}
               >
                 <item.icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
                 <span>{item.label}</span>
-                {isBuyFtc && <Zap className="w-3 h-3 ml-auto text-primary" />}
-
               </Link>
             );
           })}
         </nav>
-
-        {/* Sponsor block in sidebar */}
-        <div className="my-4 rounded-xl border border-border bg-[#111] p-3">
-          <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Sponsored</p>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">{sponsor.logo}</span>
-            <div>
-              <p className="text-xs font-semibold text-white">{sponsor.name}</p>
-              <p className="text-[10px] text-[#666]">{sponsor.tagline}</p>
-            </div>
-          </div>
-        </div>
 
         <div className="border-t border-border pt-4">
           <div className="flex items-center gap-3 px-2 mb-3">
@@ -136,15 +118,14 @@ export default function AppLayout() {
 
       {/* Mobile Bottom Nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#1a1a1a] border-t border-border z-50 flex items-center justify-around px-2">
-        {mobileNavItems.map(item => {
+        {mobileNavItems.filter(i => !i.staffOnly || isOrganizer).map(item => {
           const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
-          const isBuyFtc = item.path === "/buy-ftc";
           return (
             <Link
               key={item.path}
               to={item.path}
               className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${
-                isBuyFtc ? "text-primary" : isActive ? "text-primary" : "text-[#666]"
+                isActive ? "text-primary" : "text-[#666]"
               }`}
             >
               <item.icon className="w-5 h-5" strokeWidth={1.5} />

@@ -24,9 +24,11 @@ import Dashboard from '@/pages/Dashboard';
 import BuyFTC from '@/pages/BuyFTC';
 import Profile from '@/pages/Profile';
 import Landing from '@/pages/Landing';
+import Scan from '@/pages/Scan';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
+import OrganizerRoute from '@/components/OrganizerRoute';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -67,12 +69,13 @@ const AuthenticatedApp = () => {
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/festcoin" element={<Navigate to="/wallet" replace />} />
           <Route path="/tickets" element={<Navigate to="/wallet" replace />} />
-          <Route path="/venue-store" element={<Navigate to="/events" replace />} />
           <Route path="/moments" element={<Navigate to="/" replace />} />
-          <Route path="/staking" element={<Navigate to="/" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
+          <Route element={<OrganizerRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scan" element={<Scan />} />
+          </Route>
         </Route>
       </Route>
 

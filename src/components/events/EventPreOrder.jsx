@@ -3,8 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
-  ShoppingCart, Plus, Minus, X, Zap, QrCode, Check, Clock, Wine, Star, Sparkles, Package, Utensils
+  ShoppingCart, Plus, Minus, X, Zap, Check, Clock, Wine, Star, Sparkles, Package, Utensils
 } from "lucide-react";
+import Qr from "@/components/shared/Qr";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -27,8 +28,8 @@ function OrderConfirmation({ order, onClose }) {
         </div>
         <h3 className="font-heading font-bold text-white text-xl mb-1">Order Confirmed!</h3>
         <p className="text-[#888] text-sm mb-5">Show this QR at the collection point.</p>
-        <div className="bg-white rounded-2xl p-4 mx-auto w-40 h-40 flex items-center justify-center mb-3">
-          <QrCode className="w-28 h-28 text-[#0d0d0d]" strokeWidth={0.8} />
+        <div className="mx-auto mb-3">
+          <Qr value={order.qr_code} size={150} />
         </div>
         <p className="text-white font-mono text-xs mb-1">{order.qr_code}</p>
         <p className="text-[#666] text-xs mb-5">Collection: {order.collection_point}</p>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Zap, TrendingUp, Shield, Star, ChevronRight, CreditCard, Banknote, Check } from "lucide-react";
+import { Zap, TrendingUp, Shield, Star, CreditCard, Banknote, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,11 +20,6 @@ const perks = [
   { icon: Shield, title: "10% cheaper at the bar", desc: "FTC prices are 10% lower than cash prices at every partner venue." },
   { icon: Star, title: "Works without signal", desc: "Your QR order code is stored offline — still works inside the venue even with no network." },
   { icon: TrendingUp, title: "One wallet, every event", desc: "Load once, spend across all FestChain events. Your balance never expires." },
-];
-
-const sponsors = [
-  { name: "Heineken", logo: "🍺", msg: "Scan your ticket at Heineken bars for a free beer" },
-  { name: "Spotify", logo: "🎵", msg: "Earn 2x FTC on events featuring Spotify artists" },
 ];
 
 export default function BuyFTC() {
@@ -239,13 +234,6 @@ export default function BuyFTC() {
             <p className="text-[10px] text-[#555] text-center mt-2">Instant credit to your wallet</p>
           </div>
 
-          {/* Sponsor ad */}
-          <div className="bg-card border border-primary/20 rounded-xl p-4 text-center">
-            <p className="text-[10px] text-[#555] uppercase tracking-wider mb-2">Sponsored by</p>
-            <p className="text-2xl mb-1">🍺</p>
-            <p className="text-white font-semibold text-sm">Heineken</p>
-            <p className="text-[#666] text-xs mt-1">Buy 500+ FTC and get a free Heineken at partner festivals</p>
-          </div>
         </div>
       </div>
 
@@ -265,25 +253,6 @@ export default function BuyFTC() {
         </div>
       </div>
 
-      {/* Sponsor strip */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <p className="text-[10px] text-[#555] uppercase tracking-wider mb-4">Ecosystem Partners</p>
-        <div className="flex flex-wrap gap-4">
-          {sponsors.map((s, i) => (
-            <div key={i} className="flex items-center gap-3 bg-[#111] border border-[#222] rounded-xl px-4 py-3">
-              <span className="text-2xl">{s.logo}</span>
-              <div>
-                <p className="text-white text-xs font-bold">{s.name}</p>
-                <p className="text-[#555] text-[10px]">{s.msg}</p>
-              </div>
-            </div>
-          ))}
-          <div className="flex items-center gap-3 bg-[#111] border border-dashed border-[#333] rounded-xl px-4 py-3 text-[#444] cursor-pointer hover:border-primary/30 transition-colors">
-            <ChevronRight className="w-4 h-4" />
-            <p className="text-xs">Become a sponsor</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
