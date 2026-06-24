@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
-  LayoutDashboard, Plus, Calendar, Users, Zap, TrendingUp,
-  BarChart3, Ticket, MapPin, Music, Eye, Pencil, Trash2
+  LayoutDashboard, Plus, Calendar, Users, TrendingUp,
+  Ticket, Music, Pencil, Trash2
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import InventoryManager from "@/components/dashboard/InventoryManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -261,8 +263,19 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Events List */}
-      <div>
+      {/* Tabs: Events + Inventory */}
+      <Tabs defaultValue="events" className="space-y-4">
+        <TabsList className="bg-transparent p-0 gap-4 border-b border-border rounded-none h-auto">
+          <TabsTrigger value="events" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white">
+            Events
+          </TabsTrigger>
+          <TabsTrigger value="inventory" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white">
+            Inventory
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="events">
+        <div>
         <h3 className="font-heading font-semibold text-lg text-white mb-4">Your Events</h3>
         {loading ? (
           <div className="space-y-3">
@@ -315,7 +328,13 @@ export default function Dashboard() {
             })}
           </div>
         )}
-      </div>
+        </div>
+        </TabsContent>
+
+        <TabsContent value="inventory">
+          <InventoryManager events={events} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

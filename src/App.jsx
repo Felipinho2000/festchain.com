@@ -18,15 +18,12 @@ import ResetPassword from '@/pages/ResetPassword';
 import Home from '@/pages/Home';
 import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
-import MyTickets from '@/pages/MyTickets';
+import WalletPage from '@/pages/Wallet';
 import FestCoin from '@/pages/FestCoin';
-import Moments from '@/pages/Moments';
 import Dashboard from '@/pages/Dashboard';
 import BuyFTC from '@/pages/BuyFTC';
 import Profile from '@/pages/Profile';
-import Staking from '@/pages/Staking';
 import Landing from '@/pages/Landing';
-import VenueStore from '@/pages/VenueStore';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -67,14 +64,15 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/:id" element={<EventDetail />} />
-          <Route path="/tickets" element={<MyTickets />} />
-          <Route path="/festcoin" element={<FestCoin />} />
-          <Route path="/moments" element={<Moments />} />
+          <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/festcoin" element={<Navigate to="/wallet" replace />} />
+          <Route path="/tickets" element={<Navigate to="/wallet" replace />} />
+          <Route path="/venue-store" element={<Navigate to="/events" replace />} />
+          <Route path="/moments" element={<Navigate to="/" replace />} />
+          <Route path="/staking" element={<Navigate to="/" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/staking" element={<Navigate to="/" replace />} />
-          <Route path="/venue-store" element={<VenueStore />} />
         </Route>
       </Route>
 

@@ -3,29 +3,25 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
-  Ticket, Zap, LayoutDashboard, Calendar, Camera, Wallet,
-  LogOut, Home, ShoppingCart, User, Lock, Store
+  Zap, LayoutDashboard, Calendar, Wallet,
+  LogOut, Home, User
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/" },
-  { icon: Calendar, label: "Events", path: "/events" },
-  { icon: Ticket, label: "My Tickets", path: "/tickets" },
-  { icon: Wallet, label: "Wallet", path: "/festcoin" },
-  { icon: ShoppingCart, label: "Add Balance", path: "/buy-ftc" },
-  { icon: Store, label: "Pre-order", path: "/venue-store" },
+  { icon: Home,          label: "Home",      path: "/" },
+  { icon: Calendar,      label: "Events",    path: "/events" },
+  { icon: Wallet,        label: "Wallet",    path: "/wallet" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: User, label: "Profile", path: "/profile" },
+  { icon: User,          label: "Profile",   path: "/profile" },
 ];
 
 const mobileNavItems = [
-  { icon: Home, label: "Home", path: "/" },
-  { icon: Calendar, label: "Events", path: "/events" },
-  { icon: Ticket, label: "Tickets", path: "/tickets" },
-  { icon: Store, label: "Pre-order", path: "/venue-store" },
-  { icon: Wallet, label: "Wallet", path: "/festcoin" },
-  { icon: User, label: "Profile", path: "/profile" },
+  { icon: Home,     label: "Home",    path: "/" },
+  { icon: Calendar, label: "Events",  path: "/events" },
+  { icon: Wallet,   label: "Wallet",  path: "/wallet" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+  { icon: User,     label: "Profile", path: "/profile" },
 ];
 
 // Sponsor banner shown in sidebar
@@ -122,8 +118,8 @@ export default function AppLayout() {
           <span className="font-heading font-bold text-base text-white">FestChain</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link to="/buy-ftc" className="flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-primary text-xs font-bold px-3 py-1.5 rounded-lg">
-            <Zap className="w-3 h-3" /> Add Balance
+          <Link to="/wallet" className="flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-primary text-xs font-bold px-3 py-1.5 rounded-lg">
+            <Wallet className="w-3 h-3" /> Wallet
           </Link>
           <button onClick={() => base44.auth.logout("/")} className="p-2 text-[#888]">
             <LogOut className="w-4 h-4" />
