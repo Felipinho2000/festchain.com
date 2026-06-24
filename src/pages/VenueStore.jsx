@@ -74,27 +74,27 @@ function CartDrawer({ cart, onUpdate, onClose, onCheckout, balance, checkingOut 
 
         <div className="p-5 border-t border-border space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-[#888] text-sm">Your balance</span>
-            <span className="text-white font-bold">{balance.toLocaleString()} FTC</span>
+          <span className="text-[#888] text-sm">Your balance</span>
+          <span className="text-white font-bold">R${(balance * 0.5).toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#888] text-sm">Order total</span>
-            <span className="text-primary font-bold text-lg">{total.toLocaleString()} FTC</span>
+          <span className="text-[#888] text-sm">Order total</span>
+          <span className="text-primary font-bold text-lg">R${(total * 0.5).toFixed(2)}</span>
           </div>
           {!canAfford && (
-            <div className="bg-red-900/30 border border-red-800/40 rounded-xl p-3 text-center">
-              <p className="text-red-400 text-xs">Insufficient balance. <Link to="/buy-ftc" className="underline font-bold">Top up FTC</Link></p>
-            </div>
+          <div className="bg-red-900/30 border border-red-800/40 rounded-xl p-3 text-center">
+          <p className="text-red-400 text-xs">Insufficient balance. <Link to="/buy-ftc" className="underline font-bold">Add Balance</Link></p>
+          </div>
           )}
           <Button
-            onClick={onCheckout}
-            disabled={cart.length === 0 || !canAfford || checkingOut}
-            className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl"
+          onClick={onCheckout}
+          disabled={cart.length === 0 || !canAfford || checkingOut}
+          className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl"
           >
-            {checkingOut ? "Processing..." : `Pay ${total.toLocaleString()} FTC`}
-            <Zap className="w-4 h-4 ml-2" />
+          {checkingOut ? "Processing..." : `Pay R$${(total * 0.5).toFixed(2)}`}
+          <Zap className="w-4 h-4 ml-2" />
           </Button>
-          <p className="text-[#555] text-xs text-center">10% FTC discount applied vs. cash prices</p>
+          <p className="text-[#555] text-xs text-center">10% cheaper than cash at the bar</p>
         </div>
       </div>
     </div>
@@ -268,8 +268,8 @@ export default function VenueStore() {
           <span className="text-white text-sm font-medium">Wallet Balance</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-heading font-bold text-primary text-xl">{balance.toLocaleString()} FTC</span>
-          <Link to="/buy-ftc" className="text-xs text-[#888] hover:text-white border border-[#333] px-3 py-1.5 rounded-lg transition-colors">Top Up</Link>
+          <span className="font-heading font-bold text-primary text-xl">R${(balance * 0.5).toFixed(2)}</span>
+          <Link to="/buy-ftc" className="text-xs text-[#888] hover:text-white border border-[#333] px-3 py-1.5 rounded-lg transition-colors">Add Balance</Link>
         </div>
       </div>
 
@@ -327,8 +327,8 @@ export default function VenueStore() {
               </div>
               <div className="flex items-center justify-between mt-auto pt-2 border-t border-[#1f1f1f]">
                 <div>
-                  <p className="font-heading font-bold text-primary text-lg">{item.price_ftc} <span className="text-sm text-[#888]">FTC</span></p>
-                  {item.price_brl && <p className="text-[#555] text-xs line-through">R${item.price_brl}</p>}
+                  <p className="font-heading font-bold text-white text-lg">R${item.price_brl ?? (item.price_ftc * 0.5).toFixed(0)}</p>
+                  <p className="text-primary text-xs font-medium">{item.price_ftc} FTC · 10% off</p>
                 </div>
                 {inCart ? (
                   <div className="flex items-center gap-2">

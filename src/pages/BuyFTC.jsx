@@ -16,10 +16,10 @@ const packages = [
 ];
 
 const perks = [
-  { icon: TrendingUp, title: "Investment Upside", desc: "FTC supply is capped. As FestChain grows, early holders benefit from network demand." },
-  { icon: Shield, title: "Deflationary Token", desc: "20% of every ticket fee is burned, reducing supply over time and protecting your value." },
-  { icon: Star, title: "Holder Perks", desc: "Hold 1,000+ FTC for priority ticket access. Hold 5,000+ for exclusive backstage NFTs." },
-  { icon: Zap, title: "20% Ticket Discount", desc: "Pay with FTC on any event and save 20% vs. fiat — instant utility from day one." },
+  { icon: Zap, title: "Skip the bar queue", desc: "Pre-order drinks before you arrive. Scan your QR, collect instantly — no waiting." },
+  { icon: Shield, title: "10% cheaper at the bar", desc: "FTC prices are 10% lower than cash prices at every partner venue." },
+  { icon: Star, title: "Works without signal", desc: "Your QR order code is stored offline — still works inside the venue even with no network." },
+  { icon: TrendingUp, title: "One wallet, every event", desc: "Load once, spend across all FestChain events. Your balance never expires." },
 ];
 
 const sponsors = [
@@ -70,9 +70,9 @@ export default function BuyFTC() {
         <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
           <Check className="w-10 h-10 text-primary" />
         </div>
-        <h2 className="font-heading font-bold text-3xl text-white mb-2">FTC Purchased!</h2>
+        <h2 className="font-heading font-bold text-3xl text-white mb-2">Balance Added!</h2>
         <p className="text-[#888] mb-6">
-          <span className="text-primary font-bold text-2xl">{success.ftc.toLocaleString()} FTC</span>
+          <span className="text-primary font-bold text-2xl">R${success.brl.toFixed(2)}</span>
           {" "}has been added to your wallet.
         </p>
         <p className="text-[#555] text-sm mb-8">R${success.brl.toFixed(2)} charged via {method.toUpperCase()}</p>
@@ -93,38 +93,16 @@ export default function BuyFTC() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-widest mb-3">
-          <Zap className="w-3.5 h-3.5" /> FestCoin Economy
+          <Zap className="w-3.5 h-3.5" /> In-Venue Payments
         </div>
-        <h1 className="font-heading font-bold text-4xl text-white mb-2">Load Your FTC Wallet</h1>
+        <h1 className="font-heading font-bold text-4xl text-white mb-2">Add Balance</h1>
         <p className="text-[#888] text-base max-w-xl">
-          FTC is a <span className="text-white font-semibold">utility token and payment rail</span> — use it to buy tickets, pay for drinks and VIP tables inside the venue, earn loyalty rewards, and skip every queue.
+          Load credits in BRL to buy tickets and pre-order drinks at the venue — <span className="text-white font-semibold">10% cheaper than cash</span> and no bar queue.
         </p>
         <div className="flex flex-wrap gap-2 mt-3">
-          {["10% venue discount", "Skip bar queues", "Pre-order drinks & tables", "Earn on every event", "Stake for yield"].map(tag => (
+          {["10% cheaper at the bar", "Skip bar queues", "Pre-order drinks & tables", "Works offline"].map(tag => (
             <span key={tag} className="bg-primary/10 border border-primary/20 text-primary text-xs px-3 py-1 rounded-full">{tag}</span>
           ))}
-        </div>
-      </div>
-
-      {/* Price ticker */}
-      <div className="flex items-center gap-6 bg-card border border-border rounded-xl px-5 py-4">
-        <div>
-          <p className="text-[10px] text-[#555] uppercase tracking-wider mb-0.5">Current Rate</p>
-          <p className="font-heading font-bold text-2xl text-white">R$0.50 <span className="text-primary text-base">/ FTC</span></p>
-        </div>
-        <div className="h-10 w-px bg-border" />
-        <div>
-          <p className="text-[10px] text-[#555] uppercase tracking-wider mb-0.5">Market Cap</p>
-          <p className="font-heading font-bold text-xl text-white">R$2.4M</p>
-        </div>
-        <div className="h-10 w-px bg-border" />
-        <div>
-          <p className="text-[10px] text-[#555] uppercase tracking-wider mb-0.5">24h Change</p>
-          <p className="font-heading font-bold text-xl text-emerald-400">+8.4%</p>
-        </div>
-        <div className="ml-auto hidden sm:flex items-center gap-2 text-xs text-[#666]">
-          <TrendingUp className="w-4 h-4 text-primary" />
-          Powered by FestChain Protocol
         </div>
       </div>
 
@@ -271,9 +249,9 @@ export default function BuyFTC() {
         </div>
       </div>
 
-      {/* Investment perks */}
+      {/* Utility perks */}
       <div>
-        <h2 className="font-heading font-bold text-xl text-white mb-4">Why Hold FestCoin?</h2>
+        <h2 className="font-heading font-bold text-xl text-white mb-4">Why use in-venue balance?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {perks.map((p, i) => (
             <div key={i} className="bg-card border border-border rounded-xl p-4 hover:border-primary/30 transition-colors">

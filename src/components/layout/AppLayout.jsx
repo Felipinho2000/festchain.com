@@ -13,9 +13,8 @@ const navItems = [
   { icon: Calendar, label: "Events", path: "/events" },
   { icon: Ticket, label: "My Tickets", path: "/tickets" },
   { icon: Wallet, label: "FestCoin", path: "/festcoin" },
-  { icon: ShoppingCart, label: "Buy FTC", path: "/buy-ftc" },
-  { icon: Camera, label: "Moments", path: "/moments" },
-  { icon: Store, label: "Venue Store", path: "/venue-store" },
+  { icon: ShoppingCart, label: "Add Balance", path: "/buy-ftc" },
+  { icon: Store, label: "Pre-order", path: "/venue-store" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: User, label: "Profile", path: "/profile" },
 ];
@@ -23,9 +22,9 @@ const navItems = [
 const mobileNavItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: Calendar, label: "Events", path: "/events" },
-  { icon: ShoppingCart, label: "Buy FTC", path: "/buy-ftc" },
+  { icon: Ticket, label: "Tickets", path: "/tickets" },
+  { icon: Store, label: "Pre-order", path: "/venue-store" },
   { icon: Wallet, label: "Wallet", path: "/festcoin" },
-  { icon: Camera, label: "Moments", path: "/moments" },
   { icon: User, label: "Profile", path: "/profile" },
 ];
 
@@ -60,7 +59,7 @@ export default function AppLayout() {
         <nav className="flex-1 flex flex-col gap-0.5">
           {navItems.map(item => {
             const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
-            const isBuyFtc = item.path === "/buy-ftc";
+            const isBuyFtc = false;
             return (
               <Link
                 key={item.path}
@@ -76,6 +75,7 @@ export default function AppLayout() {
                 <item.icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
                 <span>{item.label}</span>
                 {isBuyFtc && <Zap className="w-3 h-3 ml-auto text-primary" />}
+
               </Link>
             );
           })}
@@ -123,7 +123,7 @@ export default function AppLayout() {
         </Link>
         <div className="flex items-center gap-2">
           <Link to="/buy-ftc" className="flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-primary text-xs font-bold px-3 py-1.5 rounded-lg">
-            <Zap className="w-3 h-3" /> Buy FTC
+            <Zap className="w-3 h-3" /> Add Balance
           </Link>
           <button onClick={() => base44.auth.logout("/")} className="p-2 text-[#888]">
             <LogOut className="w-4 h-4" />
