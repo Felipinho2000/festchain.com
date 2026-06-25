@@ -60,6 +60,7 @@ export default function Landing() {
       <a href="#works" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.whatWorks")}</a>
       <a href="#roadmap" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.roadmap")}</a>
       <a href="#mission" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.mission")}</a>
+      <Link to="/whitepaper" onClick={onClick} className="hover:text-white transition-colors">{t("landing.whitepaper.cta")}</Link>
       <a href="#contact" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.contact")}</a>
       <Link to="/legal" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.legal")}</Link>
     </>
@@ -335,6 +336,35 @@ export default function Landing() {
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center text-sm text-[#888]">
             <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> {t("landing.contact.emailVal")}</span>
             <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {t("landing.contact.locale")}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHITEPAPER ── */}
+      <section className="py-16 px-5 bg-[#111]">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0d0d0d] to-[#141414] border border-[#2a2a2a] p-8 sm:p-12">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/25 text-primary text-[10px] font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-widest">
+                  <Zap className="w-3 h-3" /> {t("landing.whitepaper.badge")}
+                </div>
+                <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">
+                  {t("landing.whitepaper.title")}
+                </h2>
+                <p className="text-[#888] text-sm sm:text-base leading-relaxed max-w-xl">
+                  {t("landing.whitepaper.desc")}
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Link to="/whitepaper">
+                  <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap">
+                    {t("landing.whitepaper.cta")} <ChevronRight className="w-5 h-5 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

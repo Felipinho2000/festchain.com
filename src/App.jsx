@@ -28,6 +28,7 @@ import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
 import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
+import Whitepaper from '@/pages/Whitepaper';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/legal" element={<Legal />} />
+      <Route path="/whitepaper" element={<Whitepaper />} />
 
       {/* Protected app routes */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
