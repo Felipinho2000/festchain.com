@@ -49,7 +49,7 @@ export default function Home() {
         <div className="relative max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            Private MVP Pilot · QR Ticketing
+            Public Beta · QR Ticketing
           </div>
           <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4">
             Secure QR tickets.<br />
@@ -147,7 +147,7 @@ export default function Home() {
               Run check-in<br />at scale.
             </h2>
             <p className="text-[#666] text-sm leading-relaxed mb-5">
-              Create events, issue QR tickets, and scan guests at the door with double-entry protection and a live attendance view — built for the private MVP pilot.
+              Create events, issue QR tickets, and scan guests at the door with double-entry protection and a live attendance view — built for the public beta.
             </p>
             <Link to="/dashboard">
               <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 rounded-xl text-sm">

@@ -57,22 +57,25 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/landing" element={<Landing />} />
+      {/* Public routes — always accessible, no auth required */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/landing" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/legal" element={<Legal />} />
 
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/landing" replace />} />}>
+      {/* Protected app routes */}
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/app" element={<Home />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/festcoin" element={<Navigate to="/wallet" replace />} />
           <Route path="/tickets" element={<Navigate to="/wallet" replace />} />
-          <Route path="/moments" element={<Navigate to="/" replace />} />
+          <Route path="/moments" element={<Navigate to="/app" replace />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/dashboard" element={<Dashboard />} />

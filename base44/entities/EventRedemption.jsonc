@@ -1,0 +1,88 @@
+{
+  "name": "EventRedemption",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "menu_item_id": {
+      "type": "string"
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "item_emoji": {
+      "type": "string"
+    },
+    "ftc_cost": {
+      "type": "number"
+    },
+    "redemption_code": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "redeemed",
+        "claimed",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "claimed_by": {
+      "type": "string"
+    },
+    "claimed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_pilot": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "event_id",
+    "menu_item_id",
+    "item_name",
+    "ftc_cost"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

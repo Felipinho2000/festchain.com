@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket } from "lucide-react";
+import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag } from "lucide-react";
+import EventMenuPanel from "@/components/events/EventMenuPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,10 +20,13 @@ const genreLabels = {
 export default function EventDetail() {
   const { id } = useParams();
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [buyOpen, setBuyOpen] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
+  const [userBalance, setUserBalance] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     base44.entities.Event.get(id)
@@ -30,6 +34,21 @@ export default function EventDetail() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Load FTC balance for menu redemptions
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id })
+      .then(txs => {
+        const valid = txs.filter(t => !["cancelled", "failed"].includes(t.status));
+        const bal = valid.reduce((s, t) => {
+          if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
+          if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
+          return s;
+        }, 0);
+        setUserBalance(bal);
+      }).catch(() => {});
+  }, [currentUser]);
 
   const handlePurchase = async () => {
     setPurchasing(true);
@@ -48,7 +67,7 @@ export default function EventDetail() {
           localStorage.setItem("fc_tickets", JSON.stringify(cached));
         } catch (_) {}
         setBuyOpen(false);
-        toast({ title: "Ticket secured!", description: `Your ticket for ${event.title} is in your wallet. QR saved for offline check-in.` });
+        toast({ title: "Ticket secured!", description: `Your ticket for ${event.title} is in your wallet.` });
         setEvent(prev => ({ ...prev, tickets_sold: (prev.tickets_sold || 0) + 1 }));
       } else {
         toast({ title: "Could not issue ticket", description: data.message || "Try again", variant: "destructive" });
@@ -174,10 +193,27 @@ export default function EventDetail() {
             </div>
           )}
 
-          {/* Pre-order menu — coming soon for pilot (no alcohol ordering) */}
+          {/* Pilot Event Menu */}
           <div className="bg-card border border-border rounded-xl p-5">
-            <h3 className="font-heading font-semibold text-foreground mb-1">Pre-order Menu</h3>
-            <p className="text-xs text-[#666]">Coming soon · not available in the private pilot.</p>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.5} />
+                <h3 className="font-heading font-semibold text-foreground">Event Menu · Pilot</h3>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
+              </div>
+              <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">
+                {showMenu ? "Hide" : "Show"} menu
+              </button>
+            </div>
+            {showMenu ? (
+              <EventMenuPanel
+                eventId={id}
+                userBalance={userBalance}
+                onRedeemed={(newBal) => setUserBalance(newBal)}
+              />
+            ) : (
+              <p className="text-xs text-[#666]">Use FTC pilot credits to redeem items at this event. No real payment.</p>
+            )}
           </div>
         </div>
 
@@ -198,7 +234,7 @@ export default function EventDetail() {
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
               {spotsLeft > 0 ? "Get Ticket" : "Sold Out"}
             </Button>
-            <p className="text-[10px] text-[#666] text-center">Private MVP pilot · no real payment is processed</p>
+            <p className="text-[10px] text-[#666] text-center">Public beta · no real payment is processed</p>
             <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
           </div>
         </div>
@@ -212,7 +248,7 @@ export default function EventDetail() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray">
-              <p>You'll receive a secure QR ticket in your wallet. <strong className="text-foreground">No real payment is processed during the private pilot</strong> — tickets are issued for testing and check-in.</p>
+              <p>You'll receive a secure QR ticket in your wallet. <strong className="text-foreground">No real payment is processed during the public beta</strong> — tickets are issued for testing and check-in.</p>
             </div>
             <Button
               className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl"

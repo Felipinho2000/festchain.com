@@ -163,7 +163,7 @@ export default function Dashboard() {
         </div>
         <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) { setEditingId(null); setForm(defaultForm); } }}>
           <DialogTrigger asChild>
-            <Button className="bg-foreground hover:bg-foreground/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">
+            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">
               <Plus className="w-4 h-4 mr-2" strokeWidth={1.5} />
               Create Event
             </Button>
@@ -244,7 +244,7 @@ export default function Dashboard() {
                 <Label className="text-xs">DJ Lineup (comma separated)</Label>
                 <Input value={form.dj_lineup} onChange={e => setForm(p => ({...p, dj_lineup: e.target.value}))} className="rounded-xl mt-1" placeholder="DJ Shadow, Amon Tobin" />
               </div>
-              <Button onClick={handleSave} disabled={saving || !form.title || !form.date || !form.location_name || !form.ticket_price} className="w-full h-11 bg-foreground hover:bg-foreground/90 text-white font-semibold rounded-xl">
+              <Button onClick={handleSave} disabled={saving || !form.title || !form.date || !form.location_name || !form.ticket_price} className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl">
                 {saving ? "Saving..." : editingId ? "Update Event" : "Publish Event"}
               </Button>
             </div>

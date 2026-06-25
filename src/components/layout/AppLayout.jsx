@@ -12,7 +12,7 @@ import Logo from "@/components/shared/Logo";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const navItems = [
-  { icon: Home,            labelKey: "home",      path: "/" },
+  { icon: Home,            labelKey: "home",      path: "/app" },
   { icon: Calendar,        labelKey: "events",    path: "/events" },
   { icon: Wallet,          labelKey: "wallet",    path: "/wallet" },
   { icon: LayoutDashboard, labelKey: "dashboard", path: "/dashboard", staffOnly: true },
@@ -36,7 +36,7 @@ export default function AppLayout() {
     <div className="min-h-screen bg-background flex">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-[220px] bg-[#1a1a1a] border-r border-border z-40 p-4">
-        <Link to="/" className="px-2 mb-8">
+        <Link to="/app" className="px-2 mb-8">
           <Logo size={28} />
         </Link>
 
@@ -87,7 +87,7 @@ export default function AppLayout() {
 
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a1a] border-b border-border z-50 flex items-center justify-between px-4">
-        <Link to="/" className="flex-shrink-0">
+        <Link to="/app" className="flex-shrink-0">
           <Logo size={24} />
         </Link>
         <div className="flex items-center gap-2">

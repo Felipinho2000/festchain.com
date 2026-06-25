@@ -4,8 +4,9 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
   Ticket, QrCode, Calendar, MapPin, Check, Music,
-  ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Info
+  ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Info, Zap
 } from "lucide-react";
+import PilotTopupCard from "@/components/wallet/PilotTopupCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -107,6 +108,7 @@ export default function WalletPage() {
   const [tickets, setTickets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showTopup, setShowTopup] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -121,11 +123,11 @@ export default function WalletPage() {
   // Wallet balance counts only confirmed/valid transactions (excludes cancelled/failed).
   const validTx = transactions.filter(t => !["cancelled", "failed"].includes(t.status));
   const balance = validTx.reduce((s, t) => {
-    if (["earned", "transferred_in"].includes(t.type)) return s + (t.amount || 0);
+    if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
     if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
     return s;
   }, 0);
-  const totalEarned = validTx.filter(t => ["earned", "transferred_in"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
+  const totalEarned = validTx.filter(t => ["earned", "transferred_in", "pilot_topup"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
   const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
 
   const activeTickets = tickets.filter(t => t.status === "active");
@@ -139,17 +141,23 @@ export default function WalletPage() {
           <h1 className="font-heading font-bold text-3xl text-white mb-1">Wallet</h1>
           <p className="text-[#888] text-sm">Your pilot tickets &amp; loyalty credits.</p>
         </div>
-        <Link to="/buy-ftc">
-          <Button variant="outline" className="border-border text-white font-bold px-4 h-10 rounded-xl text-sm">
-            <Info className="w-4 h-4 mr-1.5" /> Pilot Credits
-          </Button>
-        </Link>
+        <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
+          <Zap className="w-3.5 h-3.5" /> Get FTC
+        </button>
       </div>
 
       {/* Pilot disclaimer */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-[#bbb]">
-        <span className="text-primary font-semibold">Private MVP pilot.</span> FestCoin is an in-app loyalty/test credit — no cash value, not an investment, not tradable. <Link to="/legal" className="text-primary hover:underline">Learn more</Link>.
+        <span className="text-primary font-semibold">Public beta.</span> FestCoin is an in-app loyalty/test credit — no cash value, not an investment, not tradable. <Link to="/legal" className="text-primary hover:underline">Learn more</Link>.
       </div>
+
+      {showTopup && (
+        <PilotTopupCard onSuccess={() => {
+          setShowTopup(false);
+          base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser?.id }, "-created_date", 100)
+            .then(setTransactions).catch(() => {});
+        }} />
+      )}
 
       {/* Balance summary card */}
       <div className="bg-gradient-to-br from-[#1f1f1f] to-card border border-border rounded-2xl p-6 relative overflow-hidden">

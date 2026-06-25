@@ -1,52 +1,33 @@
 {
-  "name": "FestCoinTransaction",
+  "name": "PilotTopup",
   "type": "object",
   "properties": {
-    "type": {
-      "type": "string",
-      "enum": [
-        "earned",
-        "spent",
-        "staked",
-        "unstaked",
-        "transferred_in",
-        "transferred_out",
-        "pilot_topup"
-      ]
-    },
     "amount": {
-      "type": "number"
-    },
-    "description": {
-      "type": "string"
-    },
-    "event_id": {
-      "type": "string"
-    },
-    "event_title": {
-      "type": "string"
-    },
-    "balance_after": {
       "type": "number"
     },
     "status": {
       "type": "string",
       "enum": [
-        "confirmed",
         "pending",
-        "cancelled",
-        "failed"
+        "confirmed",
+        "cancelled"
       ],
       "default": "confirmed"
     },
     "source": {
-      "type": "string"
+      "type": "string",
+      "default": "pilot_beta"
+    },
+    "daily_count": {
+      "type": "number",
+      "default": 1
+    },
+    "balance_after": {
+      "type": "number"
     }
   },
   "required": [
-    "type",
-    "amount",
-    "description"
+    "amount"
   ],
   "rls": {
     "create": {
