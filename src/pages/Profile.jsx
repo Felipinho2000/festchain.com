@@ -6,6 +6,8 @@ import { Award, Ticket, Camera, Users, Bell, Check, X, ArrowRight } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ModeSwitcher from "@/components/profile/ModeSwitcher";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import moment from "moment";
 
 // All possible badges definition
@@ -26,6 +28,7 @@ const BADGE_DEFS = [
 
 export default function Profile() {
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [badges, setBadges] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [moments, setMoments] = useState([]);
@@ -105,10 +108,18 @@ export default function Profile() {
 
       <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
         <div>
-          <p className="text-white text-sm font-medium">Legal &amp; Pilot Info</p>
-          <p className="text-[#666] text-xs">Terms, privacy, refunds &amp; pilot disclaimer.</p>
+          <p className="text-white text-sm font-medium">{t("profile.language")}</p>
+          <p className="text-[#666] text-xs">{t("profile.languageHint")}</p>
         </div>
-        <Link to="/legal" className="text-primary text-sm font-medium hover:underline">View</Link>
+        <LanguageSwitcher />
+      </div>
+
+      <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p className="text-white text-sm font-medium">{t("profile.legalCardTitle")}</p>
+          <p className="text-[#666] text-xs">{t("profile.legalCardDesc")}</p>
+        </div>
+        <Link to="/legal" className="text-primary text-sm font-medium hover:underline">{t("profile.view")}</Link>
       </div>
 
       <Tabs defaultValue="social" className="space-y-4">
