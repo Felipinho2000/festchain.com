@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     }
 
     // 5. Generate QR securely server-side
-    const qrCode = `FC-${event.id}-${user.id}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const qrCode = `FC-${crypto.randomUUID()}`;
     const reward = event.festcoin_reward || 0;
 
     // 6. Create the ticket as the user (so created_by_id = user → user can read it in Wallet)

@@ -1,49 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Calendar, Zap, Ticket, ShoppingBag, ArrowRight, TrendingUp, Clock, Users, BarChart3, CheckCircle } from "lucide-react";
+import {
+  Calendar, Zap, Ticket, ArrowRight, TrendingUp, Users,
+  QrCode, ShieldCheck, Sparkles, Wallet, LayoutDashboard
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/events/EventCard";
 
 const pillars = [
-  { icon: ShoppingBag, label: "Pre-order drinks at the venue", desc: "Attendees order before they arrive. No cash, no queue." },
-  { icon: Ticket, label: "Tickets with offline QR", desc: "Works without signal at the door. Always scannable." },
-  { icon: Clock, label: "Express pickup at the bar", desc: "Staff fulfil pre-orders. Attendees collect in seconds." },
-  { icon: TrendingUp, label: "Revenue & order dashboard", desc: "Real-time pending orders and sales data for your team." },
+  { icon: QrCode, label: "Secure QR tickets", desc: "Unique, unguessable ticket codes — no forged screenshots." },
+  { icon: Zap, label: "Offline-ready", desc: "Your QR stays on your device and scans at the door without signal." },
+  { icon: ShieldCheck, label: "No double entry", desc: "Check-in is verified server-side; each ticket scans exactly once." },
+  { icon: Sparkles, label: "FestCoin loyalty", desc: "Earn pilot loyalty credits by attending — in-app, no cash value." },
 ];
 
 const flow = [
-  {
-    step: "1",
-    icon: Ticket,
-    title: "Buy your ticket",
-    desc: "Card, Pix, or wallet. Instant QR in your pocket — works offline at the door.",
-  },
-  {
-    step: "2",
-    icon: Zap,
-    title: "Load your wallet",
-    desc: "Add balance before you arrive. No cash, no card at the bar.",
-  },
-  {
-    step: "3",
-    icon: ShoppingBag,
-    title: "Pre-order drinks",
-    desc: "Pick your drinks from the venue menu before the event. Pay now, collect instantly.",
-  },
-  {
-    step: "4",
-    icon: Clock,
-    title: "Walk straight to pickup",
-    desc: "Show your order QR at the express window. Zero wait time. More time on the floor.",
-  },
+  { step: "1", icon: Ticket, title: "Get your ticket", desc: "A secure QR ticket is issued instantly into your wallet." },
+  { step: "2", icon: QrCode, title: "Show QR at the door", desc: "Open your wallet and present the QR — works offline, no app needed." },
+  { step: "3", icon: ShieldCheck, title: "Verified entry", desc: "Staff scans it; double entry is blocked automatically." },
+  { step: "4", icon: Sparkles, title: "Earn pilot credits", desc: "Get FestCoin loyalty credits for attending. No cash value." },
 ];
 
-const forPromoters = [
-  { icon: TrendingUp, label: "Real-time sales dashboard" },
-  { icon: Users, label: "Your customer data — yours" },
-  { icon: BarChart3, label: "Revenue analytics per event" },
-  { icon: CheckCircle, label: "Instant payout, no holdbacks" },
+const forOrganizers = [
+  { icon: QrCode, label: "Issue & validate QR tickets" },
+  { icon: TrendingUp, label: "Live check-in & sales view" },
+  { icon: Users, label: "Know who's at the door" },
+  { icon: ShieldCheck, label: "No passbacks, no fraud" },
 ];
 
 export default function Home() {
@@ -51,7 +34,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Event.list("-created_date", 4)
+    base44.entities.Event.filter({ status: "published" }, "-date", 4)
       .then(setEvents)
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -66,15 +49,15 @@ export default function Home() {
         <div className="relative max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            Seeking Founding Venue Partners · Launching in São Paulo
+            Private MVP Pilot · QR Ticketing
           </div>
           <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4">
-            Pre-order drinks.<br />
-            <span className="text-primary">Skip the bar queue.</span><br />
-            Sell more per head.
+            Secure QR tickets.<br />
+            <span className="text-primary">Verified entry.</span><br />
+            No queue. No passbacks.
           </h1>
           <p className="text-[#888] text-lg leading-relaxed mb-8 max-w-xl">
-            FestChain lets attendees buy tickets and pre-order drinks before they arrive — so your bar moves faster and your revenue per head goes up.
+            FestChain issues unique, offline-ready QR tickets and rewards attendees with pilot loyalty credits — so check-in is fast, reliable, and fraud-proof.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link to="/events">
@@ -83,10 +66,10 @@ export default function Home() {
                 Browse Events
               </Button>
             </Link>
-            <Link to="/venue-store">
+            <Link to="/wallet">
               <Button variant="outline" className="h-12 px-7 text-sm font-bold rounded-xl border-border text-white hover:bg-primary/10 hover:border-primary/40">
-                <ShoppingBag className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                Pre-order Drinks
+                <Wallet className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                Open Wallet
               </Button>
             </Link>
           </div>
@@ -155,25 +138,26 @@ export default function Home() {
         )}
       </section>
 
-      {/* ── FOR PROMOTERS ── */}
+      {/* ── FOR ORGANIZERS ── */}
       <section className="bg-gradient-to-br from-[#1a1a1a] to-[#111] border border-border rounded-2xl p-7 lg:p-10">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex-1">
             <p className="text-xs text-primary font-bold uppercase tracking-widest mb-3">For organizers</p>
             <h2 className="font-heading font-bold text-2xl text-white mb-3 leading-tight">
-              Your venue. Your data.<br />Your revenue.
+              Run check-in<br />at scale.
             </h2>
             <p className="text-[#666] text-sm leading-relaxed mb-5">
-              No more sharing customer lists with ticketing platforms. FestChain gives you full control — real-time sales, direct payouts, and attendee insights you actually own.
+              Create events, issue QR tickets, and scan guests at the door with double-entry protection and a live attendance view — built for the private MVP pilot.
             </p>
             <Link to="/dashboard">
               <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 rounded-xl text-sm">
+                <LayoutDashboard className="w-4 h-4 mr-1.5" />
                 Open Organizer Dashboard <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
           <div className="flex-1 grid grid-cols-2 gap-3">
-            {forPromoters.map((item, i) => (
+            {forOrganizers.map((item, i) => (
               <div key={i} className="bg-[#111] border border-[#222] rounded-xl p-4 flex items-center gap-3">
                 <item.icon className="w-5 h-5 text-primary flex-shrink-0" strokeWidth={1.5} />
                 <span className="text-sm text-white font-medium">{item.label}</span>

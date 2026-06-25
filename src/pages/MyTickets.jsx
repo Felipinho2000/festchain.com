@@ -5,6 +5,7 @@ import { Ticket, QrCode, Calendar, MapPin, Award, Check, Music } from "lucide-re
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import FestCoinBadge from "@/components/shared/FestCoinBadge";
+import Qr from "@/components/shared/Qr";
 import moment from "moment";
 
 const statusColors = {
@@ -89,7 +90,7 @@ function TicketCard({ ticket }) {
           {showQR && (
             <div className="mt-3 pt-3 border-t border-[#222] text-center">
               <div className="inline-flex flex-col items-center gap-2 bg-white rounded-2xl p-5">
-                <QrCode className="w-24 h-24 text-[#0d0d0d]" strokeWidth={0.8} />
+                <Qr value={qrCode} size={200} />
                 <span className="text-[10px] font-mono text-[#333] break-all max-w-[200px]">{qrCode || "—"}</span>
               </div>
               {cachedQR && <p className="text-[10px] text-emerald-500 mt-1.5">✓ Works offline</p>}
