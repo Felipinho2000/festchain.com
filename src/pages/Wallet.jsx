@@ -110,15 +110,31 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [showTopup, setShowTopup] = useState(false);
 
-  useEffect(() => {
+  const loadWallet = () => {
+    if (!currentUser?.id) return;
+    setLoading(true);
     Promise.all([
-      base44.entities.Ticket.filter({ created_by_id: currentUser?.id }, "-created_date", 50).catch(() => []),
-      base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser?.id }, "-created_date", 100).catch(() => [])
+      base44.entities.Ticket.filter({ created_by_id: currentUser.id }, "-created_date", 50).catch(() => []),
+      base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id }, "-created_date", 100).catch(() => [])
     ]).then(([tix, txs]) => {
       setTickets(tix);
       setTransactions(txs);
     }).finally(() => setLoading(false));
-  }, [currentUser]);
+  };
+
+  useEffect(() => {
+    loadWallet();
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === "visible") loadWallet(); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", loadWallet);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", loadWallet);
+    };
+  }, [currentUser?.id]);
 
   // Wallet balance counts only confirmed/valid transactions (excludes cancelled/failed).
   const validTx = transactions.filter(t => !["cancelled", "failed"].includes(t.status));
