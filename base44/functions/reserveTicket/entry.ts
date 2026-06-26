@@ -60,7 +60,8 @@ Deno.serve(async (req) => {
 
     // 7. Increment tickets_sold atomically (service role bypasses Event update RLS)
     try {
-      await base44.asServiceRole.entities.Event.updateMany({ id: event.id }, { $inc: { tickets_sold: 1 } });
+      const currentSold = event.tickets_sold || 0;
+      await base44.asServiceRole.entities.Event.update(event.id, { tickets_sold: currentSold + 1 });
     } catch (_) {}
 
     // 8. Optional pilot reward credits (confirmed) — only the backend can mint FestCoin now
