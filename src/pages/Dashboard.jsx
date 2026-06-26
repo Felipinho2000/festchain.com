@@ -75,6 +75,7 @@ export default function Dashboard() {
     );
   }
 
+  const totalTicketsSold = events.reduce((s, e) => s + (e.tickets_sold || 0), 0);
   const totalRevenue = tickets.reduce((s, t) => s + (t.price_paid || 0), 0);
   const checkedIn = tickets.filter(t => t.checked_in).length;
 
@@ -255,7 +256,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Revenue", value: `R$ ${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600 bg-emerald-50" },
-          { label: "Tickets Sold", value: tickets.length, icon: Ticket, color: "text-primary bg-primary/10" },
+          { label: "Tickets Sold", value: totalTicketsSold, icon: Ticket, color: "text-primary bg-primary/10" },
           { label: "Active Events", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-blue-600 bg-blue-50" },
           { label: "Checked In", value: checkedIn, icon: UserCheck, color: "text-emerald-600 bg-emerald-50" }
         ].map((kpi, i) => (
