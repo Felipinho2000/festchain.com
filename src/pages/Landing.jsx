@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/components/shared/Logo";
+import LandingFAQ from "@/components/landing/LandingFAQ";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const WORKS_ICONS = [Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard];
@@ -22,7 +23,7 @@ const PHASE_STYLES = {
 };
 
 export default function Landing() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { currentUser } = useAuth();
   const authed = !!currentUser;
   const isOrganizer = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
@@ -335,6 +336,23 @@ export default function Landing() {
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center text-sm text-[#888]">
             <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> {t("landing.contact.emailVal")}</span>
             <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {t("landing.contact.locale")}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <LandingFAQ lang={lang} />
+
+      {/* ── FOUNDER ── */}
+      <section className="py-12 px-5 bg-[#111]">
+        <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0 text-2xl font-heading font-bold text-primary">
+            GM
+          </div>
+          <div>
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-2">{t("landing.founder.kicker")}</p>
+            <h3 className="font-heading font-bold text-white text-lg mb-2">{t("landing.founder.name")}</h3>
+            <p className="text-[#aaa] text-sm leading-relaxed">{t("landing.founder.bio")}</p>
           </div>
         </div>
       </section>

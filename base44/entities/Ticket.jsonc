@@ -50,9 +50,7 @@
         "used",
         "transferred",
         "expired",
-        "refunded",
-        "burned",
-        "listed"
+        "refunded"
       ],
       "default": "active"
     },
@@ -74,10 +72,6 @@
     "festcoin_earned": {
       "type": "number",
       "default": 0
-    },
-    "poap_minted": {
-      "type": "boolean",
-      "default": false
     }
   },
   "required": [

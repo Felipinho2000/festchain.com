@@ -175,6 +175,11 @@ export const translations = {
         emailVal: "hello@festchain.io",
         locale: "São Paulo, Brazil",
       },
+      founder: {
+        kicker: "Founder",
+        name: "Giovani Magalhães — Founder & Builder",
+        bio: "Giovani is a developer and nightlife enthusiast from São Paulo who built FestChain to solve a problem he felt firsthand: events are still running on paper lists, screenshot tickets, and disconnected tools. FestChain is his bet that the party scene deserves better infrastructure — and that the people who make events happen should keep more of the value they create.",
+      },
       whitepaper: {
         badge: "FestChain Whitepaper",
         title: "FestChain Whitepaper",
@@ -637,6 +642,11 @@ export const translations = {
         sentSub: "Responderemos sobre o acesso ao beta.",
         emailVal: "hello@festchain.io",
         locale: "São Paulo, Brasil",
+      },
+      founder: {
+        kicker: "Fundador",
+        name: "Giovani Magalhães — Fundador & Desenvolvedor",
+        bio: "Giovani é um desenvolvedor e entusiasta da noite paulistana que construiu o FestChain para resolver um problema que sentiu na pele: eventos ainda rodam em listas de papel, screenshots de ingresso e ferramentas desconectadas. O FestChain é a aposta dele de que a cena de festas merece uma infraestrutura melhor — e que as pessoas que fazem eventos acontecerem deveriam ficar com mais do valor que criam.",
       },
       whitepaper: {
         badge: "Whitepaper FestChain",

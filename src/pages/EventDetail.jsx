@@ -66,6 +66,7 @@ export default function EventDetail() {
           };
           localStorage.setItem("fc_tickets", JSON.stringify(cached));
         } catch (_) {}
+        // Badge awarding removed from critical path
         setBuyOpen(false);
         toast({ title: "Ticket secured!", description: `Your ticket for ${event.title} is in your wallet.` });
         setEvent(prev => ({ ...prev, tickets_sold: (prev.tickets_sold || 0) + 1 }));
