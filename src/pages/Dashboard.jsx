@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
-  LayoutDashboard, Plus, Calendar, Users, TrendingUp,
-  Ticket, Music, Pencil, Trash2, Lock, Settings
+  LayoutDashboard, Plus, Calendar, TrendingUp,
+  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -76,17 +76,14 @@ export default function Dashboard() {
   }
 
   const totalRevenue = tickets.reduce((s, t) => s + (t.price_paid || 0), 0);
-  const totalAttendees = tickets.length;
   const checkedIn = tickets.filter(t => t.checked_in).length;
-  const myEventIds = events.map(e => e.id);
-  const myTickets = tickets.filter(t => myEventIds.includes(t.event_id));
 
   // Sales velocity chart (last 7 days)
   const chartData = [];
   for (let i = 6; i >= 0; i--) {
     const day = moment().subtract(i, "days").format("YYYY-MM-DD");
     const dayLabel = moment().subtract(i, "days").format("MMM D");
-    const count = myTickets.filter(t => moment(t.created_date).format("YYYY-MM-DD") === day).length;
+    const count = tickets.filter(t => moment(t.created_date).format("YYYY-MM-DD") === day).length;
     chartData.push({ name: dayLabel, tickets: count });
   }
 
@@ -258,9 +255,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "Total Revenue", value: `R$ ${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600 bg-emerald-50" },
-          { label: "Tickets Sold", value: myTickets.length, icon: Ticket, color: "text-primary bg-primary/10" },
+          { label: "Tickets Sold", value: tickets.length, icon: Ticket, color: "text-primary bg-primary/10" },
           { label: "Active Events", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-blue-600 bg-blue-50" },
-          { label: "Total Capacity", value: events.reduce((s, e) => s + (e.total_capacity || 0), 0), icon: Users, color: "text-amber bg-amber/10" }
+          { label: "Checked In", value: checkedIn, icon: UserCheck, color: "text-emerald-600 bg-emerald-50" }
         ].map((kpi, i) => (
           <div key={i} className="bg-card border border-border rounded-xl p-4">
             <div className={`w-9 h-9 rounded-lg ${kpi.color} flex items-center justify-center mb-3`}>

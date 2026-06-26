@@ -21,9 +21,9 @@ export const translations = {
       signOut: "Sign out",
     },
     beta: {
-      badge: "Public Beta",
+      badge: "Early Pilot",
       disclaimer:
-        "FestChain is currently in public beta. Tickets and FTC credits are for pilot testing only. No real payments, token purchases, or financial value are enabled.",
+        "FestChain is in an early pilot phase. Tickets and FTC credits are for pilot testing only. No real payments, token purchases, or financial value are enabled.",
     },
     ftc: {
       topupTitle: "Get FTC Test Credits",
@@ -68,13 +68,13 @@ export const translations = {
       },
       cta: { login: "Log in", signup: "Sign up" },
       hero: {
-        badge: "Public Beta · QR Ticketing & Check-ins",
+        badge: "Pilot Access · Launching with Selected Organizers & DJs",
         title: "The event platform for organizers, DJs, and partygoers.",
         sub: "FestChain is a mobile-first platform where organizers manage QR tickets and check-ins, and partygoers keep their tickets, rewards, and event experiences in one place.",
         organizer: "I'm an Organizer",
         partygoer: "I'm a Partygoer",
         already: "Already have an account?",
-        pills: ["Free during pilot", "Single-use QR check-in", "Mobile-first"],
+        pills: ["Free for pilot events", "Single-use QR check-in", "Mobile-first"],
       },
       whatIs: {
         kicker: "What is FestChain",
@@ -99,8 +99,8 @@ export const translations = {
         },
       },
       works: {
-        kicker: "What works in beta today",
-        title: "Live in the beta right now",
+        kicker: "What works in the pilot today",
+        title: "Live in the pilot right now",
         subtitle: "No hype — just what actually runs today.",
         items: [
           { title: "Event discovery", desc: "Browse published pilot events with full event detail." },
@@ -155,13 +155,13 @@ export const translations = {
         items: ["Real payments (Pix / card)", "NFT tickets", "Resale / transfer", "Full venue ordering", "Social profiles", "FestCard"],
       },
       disclaimer: {
-        title: "Public Beta Disclaimer",
+        title: "Early Pilot Disclaimer",
         readMore: "Read the full disclaimer",
       },
       contact: {
         kicker: "Get in touch",
         title: "Want to run a pilot event?",
-        subtitle: "We're onboarding a small set of organizers for the public beta.",
+        subtitle: "We're onboarding a select group of organizers, DJs, and brands for our first pilot events.",
         nameL: "Name",
         emailL: "Email",
         msgL: "Tell us about your event",
@@ -177,8 +177,8 @@ export const translations = {
       },
       founder: {
         kicker: "Founder",
-        name: "Giovani Magalhães — Founder & Builder",
-        bio: "Giovani is a developer and nightlife enthusiast from São Paulo who built FestChain to solve a problem he felt firsthand: events are still running on paper lists, screenshot tickets, and disconnected tools. FestChain is his bet that the party scene deserves better infrastructure — and that the people who make events happen should keep more of the value they create.",
+        name: "Felipe de Oliveira — Founder & CEO",
+        bio: "Felipe is a Web3 builder and entrepreneur passionate about rethinking how the events industry operates. He founded FestChain to empower organizers with modern infrastructure for ticketing, payments, loyalty, and community engagement — while reducing reliance on unnecessary intermediaries. He believes the future of events is community-driven: organizers own their audience, attendees are rewarded for their participation, and technology creates a more transparent, connected, and fair ecosystem for everyone.",
       },
       whitepaper: {
         badge: "FestChain Whitepaper",
@@ -187,9 +187,10 @@ export const translations = {
         cta: "Read the Whitepaper",
       },
       footer: {
-        rights: "© 2026 FestChain · Public Beta. FTC is an in-app test credit — no cash value.",
+        rights: "© 2026 FestChain · Early Pilot. FTC is an in-app loyalty credit — no cash value.",
         legal: "Legal",
         contact: "Contact",
+        whitepaper: "Whitepaper",
       },
     },
     whitepaper: {
@@ -490,9 +491,9 @@ export const translations = {
       signOut: "Sair",
     },
     beta: {
-      badge: "Beta Público",
+      badge: "Piloto Inicial",
       disclaimer:
-        "O FestChain está atualmente em beta público. Os ingressos e créditos FTC são apenas para testes do piloto. Nenhum pagamento real, compra de tokens ou valor financeiro está habilitado.",
+        "O FestChain está em fase de piloto inicial. Os ingressos e créditos FTC são apenas para testes do piloto. Nenhum pagamento real, compra de tokens ou valor financeiro está habilitado.",
     },
     ftc: {
       topupTitle: "Obter Créditos FTC de Teste",
@@ -536,13 +537,13 @@ export const translations = {
       },
       cta: { login: "Entrar", signup: "Cadastrar" },
       hero: {
-        badge: "Beta Público · Ingressos QR e Check-ins",
+        badge: "Acesso Piloto · Lançando com Organizadores e DJs Selecionados",
         title: "A plataforma de eventos para organizadores, DJs e participantes.",
         sub: "FestChain é uma plataforma mobile-first onde organizadores gerenciam ingressos QR e check-ins, e participantes mantêm seus ingressos, recompensas e experiências em um só lugar.",
         organizer: "Sou Organizador",
         partygoer: "Sou Participante",
         already: "Já tem uma conta?",
-        pills: ["Gratuito durante o piloto", "Check-in QR de uso único", "Mobile-first"],
+        pills: ["Gratuito para eventos piloto", "Check-in QR de uso único", "Mobile-first"],
       },
       whatIs: {
         kicker: "O que é o FestChain",
@@ -567,8 +568,8 @@ export const translations = {
         },
       },
       works: {
-        kicker: "O que funciona no beta hoje",
-        title: "Disponível no beta agora",
+        kicker: "O que funciona no piloto hoje",
+        title: "Disponível no piloto agora",
         subtitle: "Sem promessa vazia — só o que realmente funciona hoje.",
         items: [
           { title: "Descoberta de eventos", desc: "Navegue pelos eventos piloto publicados com detalhes completos." },
@@ -623,13 +624,13 @@ export const translations = {
         items: ["Pagamentos reais (Pix / cartão)", "Ingressos NFT", "Revenda / transferência", "Pedidos completos no local", "Perfis sociais", "FestCard"],
       },
       disclaimer: {
-        title: "Aviso de Beta Público",
+        title: "Aviso do Piloto Inicial",
         readMore: "Ler o aviso completo",
       },
       contact: {
         kicker: "Fale conosco",
         title: "Quer organizar um evento piloto?",
-        subtitle: "Estamos aceitando um número pequeno de organizadores para o beta público.",
+        subtitle: "Estamos selecionando organizadores, DJs e marcas para os primeiros eventos piloto.",
         nameL: "Nome",
         emailL: "E-mail",
         msgL: "Conte sobre seu evento",
@@ -645,8 +646,8 @@ export const translations = {
       },
       founder: {
         kicker: "Fundador",
-        name: "Giovani Magalhães — Fundador & Desenvolvedor",
-        bio: "Giovani é um desenvolvedor e entusiasta da noite paulistana que construiu o FestChain para resolver um problema que sentiu na pele: eventos ainda rodam em listas de papel, screenshots de ingresso e ferramentas desconectadas. O FestChain é a aposta dele de que a cena de festas merece uma infraestrutura melhor — e que as pessoas que fazem eventos acontecerem deveriam ficar com mais do valor que criam.",
+        name: "Felipe de Oliveira — Fundador & CEO",
+        bio: "Felipe é um builder de Web3 e empreendedor apaixonado por reinventar como a indústria de eventos opera. Ele fundou o FestChain para capacitar organizadores com infraestrutura moderna de ingressos, pagamentos, fidelidade e engajamento comunitário — reduzindo a dependência de intermediários desnecessários. Ele acredita que o futuro dos eventos é orientado pela comunidade: organizadores têm sua audiência, participantes são recompensados pela sua presença, e a tecnologia cria um ecossistema mais transparente, conectado e justo para todos.",
       },
       whitepaper: {
         badge: "Whitepaper FestChain",
@@ -655,9 +656,10 @@ export const translations = {
         cta: "Ler o Whitepaper",
       },
       footer: {
-        rights: "© 2026 FestChain · Beta Público. FTC é um crédito de teste no app — sem valor em dinheiro.",
+        rights: "© 2026 FestChain · Piloto Inicial. FTC é um crédito de fidelidade no app — sem valor em dinheiro.",
         legal: "Legal",
         contact: "Contato",
+        whitepaper: "Whitepaper",
       },
     },
     whitepaper: {

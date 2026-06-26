@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard,
-  Mail, MapPin, Send, Check, ChevronRight, Menu, X, Zap, Target,
+  Mail, MapPin, Send, Check, ChevronRight, Menu, X, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -347,41 +347,12 @@ export default function Landing() {
       <section className="py-12 px-5 bg-[#111]">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center flex-shrink-0 text-2xl font-heading font-bold text-primary">
-            GM
+            FO
           </div>
           <div>
             <p className="text-primary text-xs uppercase tracking-widest font-bold mb-2">{t("landing.founder.kicker")}</p>
             <h3 className="font-heading font-bold text-white text-lg mb-2">{t("landing.founder.name")}</h3>
             <p className="text-[#aaa] text-sm leading-relaxed">{t("landing.founder.bio")}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHITEPAPER ── */}
-      <section className="py-16 px-5 bg-[#111]">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0d0d0d] to-[#141414] border border-[#2a2a2a] p-8 sm:p-12">
-            <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-8">
-              <div className="flex-1">
-                <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/25 text-primary text-[10px] font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-widest">
-                  <Zap className="w-3 h-3" /> {t("landing.whitepaper.badge")}
-                </div>
-                <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">
-                  {t("landing.whitepaper.title")}
-                </h2>
-                <p className="text-[#888] text-sm sm:text-base leading-relaxed max-w-xl">
-                  {t("landing.whitepaper.desc")}
-                </p>
-              </div>
-              <div className="flex-shrink-0">
-                <Link to="/whitepaper">
-                  <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-sm sm:text-base whitespace-nowrap">
-                    {t("landing.whitepaper.cta")} <ChevronRight className="w-5 h-5 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -394,6 +365,7 @@ export default function Landing() {
           <div className="flex items-center gap-4 text-[#777] text-sm">
             <Link to="/legal" className="hover:text-white transition-colors">{t("landing.footer.legal")}</Link>
             <a href="#contact" className="hover:text-white transition-colors">{t("landing.footer.contact")}</a>
+            <Link to="/whitepaper" className="hover:text-white transition-colors">{t("landing.footer.whitepaper")}</Link>
           </div>
         </div>
       </footer>
