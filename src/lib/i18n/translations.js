@@ -59,7 +59,8 @@ export const translations = {
     },
     landing: {
       nav: {
-        whatWorks: "What works",
+        howItWorks: "How it Works",
+        audiences: "For You",
         roadmap: "Roadmap",
         mission: "Mission",
         contact: "Contact",
@@ -69,12 +70,30 @@ export const translations = {
       cta: { login: "Log in", signup: "Sign up" },
       hero: {
         badge: "Pilot Access · Launching with Selected Organizers & DJs",
-        title: "The event platform for organizers, DJs, and partygoers.",
-        sub: "FestChain is a mobile-first platform where organizers manage QR tickets and check-ins, and partygoers keep their tickets, rewards, and event experiences in one place.",
-        organizer: "I'm an Organizer",
-        partygoer: "I'm a Partygoer",
+        title: "Smarter events for organizers, DJs, brands, and partygoers.",
+        sub: "FestChain helps organizers sell tickets, validate guests with QR code, reward attendees with FestCoin, and create more connected event experiences.",
+        joinPilot: "Join the Pilot",
+        forOrganizers: "I'm an Organizer",
+        forDJs: "I'm a DJ",
+        forBrands: "I'm a Brand",
         already: "Already have an account?",
-        pills: ["Free for pilot events", "Single-use QR check-in", "Mobile-first"],
+        trustPills: ["Free for pilot events", "QR-based ticket validation", "Designed for non-crypto users", "FestCoin rewards for loyalty"],
+      },
+      how: {
+        kicker: "How it Works",
+        title: "Four simple steps",
+        subtitle: "From event creation to FestCoin rewards — everything in one platform.",
+        steps: [
+          { title: "Organizer creates an event", desc: "Set up your event, ticket details, guest access, and event perks in one place." },
+          { title: "Guest gets a digital ticket", desc: "Guests receive a secure digital ticket with QR code access — no printing needed." },
+          { title: "QR code scanned at the entrance", desc: "Organizers validate tickets quickly and reduce fake or duplicated entries." },
+          { title: "Guests receive FestCoin rewards", desc: "Attendees earn FestCoin rewards and use them for perks, loyalty, and future FestChain experiences." },
+        ],
+      },
+      pilotCta: {
+        badge: "Join the First Pilot",
+        title: "Help build the future of events",
+        sub: "FestChain is selecting DJs, organizers, venues, and brands to join the first pilot events. Test QR ticketing, guest rewards, FestCoin perks, and event engagement tools with us.",
       },
       whatIs: {
         kicker: "What is FestChain",
@@ -85,18 +104,14 @@ export const translations = {
           "FestChain is a mobile-first event platform built for organizers, DJs, and partygoers. In the current beta, users can discover events, reserve QR tickets, access them in their wallet, check in at the entrance, and test FTC pilot credits for event rewards and redemptions. The long-term vision is to become a decentralized party ecosystem that connects tickets, loyalty, social experiences, and fairer event economics.",
       },
       audiences: {
-        title: "Are you an organizer or a partygoer?",
-        organizer: {
-          name: "Organizers & DJs",
-          desc: "Create events, issue QR tickets, scan guests at the door, manage your event menu, and keep more value from your events with lower platform friction.",
-          cta: "Organizer access",
-          notApproved: "Organizer approval is required. Contact the admin team to get approved during the beta.",
-        },
-        partygoer: {
-          name: "Partygoers",
-          desc: "Discover events, reserve QR tickets, keep everything in your mobile wallet, redeem FTC credits at events, and build your event history.",
-          cta: "Browse events",
-        },
+        kicker: "Who is FestChain for?",
+        title: "Built for everyone in the event ecosystem",
+        cards: [
+          { name: "Organizers", desc: "Sell tickets, scan guests, reduce fraud, and build loyalty for future events.", cta: "Join as Organizer" },
+          { name: "DJs", desc: "Create a stronger connection with fans through profiles, event history, voting, and rewards.", cta: "Join as DJ" },
+          { name: "Brands", desc: "Sponsor event experiences with digital rewards, perks, and measurable engagement.", cta: "Join as Brand" },
+          { name: "Partygoers", desc: "Get secure tickets, faster check-in, rewards, and more connected party experiences.", cta: "Explore Events" },
+        ],
       },
       works: {
         kicker: "What works in the pilot today",
@@ -179,6 +194,7 @@ export const translations = {
         kicker: "Founder",
         name: "Felipe de Oliveira — Founder & CEO",
         bio: "Felipe is a Web3 builder and entrepreneur passionate about rethinking how the events industry operates. He founded FestChain to empower organizers with modern infrastructure for ticketing, payments, loyalty, and community engagement — while reducing reliance on unnecessary intermediaries. He believes the future of events is community-driven: organizers own their audience, attendees are rewarded for their participation, and technology creates a more transparent, connected, and fair ecosystem for everyone.",
+        cta: "Join the Pilot",
       },
       whitepaper: {
         badge: "FestChain Whitepaper",
@@ -528,7 +544,8 @@ export const translations = {
     },
     landing: {
       nav: {
-        whatWorks: "O que funciona",
+        howItWorks: "Como Funciona",
+        audiences: "Para Você",
         roadmap: "Roadmap",
         mission: "Missão",
         contact: "Contato",
@@ -538,12 +555,30 @@ export const translations = {
       cta: { login: "Entrar", signup: "Cadastrar" },
       hero: {
         badge: "Acesso Piloto · Lançando com Organizadores e DJs Selecionados",
-        title: "A plataforma de eventos para organizadores, DJs e participantes.",
-        sub: "FestChain é uma plataforma mobile-first onde organizadores gerenciam ingressos QR e check-ins, e participantes mantêm seus ingressos, recompensas e experiências em um só lugar.",
-        organizer: "Sou Organizador",
-        partygoer: "Sou Participante",
+        title: "Eventos mais inteligentes para organizadores, DJs, marcas e participantes.",
+        sub: "O FestChain ajuda organizadores a vender ingressos, validar convidados com QR code, recompensar participantes com FestCoin e criar experiências de eventos mais conectadas.",
+        joinPilot: "Participar do Piloto",
+        forOrganizers: "Sou Organizador",
+        forDJs: "Sou DJ",
+        forBrands: "Sou uma Marca",
         already: "Já tem uma conta?",
-        pills: ["Gratuito para eventos piloto", "Check-in QR de uso único", "Mobile-first"],
+        trustPills: ["Gratuito para eventos piloto", "Validação por QR code", "Sem necessidade de cripto", "Recompensas FestCoin por fidelidade"],
+      },
+      how: {
+        kicker: "Como Funciona",
+        title: "Quatro passos simples",
+        subtitle: "Da criação do evento às recompensas FestCoin — tudo em uma plataforma.",
+        steps: [
+          { title: "Organizador cria o evento", desc: "Configure seu evento, detalhes dos ingressos, acesso de convidados e benefícios em um só lugar." },
+          { title: "Convidado recebe ingresso digital", desc: "Os convidados recebem um ingresso digital seguro com acesso por QR code — sem impressão." },
+          { title: "QR code escaneado na entrada", desc: "Os organizadores validam ingressos rapidamente e reduzem entradas falsas ou duplicadas." },
+          { title: "Convidados recebem recompensas FestCoin", desc: "Participantes ganham FestCoin e usam para benefícios, fidelidade e experiências futuras no FestChain." },
+        ],
+      },
+      pilotCta: {
+        badge: "Seja do Primeiro Piloto",
+        title: "Ajude a construir o futuro dos eventos",
+        sub: "O FestChain está selecionando DJs, organizadores, locais e marcas para os primeiros eventos piloto. Teste ingressos QR, recompensas para convidados, benefícios FestCoin e ferramentas de engajamento.",
       },
       whatIs: {
         kicker: "O que é o FestChain",
@@ -554,18 +589,14 @@ export const translations = {
           "FestChain é uma plataforma de eventos mobile-first criada para organizadores, DJs e participantes. No beta atual, usuários podem descobrir eventos, reservar ingressos QR, acessá-los na carteira, fazer check-in na entrada e testar créditos FTC do piloto para recompensas e resgates no evento. A visão de longo prazo é se tornar um ecossistema descentralizado de festas, conectando ingressos, fidelidade, experiências sociais e uma economia de eventos mais justa.",
       },
       audiences: {
-        title: "Você é organizador ou participante?",
-        organizer: {
-          name: "Organizadores & DJs",
-          desc: "Crie eventos, emita ingressos QR, escaneie convidados na porta, gerencie o menu do evento e mantenha mais valor nos seus eventos com menos fricção de plataforma.",
-          cta: "Acesso do organizador",
-          notApproved: "É necessária aprovação de organizador. Entre em contato com o time de admin para ser aprovado durante o beta.",
-        },
-        partygoer: {
-          name: "Participantes",
-          desc: "Descubra eventos, reserve ingressos QR, guarde tudo na carteira mobile, use créditos FTC em eventos e construa seu histórico de festas.",
-          cta: "Ver eventos",
-        },
+        kicker: "Para quem é o FestChain?",
+        title: "Construído para todos no ecossistema de eventos",
+        cards: [
+          { name: "Organizadores", desc: "Venda ingressos, escaneie convidados, reduza fraudes e construa fidelidade para eventos futuros.", cta: "Entrar como Organizador" },
+          { name: "DJs", desc: "Crie uma conexão mais forte com os fãs por meio de perfis, histórico de eventos, votação e recompensas.", cta: "Entrar como DJ" },
+          { name: "Marcas", desc: "Patrocine experiências em eventos com recompensas digitais, benefícios e engajamento mensurável.", cta: "Entrar como Marca" },
+          { name: "Participantes", desc: "Tenha ingressos seguros, check-in mais rápido, recompensas e experiências de festa mais conectadas.", cta: "Explorar Eventos" },
+        ],
       },
       works: {
         kicker: "O que funciona no piloto hoje",
@@ -648,6 +679,7 @@ export const translations = {
         kicker: "Fundador",
         name: "Felipe de Oliveira — Fundador & CEO",
         bio: "Felipe é um builder de Web3 e empreendedor apaixonado por reinventar como a indústria de eventos opera. Ele fundou o FestChain para capacitar organizadores com infraestrutura moderna de ingressos, pagamentos, fidelidade e engajamento comunitário — reduzindo a dependência de intermediários desnecessários. Ele acredita que o futuro dos eventos é orientado pela comunidade: organizadores têm sua audiência, participantes são recompensados pela sua presença, e a tecnologia cria um ecossistema mais transparente, conectado e justo para todos.",
+        cta: "Participar do Piloto",
       },
       whitepaper: {
         badge: "Whitepaper FestChain",

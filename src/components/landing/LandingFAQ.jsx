@@ -3,39 +3,55 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 const FAQ_EN = [
   {
-    q: "Is FestChain free to use?",
-    a: "Yes — during the public beta, FestChain is completely free for both organizers and partygoers. No payment processing is enabled yet. Tickets are issued as secure QR credentials for testing and real event check-ins."
+    q: "Do guests need crypto to use FestChain?",
+    a: "No. The pilot is designed to be simple and accessible. Guests can use FestChain without needing any crypto knowledge, wallet setup, or technical steps — just sign up with your email and get your ticket."
   },
   {
-    q: "Do guests need crypto or a blockchain wallet?",
-    a: "No. FestChain works like any regular app — sign up with your email, get a ticket, show your QR at the door. No crypto knowledge, no wallet setup, no technical steps required."
+    q: "What is FestCoin?",
+    a: "FestCoin is the reward and utility credit of the FestChain ecosystem. During the pilot, it is used for perks, loyalty, and event experiences. It is not a cryptocurrency, has no cash value, and cannot be sold or withdrawn."
   },
   {
-    q: "What is FestCoin (FTC)?",
-    a: "FestCoin is FestChain's in-app loyalty credit. Earn FTC by attending events and use it for pilot redemptions (drinks, perks) at participating events. FTC is not a cryptocurrency, has no cash value, and cannot be sold or withdrawn — it's a reward layer for the event experience."
+    q: "Is FestChain already live?",
+    a: "FestChain is currently preparing selected pilot events with DJs, organizers, venues, and partner brands. Join the pilot to be part of the first wave."
   },
   {
-    q: "How do I get access as an organizer?",
-    a: "Organizer access is approved manually during the pilot. Fill out the contact form below with your event details and we'll get back to you quickly. DJs and brands can also reach out the same way."
+    q: "How can I join the pilot?",
+    a: "DJs, organizers, venues, and brands can request access through the contact form below. We'll review your request and get back to you quickly."
+  },
+  {
+    q: "Is FestCoin an investment?",
+    a: "No. FestCoin should be understood as a utility and reward mechanism for the FestChain ecosystem. The pilot does not make financial promises. FTC has no monetary value and is for in-app use only."
+  },
+  {
+    q: "What problem does FestChain solve?",
+    a: "FestChain helps reduce ticket fraud, improve event access, reward loyal guests, connect DJs with fans, and give organizers better tools to manage event experiences."
   }
 ];
 
 const FAQ_PT = [
   {
-    q: "O FestChain é gratuito?",
-    a: "Sim — durante o beta público, o FestChain é completamente gratuito tanto para organizadores quanto para participantes. Nenhum pagamento real é processado ainda. Os ingressos são emitidos como credenciais QR seguras para testes e check-ins em eventos reais."
+    q: "Os convidados precisam de cripto para usar o FestChain?",
+    a: "Não. O piloto foi criado para ser simples e acessível. Os convidados podem usar o FestChain sem nenhum conhecimento de cripto, configuração de carteira ou passos técnicos — basta criar uma conta com seu e-mail e receber o ingresso."
   },
   {
-    q: "Os convidados precisam de cripto ou carteira blockchain?",
-    a: "Não. O FestChain funciona como qualquer app comum — cadastre-se com seu e-mail, receba um ingresso, mostre seu QR na porta. Sem conhecimento técnico, sem configuração de carteira, sem passos complicados."
+    q: "O que é FestCoin?",
+    a: "FestCoin é o crédito de recompensa e utilidade do ecossistema FestChain. Durante o piloto, é usado para benefícios, fidelidade e experiências no evento. Não é criptomoeda, não tem valor em dinheiro e não pode ser vendido ou sacado."
   },
   {
-    q: "O que é FestCoin (FTC)?",
-    a: "FestCoin é o crédito de fidelidade interno do FestChain. Ganhe FTC participando de eventos e use para resgates piloto (drinks, benefícios) em eventos participantes. FTC não é criptomoeda, não tem valor em dinheiro e não pode ser vendido ou sacado — é uma camada de recompensa para a experiência do evento."
+    q: "O FestChain já está no ar?",
+    a: "O FestChain está atualmente preparando eventos piloto selecionados com DJs, organizadores, locais e marcas parceiras. Junte-se ao piloto para fazer parte da primeira onda."
   },
   {
-    q: "Como consigo acesso como organizador?",
-    a: "O acesso de organizador é aprovado manualmente durante o piloto. Preencha o formulário de contato abaixo com os detalhes do seu evento e entraremos em contato rapidamente. DJs e marcas também podem usar o mesmo formulário."
+    q: "Como posso entrar no piloto?",
+    a: "DJs, organizadores, locais e marcas podem solicitar acesso pelo formulário de contato abaixo. Vamos analisar seu pedido e retornar rapidamente."
+  },
+  {
+    q: "FestCoin é um investimento?",
+    a: "Não. FestCoin deve ser entendido como um mecanismo de utilidade e recompensa do ecossistema FestChain. O piloto não faz promessas financeiras. O FTC não tem valor monetário e é apenas para uso no app."
+  },
+  {
+    q: "Qual problema o FestChain resolve?",
+    a: "O FestChain ajuda a reduzir fraudes em ingressos, melhorar o acesso aos eventos, recompensar convidados fiéis, conectar DJs com fãs e dar aos organizadores melhores ferramentas para gerenciar experiências de eventos."
   }
 ];
 
