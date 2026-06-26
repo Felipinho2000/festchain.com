@@ -89,7 +89,15 @@ export default function Events() {
       ) : (
         <div className="bg-card border border-border rounded-xl p-12 text-center">
           <Calendar className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-          <p className="text-[#666] text-sm">No events found. Check back soon or adjust your filters.</p>
+          {search || genre !== "all" ? (
+            <p className="text-[#666] text-sm">No events match your filters. Try adjusting your search.</p>
+          ) : (
+            <>
+              <p className="text-[#888] text-sm font-medium mb-1">First pilot events coming soon</p>
+              <p className="text-[#555] text-sm mb-4">Want to run a pilot event? Get in touch.</p>
+              <a href="/#contact" className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">Contact us →</a>
+            </>
+          )}
         </div>
       )}
     </div>

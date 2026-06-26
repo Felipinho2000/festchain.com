@@ -60,7 +60,6 @@ export default function Landing() {
       <a href="#works" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.whatWorks")}</a>
       <a href="#roadmap" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.roadmap")}</a>
       <a href="#mission" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.mission")}</a>
-      <Link to="/whitepaper" onClick={onClick} className="hover:text-white transition-colors">{t("landing.whitepaper.cta")}</Link>
       <a href="#contact" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.contact")}</a>
       <Link to="/legal" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.legal")}</Link>
     </>

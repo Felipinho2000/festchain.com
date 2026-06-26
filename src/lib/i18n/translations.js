@@ -74,7 +74,7 @@ export const translations = {
         organizer: "I'm an Organizer",
         partygoer: "I'm a Partygoer",
         already: "Already have an account?",
-        pills: ["No real payments yet", "Single-use QR check-in", "Mobile-first"],
+        pills: ["Free during pilot", "Single-use QR check-in", "Mobile-first"],
       },
       whatIs: {
         kicker: "What is FestChain",
@@ -537,7 +537,7 @@ export const translations = {
         organizer: "Sou Organizador",
         partygoer: "Sou Participante",
         already: "Já tem uma conta?",
-        pills: ["Sem pagamentos reais ainda", "Check-in QR de uso único", "Mobile-first"],
+        pills: ["Gratuito durante o piloto", "Check-in QR de uso único", "Mobile-first"],
       },
       whatIs: {
         kicker: "O que é o FestChain",
