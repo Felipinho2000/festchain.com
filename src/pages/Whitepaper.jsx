@@ -166,6 +166,19 @@ export default function Whitepaper() {
         {/* ── MAIN CONTENT ── */}
         <main className="flex-1 min-w-0 space-y-16">
 
+          {/* Legal disclaimer banner */}
+          <div className="bg-amber-950/40 border border-amber-600/40 rounded-2xl p-5 flex gap-4">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <ShieldCheck className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">Important Notice</p>
+              <p className="text-amber-200/80 text-sm leading-relaxed">
+                This document describes FestChain's long-term vision. <strong className="text-amber-200">FestCoin is currently a pilot utility credit with no monetary value.</strong> It is not a financial instrument, not an investment, and cannot be traded or redeemed for cash. Future tokenomics described herein are subject to legal review and regulatory approval before any implementation.
+              </p>
+            </div>
+          </div>
+
           {/* Hero */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#111] to-[#0d0d0d] border border-[#1f1f1f] p-8 sm:p-12">
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />

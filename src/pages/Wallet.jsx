@@ -222,11 +222,14 @@ export default function WalletPage() {
           {loading ? (
             <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="bg-card border border-border rounded-xl h-28 animate-pulse" />)}</div>
           ) : tickets.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-12 text-center">
-              <Ticket className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-              <p className="text-[#666] text-sm mb-1">No tickets yet</p>
-              <p className="text-[#555] text-xs mb-4">Browse events and get your first pilot ticket.</p>
-              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl">Browse Events</Button></Link>
+            <div className="bg-card border border-border rounded-xl p-10 text-center">
+              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Ticket className="w-7 h-7 text-primary" strokeWidth={1.5} />
+              </div>
+              <h3 className="font-heading font-semibold text-white text-base mb-2">No tickets yet</h3>
+              <p className="text-[#666] text-sm mb-1 max-w-xs mx-auto">Attend a FestChain pilot event to get your first ticket and earn FestCoin automatically.</p>
+              <p className="text-[#555] text-xs mb-5">Your tickets and loyalty credits will appear here after joining a pilot event.</p>
+              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Browse Pilot Events</Button></Link>
             </div>
           ) : (
             <div className="space-y-4">
@@ -251,10 +254,13 @@ export default function WalletPage() {
           {loading ? (
             <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="bg-card border border-border rounded-xl h-16 animate-pulse" />)}</div>
           ) : transactions.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-12 text-center">
-              <WalletIcon className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-              <p className="text-[#666] text-sm mb-4">No transactions yet. Earn pilot credits by getting tickets to pilot events.</p>
-              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl">Browse Events</Button></Link>
+            <div className="bg-card border border-border rounded-xl p-10 text-center">
+              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <WalletIcon className="w-7 h-7 text-primary" strokeWidth={1.5} />
+              </div>
+              <h3 className="font-heading font-semibold text-white text-base mb-2">Your FestCoin will appear here</h3>
+              <p className="text-[#666] text-sm mb-5 max-w-xs mx-auto">Attend a FestChain pilot event to earn your first FestCoin. Credits are issued automatically when you get a ticket.</p>
+              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Browse Pilot Events</Button></Link>
             </div>
           ) : (
             <div className="space-y-2">
