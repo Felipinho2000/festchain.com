@@ -15,9 +15,10 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'Missing event_id or menu_item_id' }, { status: 400 });
     }
 
-    // Verify event exists
+    // Verify event exists and capture organizer_id
     const event = await base44.asServiceRole.entities.Event.get(event_id).catch(() => null);
     if (!event) return Response.json({ status: 'error', message: 'Event not found' }, { status: 404 });
+    const organizerId = event.created_by_id ? String(event.created_by_id) : null;
 
     // Verify menu item belongs to event and is active
     const item = await base44.asServiceRole.entities.VenueMenuItem.get(menu_item_id).catch(() => null);
@@ -35,7 +36,7 @@ Deno.serve(async (req) => {
     const allTx = await base44.entities.FestCoinTransaction.filter({ created_by_id: user.id }).catch(() => []);
     const validTx = allTx.filter(t => !['cancelled', 'failed'].includes(t.status));
     const currentBalance = validTx.reduce((s, t) => {
-      if (['earned', 'transferred_in'].includes(t.type)) return s + (t.amount || 0);
+      if (['earned', 'transferred_in', 'pilot_topup'].includes(t.type)) return s + (t.amount || 0);
       if (['spent', 'transferred_out'].includes(t.type)) return s - (t.amount || 0);
       return s;
     }, 0);
@@ -65,11 +66,12 @@ Deno.serve(async (req) => {
       status: 'confirmed'
     });
 
-    // Create redemption record
+    // Create redemption record with organizer_id so organizer can see it in their dashboard
     const redemption = await base44.entities.EventRedemption.create({
       created_by_id: user.id,
       event_id,
       event_title: event.title,
+      organizer_id: organizerId,
       menu_item_id,
       item_name: item.name,
       item_emoji: item.emoji || '🎟️',

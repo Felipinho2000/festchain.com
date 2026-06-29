@@ -24,12 +24,12 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'This event is not open for booking' });
     }
 
-    // 3. Capacity
+    // 3. Capacity check
     if ((event.tickets_sold || 0) >= (event.total_capacity || 0)) {
       return Response.json({ status: 'error', message: 'Sold out' });
     }
 
-    // 4. Prevent duplicates: one active ticket per user per event (pilot rule)
+    // 4. Prevent duplicates: one active ticket per user per event
     const existing = await base44.asServiceRole.entities.Ticket.filter({
       event_id, created_by_id: String(user.id), status: 'active'
     });
@@ -40,14 +40,17 @@ Deno.serve(async (req) => {
     // 5. Generate QR securely server-side
     const qrCode = `FC-${crypto.randomUUID()}`;
     const reward = event.festcoin_reward || 0;
+    const organizerId = event.created_by_id ? String(event.created_by_id) : null;
 
-    // 6. Create the ticket as the user (so created_by_id = user → user can read it in Wallet)
+    // 6. Create ticket as the user (created_by_id = user for wallet access)
+    //    Include organizer_id so the event owner can read this ticket in their dashboard
     const ticket = await base44.entities.Ticket.create({
       event_id: event.id,
       event_title: event.title,
       event_date: event.date,
       event_image: event.image_url,
       event_location: event.location_name,
+      organizer_id: organizerId,
       ticket_type: 'general',
       price_paid: event.ticket_price || 0,
       payment_method,
@@ -63,7 +66,7 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.Event.update(event.id, { tickets_sold: currentSold + 1 });
     } catch (_) {}
 
-    // 8. FestCoin reward — created via service role but with created_by_id set to ticket owner
+    // 8. FestCoin reward — service role write, but created_by_id = ticket buyer so it shows in their wallet
     if (reward > 0) {
       try {
         await base44.asServiceRole.entities.FestCoinTransaction.create({
