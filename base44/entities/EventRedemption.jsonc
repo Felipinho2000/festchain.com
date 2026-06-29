@@ -8,6 +8,9 @@
     "event_title": {
       "type": "string"
     },
+    "organizer_id": {
+      "type": "string"
+    },
     "menu_item_id": {
       "type": "string"
     },
@@ -61,6 +64,9 @@
           "created_by_id": "{{user.id}}"
         },
         {
+          "data.organizer_id": "{{user.id}}"
+        },
+        {
           "user_condition": {
             "role": "admin"
           }
@@ -71,6 +77,9 @@
       "$or": [
         {
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organizer_id": "{{user.id}}"
         },
         {
           "user_condition": {
