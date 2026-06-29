@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // Hardened ticket check-in for the private MVP pilot.
-// Returns attendee info, scanned time, and previous-scan details on a double scan.
+// Only admin or the specific event creator/owner can validate tickets.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -16,11 +16,16 @@ Deno.serve(async (req) => {
     if (!event_id) return Response.json({ status: 'invalid', message: 'Select an event before scanning' });
 
     const isAdmin = user.role === 'admin';
+
+    // Load event and verify scanner owns it (or is admin)
     let event = null;
     try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
-    const isCreator = !!(event && event.created_by_id && String(event.created_by_id) === String(user.id));
-    const isApproved = user.approved_organizer === true;
-    if (!isAdmin && !isApproved && !isCreator) {
+    if (!event) return Response.json({ status: 'invalid', message: 'Event not found' });
+
+    const isEventOwner = String(event.created_by_id) === String(user.id);
+
+    // SECURITY: only admin or the event creator can scan — not any approved organizer globally
+    if (!isAdmin && !isEventOwner) {
       return Response.json({ status: 'unauthorized', message: 'You are not authorized to scan for this event' }, { status: 403 });
     }
 

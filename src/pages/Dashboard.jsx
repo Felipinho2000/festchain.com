@@ -255,10 +255,10 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total Revenue", value: `R$ ${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-600 bg-emerald-50" },
-          { label: "Tickets Sold", value: totalTicketsSold, icon: Ticket, color: "text-primary bg-primary/10" },
-          { label: "Active Events", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-blue-600 bg-blue-50" },
-          { label: "Checked In", value: checkedIn, icon: UserCheck, color: "text-emerald-600 bg-emerald-50" }
+          { label: "Est. Ticket Value", value: `R$ ${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-400 bg-emerald-900/20" },
+          { label: "Tickets Issued", value: totalTicketsSold, icon: Ticket, color: "text-primary bg-primary/10" },
+          { label: "Active Events", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-primary bg-primary/10" },
+          { label: "Checked In", value: checkedIn, icon: UserCheck, color: "text-emerald-400 bg-emerald-900/20" }
         ].map((kpi, i) => (
           <div key={i} className="bg-card border border-border rounded-xl p-4">
             <div className={`w-9 h-9 rounded-lg ${kpi.color} flex items-center justify-center mb-3`}>
@@ -280,7 +280,7 @@ export default function Dashboard() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888" }} />
               <YAxis tick={{ fontSize: 11, fill: "#888" }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #333", background: "#1a1a1a", color: "#fff", fontSize: 12 }} />
-              <Line type="monotone" dataKey="tickets" stroke="#7C3AED" strokeWidth={2} dot={{ r: 4, fill: "#7C3AED" }} />
+              <Line type="monotone" dataKey="tickets" stroke="hsl(160 84% 39%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(160 84% 39%)" }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -306,8 +306,9 @@ export default function Dashboard() {
           </div>
         ) : events.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-12 text-center">
-            <Calendar className="w-10 h-10 text-warmgray/40 mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-warmgray text-sm">No events yet. Create your first event to get started.</p>
+            <Calendar className="w-10 h-10 text-warmgray/40 mx-auto mb-4" strokeWidth={1.5} />
+            <p className="text-white text-sm font-medium mb-1">No events yet</p>
+            <p className="text-[#666] text-sm">Create your first event and start testing QR tickets, check-in, and FestCoin rewards.</p>
           </div>
         ) : (
           <div className="space-y-3">

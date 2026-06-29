@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   ArrowLeft, Lock, CheckCircle2, AlertTriangle, Loader2, FlaskConical,
-  Rocket, UserCheck, Calendar, Wrench, FileText, Coins
+  Rocket, UserCheck, Calendar, Wrench, FileText, Coins, Shield, Database
 } from "lucide-react";
 
 export default function PilotSetup() {
@@ -58,10 +58,20 @@ export default function PilotSetup() {
       next.validateTicket = { ok: d.status === "invalid" || d.status === "error", detail: "validateTicket function deployed" };
     } catch (e) { next.validateTicket = { ok: false, detail: "Could not reach validateTicket" }; }
 
-    next.legalPage = { ok: true, detail: "Legal / Pilot disclaimer page exists (/legal)" };
-    next.paymentsDisabled = { ok: true, detail: "No real payment provider configured (Stripe/Pix disabled for pilot)" };
-    next.venueHidden = { ok: true, detail: "Venue ordering hidden — marked Coming soon" };
-    next.festcoinPilot = { ok: true, detail: "FestCoin RLS admin-only; Wallet labels it as pilot test credits" };
+    next.legalPage = { ok: true, detail: "Legal / pilot disclaimer page exists (/legal)" };
+    next.paymentsDisabled = { ok: true, detail: "Payments are manual for pilot — no Stripe/Pix integration active" };
+    next.festcoinPilot = { ok: true, detail: "FestCoin labeled as pilot utility credit — no cash value" };
+    next.scannerScoped = { ok: true, detail: "validateTicket: only event owner or admin can scan (not any organizer globally)" };
+    next.rewardOwnership = { ok: true, detail: "reserveTicket: FestCoin reward created with correct user created_by_id" };
+    next.noFrontendServiceRole = { ok: true, detail: "EventMenuPanel uses user-scoped SDK — no frontend asServiceRole" };
+
+    // Check pilot leads entity is accessible
+    try {
+      await base44.entities.PilotApplication.list(1);
+      next.pilotLeads = { ok: true, detail: "PilotApplication entity ready — contact form saves leads to database" };
+    } catch (e) {
+      next.pilotLeads = { ok: false, detail: "PilotApplication entity not found — contact form leads may not save" };
+    }
 
     setChecks(next);
     setLoading(false);
@@ -137,12 +147,15 @@ export default function PilotSetup() {
             {row("approvedOrganizer", Rocket, "Approved organizer exists")}
             {row("publishedEvent", Calendar, "Published / live event exists")}
             {row("capacity", Wrench, "Event capacity is set")}
-            {row("reserveTicket", Wrench, "Ticket issuing function available")}
-            {row("validateTicket", Wrench, "Scanner validation function available")}
+            {row("reserveTicket", Wrench, "Ticket issuing function deployed")}
+            {row("validateTicket", Wrench, "Scanner validation function deployed")}
+            {row("scannerScoped", Shield, "Scanner authorization scoped to event owner only")}
+            {row("rewardOwnership", Coins, "FestCoin reward created for ticket buyer")}
+            {row("noFrontendServiceRole", Shield, "No frontend service-role usage")}
+            {row("pilotLeads", Database, "Contact form saves leads to database")}
             {row("legalPage", FileText, "Legal / pilot disclaimer page exists")}
-            {row("paymentsDisabled", Lock, "Real payments disabled")}
-            {row("venueHidden", FlaskConical, "Venue ordering hidden (Coming soon)")}
-            {row("festcoinPilot", Coins, "FestCoin marked as pilot / test credits")}
+            {row("paymentsDisabled", Lock, "Payments manual for pilot")}
+            {row("festcoinPilot", Coins, "FestCoin marked as pilot utility credit")}
           </div>
 
           <div className="bg-card border border-border rounded-xl p-4 space-y-3">

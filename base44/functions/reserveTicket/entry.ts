@@ -54,17 +54,16 @@ Deno.serve(async (req) => {
       qr_code: qrCode,
       status: 'active',
       checked_in: false,
-      festcoin_earned: reward,
-      poap_minted: false
+      festcoin_earned: reward
     });
 
-    // 7. Increment tickets_sold atomically (service role bypasses Event update RLS)
+    // 7. Increment tickets_sold (service role bypasses Event update RLS)
     try {
       const currentSold = event.tickets_sold || 0;
       await base44.asServiceRole.entities.Event.update(event.id, { tickets_sold: currentSold + 1 });
     } catch (_) {}
 
-    // 8. Optional pilot reward credits (confirmed) — only the backend can mint FestCoin now
+    // 8. FestCoin reward — created via service role but with created_by_id set to ticket owner
     if (reward > 0) {
       try {
         await base44.asServiceRole.entities.FestCoinTransaction.create({
@@ -73,7 +72,8 @@ Deno.serve(async (req) => {
           description: `Pilot reward: ${event.title}`,
           event_id: event.id,
           event_title: event.title,
-          status: 'confirmed'
+          status: 'confirmed',
+          created_by_id: String(user.id)
         });
       } catch (_) {}
     }

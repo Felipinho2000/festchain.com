@@ -19,7 +19,7 @@ export default function EventMenuPanel({ eventId, userBalance, onRedeemed }) {
   useEffect(() => {
     if (!eventId) return;
     Promise.all([
-      base44.asServiceRole.entities.VenueMenuItem.filter({ event_id: eventId, is_available: true }).catch(() => []),
+      base44.entities.VenueMenuItem.filter({ event_id: eventId, is_available: true }).catch(() => []),
       base44.entities.EventRedemption.filter({ event_id: eventId, created_by_id: currentUser?.id }).catch(() => []),
     ]).then(([menuItems, rdps]) => {
       setItems(menuItems.filter(i => !i.pilot_only || true)); // show pilot items

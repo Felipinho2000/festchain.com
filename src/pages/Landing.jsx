@@ -33,13 +33,25 @@ export default function Landing() {
     e.preventDefault();
     setSending(true);
     try {
-      await base44.integrations.Core.SendEmail({
+      // Save lead to database first — this is the source of truth
+      await base44.entities.PilotApplication.create({
+        name: form.name,
+        email: form.email,
+        role: form.role || "",
+        message: form.message,
+        status: "new",
+        source: "landing_form"
+      });
+      // Send email notification (best-effort, don't fail on it)
+      base44.integrations.Core.SendEmail({
         to: "hello@festchain.io",
-        subject: `Pilot request — ${form.name}${form.role ? ` (${form.role})` : ""}`,
+        subject: `Pilot application — ${form.name}${form.role ? ` (${form.role})` : ""}`,
         body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
       }).catch(() => {});
       setSent(true);
       toast({ title: t("landing.contact.sentTitle"), description: t("landing.contact.sentSub") });
+    } catch (err) {
+      toast({ title: "Error", description: "Could not submit your application. Please try again.", variant: "destructive" });
     } finally {
       setSending(false);
     }
@@ -107,31 +119,31 @@ export default function Landing() {
             {t("landing.hero.badge")}
           </div>
           <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight mb-5">
-            {t("landing.hero.title")}
+            Sell tickets. Scan guests. Reward your crowd.
           </h1>
           <p className="text-[#aaa] text-base sm:text-lg leading-relaxed mb-9 max-w-2xl mx-auto">
-            {t("landing.hero.sub")}
+            FestChain helps organizers run pilot events with secure QR tickets, fast check-in, FestCoin rewards, and event perks built for DJs, brands, and partygoers.
           </p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            <Link to={authed ? "/events" : "/register"}>
+            <a href="#contact">
               <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-base">
-                {t("landing.hero.joinPilot")} <ArrowRight className="w-5 h-5 ml-1" />
+                Join the Pilot <ArrowRight className="w-5 h-5 ml-1" />
               </Button>
-            </Link>
-            <a href="#audiences">
+            </a>
+            <a href="#contact" onClick={() => setForm(f => ({ ...f, role: "Organizer" }))}>
               <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                {t("landing.hero.forOrganizers")}
+                I'm an Organizer
               </Button>
             </a>
             <a href="#contact" onClick={() => setForm(f => ({ ...f, role: "DJ" }))}>
               <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                {t("landing.hero.forDJs")}
+                I'm a DJ
               </Button>
             </a>
             <a href="#contact" onClick={() => setForm(f => ({ ...f, role: "Brand" }))}>
               <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                {t("landing.hero.forBrands")}
+                I'm a Brand
               </Button>
             </a>
           </div>

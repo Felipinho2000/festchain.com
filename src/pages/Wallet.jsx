@@ -158,7 +158,7 @@ export default function WalletPage() {
           <p className="text-[#888] text-sm">Your pilot tickets &amp; loyalty credits.</p>
         </div>
         <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
-          <Zap className="w-3.5 h-3.5" /> Get FTC
+          <Zap className="w-3.5 h-3.5" /> Add Pilot Credits
         </button>
       </div>
 

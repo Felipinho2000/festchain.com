@@ -222,9 +222,9 @@ export default function EventDetail() {
         <div className="lg:col-span-1">
           <div className="bg-card border border-border rounded-xl p-5 sticky top-8 space-y-5">
             <div>
-              <p className="text-xs text-warmgray mb-1">Ticket</p>
+              <p className="text-xs text-warmgray mb-1">Pilot Ticket</p>
               <p className="font-heading font-bold text-3xl text-foreground">R$ {event.ticket_price?.toFixed(2)}</p>
-              <p className="text-xs text-warmgray mt-1">Secure QR · issued instantly · check-in at the door</p>
+              <p className="text-xs text-warmgray mt-1">Pilot reservation — payment handled manually during MVP.</p>
             </div>
 
             <Button
@@ -233,9 +233,8 @@ export default function EventDetail() {
               disabled={spotsLeft <= 0}
             >
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
-              {spotsLeft > 0 ? "Get Ticket" : "Sold Out"}
+              {spotsLeft > 0 ? "Reserve Pilot Ticket" : "Sold Out"}
             </Button>
-            <p className="text-[10px] text-[#666] text-center">Public beta · no real payment is processed</p>
             <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
           </div>
         </div>
@@ -262,7 +261,7 @@ export default function EventDetail() {
                   Issuing...
                 </span>
               ) : (
-                `Get Ticket · R$ ${event.ticket_price?.toFixed(2)}`
+                `Reserve Pilot Ticket · R$ ${event.ticket_price?.toFixed(2)}`
               )}
             </Button>
             <p className="text-[10px] text-[#555] text-center">By getting a ticket you accept the <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.</p>
