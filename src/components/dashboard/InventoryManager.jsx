@@ -38,10 +38,10 @@ export default function InventoryManager({ events }) {
     setLoading(true);
     const [menuItems, venueOrders] = await Promise.all([
       base44.entities.VenueMenuItem.filter({ event_id: eventId }).catch(() => []),
-      base44.entities.VenueOrder.list("-created_date", 200).catch(() => [])
+      base44.entities.VenueOrder.filter({ event_id: eventId }, "-created_date", 200).catch(() => [])
     ]);
     setItems(menuItems);
-    setOrders(venueOrders.filter(o => o.event_id === eventId));
+    setOrders(venueOrders);
     setLoading(false);
   };
 

@@ -46,13 +46,12 @@ export default function Dashboard() {
   const { toast } = useToast();
 
   const loadData = async () => {
+    if (!currentUser?.id) return;
     setLoading(true);
-    const evts = await base44.entities.Event.filter({ created_by_id: currentUser?.id }, "-created_date", 50).catch(() => []);
-    const myIds = evts.map(e => e.id);
-    const tixArrays = await Promise.all(
-      myIds.map(eid => base44.entities.Ticket.filter({ event_id: eid }, "-created_date", 200).catch(() => []))
-    );
-    const tix = tixArrays.flat();
+    const [evts, tix] = await Promise.all([
+      base44.entities.Event.filter({ created_by_id: currentUser.id }, "-created_date", 50).catch(() => []),
+      base44.entities.Ticket.filter({ organizer_id: currentUser.id }, "-created_date", 500).catch(() => [])
+    ]);
     setEvents(evts);
     setTickets(tix);
     setLoading(false);
