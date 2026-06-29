@@ -18,6 +18,9 @@
     "event_location": {
       "type": "string"
     },
+    "organizer_id": {
+      "type": "string"
+    },
     "ticket_type": {
       "type": "string",
       "enum": [
@@ -88,6 +91,9 @@
       "$or": [
         {
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organizer_id": "{{user.id}}"
         },
         {
           "user_condition": {
