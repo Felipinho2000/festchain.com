@@ -50,10 +50,10 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			green: {
-  					DEFAULT: '#10b981',
-  					light: '#34d399',
-  					dark: '#059669'
+  			orange: {
+  					DEFAULT: '#ff6600',
+  					light: '#ff8533',
+  					dark: '#cc5200'
   				},
   				bone: '#141414',
   				warmgray: '#888888',
