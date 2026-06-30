@@ -121,7 +121,7 @@ export default function MyTickets() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading font-bold text-3xl text-foreground mb-1">My Tickets</h1>
-        <p className="text-warmgray text-sm">Your NFT ticket vault — secure, verifiable, and transferable.</p>
+        <p className="text-warmgray text-sm">Your digital ticket wallet — secure and verifiable.</p>
       </div>
 
       {loading ? (
@@ -134,7 +134,7 @@ export default function MyTickets() {
         <div className="bg-card border border-border rounded-xl p-12 text-center">
           <Ticket className="w-10 h-10 text-warmgray/40 mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-warmgray text-sm mb-1">No tickets yet</p>
-          <p className="text-warmgray text-xs">Browse events and secure your first NFT ticket.</p>
+          <p className="text-warmgray text-xs">Browse events and get your first digital ticket.</p>
         </div>
       ) : (
         <Tabs defaultValue="active" className="space-y-4">

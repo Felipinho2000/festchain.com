@@ -187,13 +187,13 @@ export const translations = {
         sending: "Sending…",
         sentTitle: "Thanks — we'll be in touch",
         sentSub: "We'll reply to you about beta access.",
-        emailVal: "hello@festchain.io",
+        emailVal: "hello@festchain.com",
         locale: "São Paulo, Brazil",
       },
       founder: {
         kicker: "Founder",
         name: "Felipe de Oliveira — Founder & CEO",
-        bio: "Felipe is a Web3 builder and entrepreneur passionate about rethinking how the events industry operates. He founded FestChain to empower organizers with modern infrastructure for ticketing, payments, loyalty, and community engagement — while reducing reliance on unnecessary intermediaries. He believes the future of events is community-driven: organizers own their audience, attendees are rewarded for their participation, and technology creates a more transparent, connected, and fair ecosystem for everyone.",
+        bio: "[Founder bio — verify and update before pilot launch. Keep it concise: who you are, why you built FestChain, and your vision for events.]",
         cta: "Join the Pilot",
       },
       whitepaper: {
@@ -672,13 +672,13 @@ export const translations = {
         sending: "Enviando…",
         sentTitle: "Obrigado — entraremos em contato",
         sentSub: "Responderemos sobre o acesso ao beta.",
-        emailVal: "hello@festchain.io",
+        emailVal: "hello@festchain.com",
         locale: "São Paulo, Brasil",
       },
       founder: {
         kicker: "Fundador",
         name: "Felipe de Oliveira — Fundador & CEO",
-        bio: "Felipe é um builder de Web3 e empreendedor apaixonado por reinventar como a indústria de eventos opera. Ele fundou o FestChain para capacitar organizadores com infraestrutura moderna de ingressos, pagamentos, fidelidade e engajamento comunitário — reduzindo a dependência de intermediários desnecessários. Ele acredita que o futuro dos eventos é orientado pela comunidade: organizadores têm sua audiência, participantes são recompensados pela sua presença, e a tecnologia cria um ecossistema mais transparente, conectado e justo para todos.",
+        bio: "[Bio do fundador — verificar e atualizar antes do piloto. Mantenha conciso: quem você é, por que criou o FestChain e sua visão para eventos.]",
         cta: "Participar do Piloto",
       },
       whitepaper: {

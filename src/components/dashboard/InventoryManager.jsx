@@ -26,7 +26,6 @@ export default function InventoryManager({ events }) {
   const { toast } = useToast();
   const [selectedEventId, setSelectedEventId] = useState(events?.[0]?.id || "");
   const [items, setItems] = useState([]);
-  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -36,12 +35,8 @@ export default function InventoryManager({ events }) {
   const loadItems = async (eventId) => {
     if (!eventId) return;
     setLoading(true);
-    const [menuItems, venueOrders] = await Promise.all([
-      base44.entities.VenueMenuItem.filter({ event_id: eventId }).catch(() => []),
-      base44.entities.VenueOrder.filter({ event_id: eventId }, "-created_date", 200).catch(() => [])
-    ]);
+    const menuItems = await base44.entities.VenueMenuItem.filter({ event_id: eventId }).catch(() => []);
     setItems(menuItems);
-    setOrders(venueOrders);
     setLoading(false);
   };
 
@@ -109,11 +104,6 @@ export default function InventoryManager({ events }) {
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_available: !i.is_available } : i));
   };
 
-  // Analytics
-  const totalPreOrderRevenue = orders.reduce((s, o) => s + (o.total_ftc || 0) * 0.5, 0);
-  const pendingOrders = orders.filter(o => o.status === "confirmed" || o.status === "pending").length;
-  const redeemedOrders = orders.filter(o => o.status === "collected").length;
-
   if (!events || events.length === 0) {
     return (
       <div className="bg-card border border-border rounded-xl p-12 text-center">
@@ -139,20 +129,6 @@ export default function InventoryManager({ events }) {
           className="bg-primary hover:bg-primary/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">
           <Plus className="w-4 h-4 mr-1.5" /> Add Product
         </Button>
-      </div>
-
-      {/* Analytics strip */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Pre-order Revenue", value: `R$${totalPreOrderRevenue.toFixed(0)}` },
-          { label: "Pending Orders", value: pendingOrders },
-          { label: "Redeemed", value: redeemedOrders },
-        ].map((s, i) => (
-          <div key={i} className="bg-card border border-border rounded-xl p-4 text-center">
-            <p className="font-bold text-white text-xl">{s.value}</p>
-            <p className="text-xs text-[#666] mt-0.5">{s.label}</p>
-          </div>
-        ))}
       </div>
 
       {/* Products list */}

@@ -44,7 +44,7 @@ export default function Landing() {
       });
       // Send email notification (best-effort, don't fail on it)
       base44.integrations.Core.SendEmail({
-        to: "hello@festchain.io",
+        to: "hello@festchain.com",
         subject: `Pilot application — ${form.name}${form.role ? ` (${form.role})` : ""}`,
         body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
       }).catch(() => {});

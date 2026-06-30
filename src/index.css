@@ -18,7 +18,7 @@
     --secondary-foreground: 0 0% 80%;
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 55%;
-    --accent: 30 100% 55%;
+    --accent: 24 95% 58%;
     --accent-foreground: 0 0% 0%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -26,10 +26,10 @@
     --input: 0 0% 18%;
     --ring: 24 100% 50%;
     --chart-1: 24 100% 50%;
-    --chart-2: 30 100% 60%;
-    --chart-3: 0 0% 55%;
+    --chart-2: 24 90% 60%;
+    --chart-3: 18 85% 45%;
     --chart-4: 24 100% 50%;
-    --chart-5: 0 0% 35%;
+    --chart-5: 24 60% 35%;
     --radius: 0.75rem;
     --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
@@ -52,7 +52,6 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased;
-    background-color: #141414;
   }
 }
 
