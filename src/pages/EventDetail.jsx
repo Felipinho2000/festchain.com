@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag } from "lucide-react";
+import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2 } from "lucide-react";
+import EventShareButtons from "@/components/events/EventShareButtons";
 import EventMenuPanel from "@/components/events/EventMenuPanel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -133,6 +134,9 @@ export default function EventDetail() {
               {event.genre && (
                 <Badge variant="secondary" className="text-xs">{genreLabels[event.genre]}</Badge>
               )}
+              <Badge className={`text-xs border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>
+                {event.visibility === "private" ? "Private Event" : "Public Event"}
+              </Badge>
             </div>
             <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-2">{event.title}</h1>
             {event.organizer_name && (
@@ -236,6 +240,18 @@ export default function EventDetail() {
               {spotsLeft > 0 ? "Reserve Pilot Ticket" : "Sold Out"}
             </Button>
             <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
+
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5">
+                <Share2 className="w-3.5 h-3.5 text-primary" /> Share Event
+              </p>
+              <EventShareButtons
+                eventName={event.title}
+                eventUrl={`${window.location.origin}/events/${event.id}`}
+                visibility={event.visibility}
+                eventDate={event.date}
+              />
+            </div>
           </div>
         </div>
       </div>

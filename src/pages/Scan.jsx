@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
   CheckCircle2, XCircle, AlertTriangle, RotateCcw, Camera, Lock, Ban,
-  Ticket as TicketIcon, User, Mail, Clock, Keyboard
+  Ticket as TicketIcon, User, Mail, Clock, Keyboard, Loader2
 } from "lucide-react";
 import moment from "moment";
 import GuestList from "@/components/scan/GuestList";
@@ -17,12 +17,15 @@ export default function Scan() {
   const lockedRef = useRef(false);
   const [result, setResult] = useState(null);
   const [camError, setCamError] = useState(null);
+  const [cameraState, setCameraState] = useState("idle");
   const [events, setEvents] = useState([]);
   const [eventId, setEventId] = useState("");
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [manual, setManual] = useState("");
   const [validating, setValidating] = useState(false);
   const [view, setView] = useState("scanner");
+
+  const isHTTPS = window.location.protocol === "https:" || window.location.hostname === "localhost";
 
   useEffect(() => {
     if (!canScan) { setLoadingEvents(false); return; }
@@ -34,33 +37,75 @@ export default function Scan() {
   }, [canScan, currentUser]);
 
   useEffect(() => {
-    return () => {
-      const inst = html5Ref.current;
-      if (inst) { inst.stop().catch(() => {}).finally(() => { html5Ref.current = null; }); }
-    };
+    return () => { stopCamera(); };
   }, []);
 
   const stopCamera = () => {
     const inst = html5Ref.current;
     if (inst) { inst.stop().catch(() => {}).finally(() => { html5Ref.current = null; }); }
+    setCameraState("idle");
   };
 
-  const startCamera = () => {
+  const handleCameraError = (err) => {
+    const name = err?.name || "";
+    let msg = "Camera error. Try the manual entry below.";
+    if (!isHTTPS) {
+      msg = "Camera access requires HTTPS. Please open FestChain from the secure live URL.";
+    } else if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+      msg = "Camera permission was denied. Please allow camera access in your browser settings.";
+    } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+      msg = "No camera found on this device.";
+    } else if (name === "NotReadableError" || name === "TrackStartError") {
+      msg = "Camera is already in use by another app. Close other camera apps and try again.";
+    } else if (name === "OverconstrainedError") {
+      msg = "Your browser does not support camera scanning. Please try another browser.";
+    }
+    setCamError(msg);
+    setCameraState("error");
+    if (html5Ref.current) {
+      html5Ref.current.stop().catch(() => {});
+      html5Ref.current = null;
+    }
+  };
+
+  const startCamera = async () => {
     if (!eventId || html5Ref.current) return;
-    let mounted = true;
+    if (!isHTTPS) {
+      setCamError("Camera access requires HTTPS. Please open FestChain from the secure live URL.");
+      setCameraState("error");
+      return;
+    }
+    setCameraState("requesting");
+    setCamError(null);
+
     const html5 = new Html5Qrcode("reader");
     html5Ref.current = html5;
+
     const onScan = async (decoded) => {
       if (lockedRef.current) return;
       lockedRef.current = true;
       try { await html5.pause(); } catch (_) {}
       await runValidation(decoded);
     };
-    html5.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 230, height: 230 } },
-      onScan, () => {}
-    ).catch(() => { if (mounted) setCamError("Camera unavailable — check browser permissions and ensure you're on HTTPS. You can still enter the code manually below."); });
+
+    const config = { fps: 10, qrbox: { width: 230, height: 230 } };
+
+    try {
+      await html5.start({ facingMode: { ideal: "environment" } }, config, onScan, () => {});
+      setCameraState("active");
+    } catch (err) {
+      try {
+        await html5.start({ facingMode: "environment" }, config, onScan, () => {});
+        setCameraState("active");
+      } catch (err2) {
+        try {
+          await html5.start({ video: true }, config, onScan, () => {});
+          setCameraState("active");
+        } catch (err3) {
+          handleCameraError(err3);
+        }
+      }
+    }
   };
 
   const runValidation = async (qr) => {
@@ -117,6 +162,13 @@ export default function Scan() {
 
   const selectedEvent = events.find(e => e.id === eventId);
 
+  const statusLabel = {
+    idle: "Camera not started",
+    requesting: "Requesting camera permission…",
+    active: "Camera active — scanning",
+    error: "Camera error",
+  }[cameraState];
+
   return (
     <div className="space-y-4">
       <div>
@@ -148,11 +200,6 @@ export default function Scan() {
               ))}
             </div>
           )}
-          {events.length > 0 && (
-            <button onClick={startCamera} className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl">
-              Start scanning
-            </button>
-          )}
         </div>
       ) : (
         <div className="space-y-3">
@@ -178,21 +225,61 @@ export default function Scan() {
 
           {view === "scanner" && (
             <>
+              {/* HTTPS warning */}
+              {!isHTTPS && (
+                <div className="flex items-start gap-2 bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
+                  <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <p>Camera access requires HTTPS. Please open FestChain from the secure live URL. You can still enter ticket codes manually below.</p>
+                </div>
+              )}
+
+              {/* Camera area */}
               <div className="relative bg-black rounded-2xl overflow-hidden aspect-square sm:aspect-video">
-                {camError ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                    <Camera className="w-10 h-10 text-[#555] mb-3" strokeWidth={1.5} />
-                    <p className="text-[#888] text-sm max-w-xs">{camError}</p>
+                <div id="reader" className="w-full h-full" />
+
+                {cameraState === "idle" && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-4">
+                    <Camera className="w-12 h-12 text-[#555]" strokeWidth={1.5} />
+                    <p className="text-[#888] text-sm max-w-xs">Tap the button below to start the camera and scan tickets.</p>
+                    <button onClick={startCamera}
+                      className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors">
+                      <Camera className="w-4 h-4" /> Start Camera
+                    </button>
                   </div>
-                ) : (
-                  <>
-                    <div id="reader" className="w-full h-full" />
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <div className="w-56 h-56 border-2 border-white/70 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]" />
-                    </div>
-                  </>
                 )}
 
+                {cameraState === "requesting" && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-3">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={1.5} />
+                    <p className="text-[#888] text-sm">Requesting camera permission…</p>
+                  </div>
+                )}
+
+                {cameraState === "active" && !result && (
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="w-56 h-56 border-2 border-white/70 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]" />
+                  </div>
+                )}
+
+                {cameraState === "error" && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-4">
+                    <AlertTriangle className="w-10 h-10 text-red-400" strokeWidth={1.5} />
+                    <p className="text-red-400 text-sm max-w-xs">{camError}</p>
+                    <button onClick={startCamera}
+                      className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-4 py-2 text-xs transition-colors">
+                      <RotateCcw className="w-3.5 h-3.5" /> Retry Camera
+                    </button>
+                  </div>
+                )}
+
+                {cameraState === "active" && (
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-emerald-400 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                    {statusLabel}
+                  </div>
+                )}
+
+                {/* Result overlay */}
                 {result && config.icon && (
                   <div className="absolute inset-x-0 bottom-0 p-4">
                     <div className={`rounded-xl p-4 bg-[#1a1a1a] border ${config.border}`}>
@@ -209,7 +296,6 @@ export default function Scan() {
                         </button>
                       </div>
 
-                      {/* Attendee + details */}
                       {result.ticket && (
                         <div className="mt-3 pt-3 border-t border-[#222] space-y-1.5 text-xs">
                           <p className="text-white font-medium truncate"><TicketIcon className="w-3 h-3 inline mr-1.5" />{result.ticket.event_title}</p>
@@ -235,6 +321,16 @@ export default function Scan() {
                 )}
               </div>
 
+              {/* Status bar */}
+              <div className="flex items-center justify-between bg-card border border-border rounded-xl px-4 py-2.5">
+                <span className={`text-xs font-medium ${cameraState === "active" ? "text-emerald-400" : cameraState === "error" ? "text-red-400" : "text-[#888]"}`}>
+                  {validating ? "Validating ticket…" : statusLabel}
+                </span>
+                {cameraState === "active" && (
+                  <button onClick={stopCamera} className="text-xs text-[#888] hover:text-red-400 font-medium">Stop Camera</button>
+                )}
+              </div>
+
               {/* Manual entry fallback */}
               <form onSubmit={submitManual} className="bg-card border border-border rounded-xl p-4 space-y-2">
                 <label className="text-xs text-[#888] flex items-center gap-1.5"><Keyboard className="w-3.5 h-3.5" /> Camera not working? Enter the ticket code manually</label>
@@ -246,14 +342,10 @@ export default function Scan() {
                     className="flex-1 bg-[#111] border border-border rounded-lg px-3 py-2 text-sm text-white font-mono placeholder-[#444] focus:outline-none focus:border-primary"
                   />
                   <button type="submit" disabled={validating || !manual.trim()} className="px-4 rounded-lg bg-primary hover:bg-primary/90 text-white text-sm font-semibold disabled:opacity-50">
-                    {validating ? "…" : "Validate"}
+                    {validating ? "…" : "Validate Ticket"}
                   </button>
                 </div>
               </form>
-
-              {!result && !camError && (
-                <p className="text-center text-[#555] text-xs">Align the ticket QR inside the frame. Each ticket is validated exactly once.</p>
-              )}
             </>
           )}
 

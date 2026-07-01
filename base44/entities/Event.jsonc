@@ -69,6 +69,14 @@
       ],
       "default": "draft"
     },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "private"
+      ],
+      "default": "public"
+    },
     "has_poap": {
       "type": "boolean",
       "default": true

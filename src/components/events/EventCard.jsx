@@ -21,7 +21,7 @@ export default function EventCard({ event }) {
 
   return (
     <Link to={`/events/${event.id}`} className="group block">
-      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_20px_-4px_rgba(255,85,0,0.2)]">
+      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_20px_-4px_rgba(17,197,137,0.2)]">
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
           {event.image_url ? (

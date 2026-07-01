@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Plus, Calendar, TrendingUp,
-  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck
+  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck,
+  Share2, Check
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -16,6 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import EventShareButtons from "@/components/events/EventShareButtons";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import moment from "moment";
 
@@ -31,7 +34,7 @@ const defaultForm = {
   title: "", description: "", genre: "techno", date: "",
   end_date: "", location_name: "", location_address: "",
   ticket_price: "", festcoin_reward: "50", total_capacity: "",
-  status: "published", dj_lineup: ""
+  status: "published", visibility: "public", dj_lineup: ""
 };
 
 export default function Dashboard() {
@@ -42,6 +45,7 @@ export default function Dashboard() {
   const [form, setForm] = useState(defaultForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [createdEvent, setCreatedEvent] = useState(null);
   const { currentUser } = useAuth();
   const { toast } = useToast();
 
@@ -101,6 +105,7 @@ export default function Dashboard() {
       festcoin_reward: parseInt(form.festcoin_reward) || 50,
       total_capacity: parseInt(form.total_capacity) || 100,
       status: form.status,
+      visibility: form.visibility,
       organizer_name: currentUser?.full_name || "Organizer",
       dj_lineup: form.dj_lineup ? form.dj_lineup.split(",").map(s => s.trim()).filter(Boolean) : []
     };
@@ -109,8 +114,14 @@ export default function Dashboard() {
       await base44.entities.Event.update(editingId, data);
       toast({ title: "Event updated" });
     } else {
-      await base44.entities.Event.create(data);
+      const created = await base44.entities.Event.create(data);
       toast({ title: "Event created!", description: "Your event is now live." });
+      setCreatedEvent({
+        id: created.id,
+        title: created.title,
+        visibility: created.visibility,
+        date: created.date
+      });
     }
     setSaving(false);
     setCreateOpen(false);
@@ -132,6 +143,7 @@ export default function Dashboard() {
       festcoin_reward: event.festcoin_reward?.toString() || "50",
       total_capacity: event.total_capacity?.toString() || "",
       status: event.status || "published",
+      visibility: event.visibility || "public",
       dj_lineup: event.dj_lineup?.join(", ") || ""
     });
     setEditingId(event.id);
@@ -243,6 +255,17 @@ export default function Dashboard() {
                 <Label className="text-xs">DJ Lineup (comma separated)</Label>
                 <Input value={form.dj_lineup} onChange={e => setForm(p => ({...p, dj_lineup: e.target.value}))} className="rounded-xl mt-1" placeholder="DJ Shadow, Amon Tobin" />
               </div>
+              <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
+                <div className="flex-1 mr-3">
+                  <Label className="text-xs">Public event</Label>
+                  <p className="text-[10px] text-[#666] mt-0.5">
+                    {form.visibility === "public"
+                      ? "Appears on event discovery and can be shared publicly."
+                      : "Hidden from public listing. Only people with the link can access."}
+                  </p>
+                </div>
+                <Switch checked={form.visibility === "public"} onCheckedChange={(v) => setForm(p => ({...p, visibility: v ? "public" : "private"}))} />
+              </div>
               <Button onClick={handleSave} disabled={saving || !form.title || !form.date || !form.location_name || !form.ticket_price} className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl">
                 {saving ? "Saving..." : editingId ? "Update Event" : "Publish Event"}
               </Button>
@@ -279,7 +302,7 @@ export default function Dashboard() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888" }} />
               <YAxis tick={{ fontSize: 11, fill: "#888" }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #333", background: "#1a1a1a", color: "#fff", fontSize: 12 }} />
-              <Line type="monotone" dataKey="tickets" stroke="hsl(160 84% 39%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(160 84% 39%)" }} />
+              <Line type="monotone" dataKey="tickets" stroke="hsl(160 84% 42%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(160 84% 42%)" }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -328,6 +351,7 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2 mb-0.5">
                       <h4 className="font-heading font-semibold text-sm text-white truncate">{event.title}</h4>
                       <Badge className={`text-[10px] px-2 py-0 border-0 ${statusColors[event.status]}`}>{event.status}</Badge>
+                      <Badge className={`text-[10px] px-2 py-0 border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>{event.visibility === "private" ? "Private" : "Public"}</Badge>
                     </div>
                     <p className="text-xs text-warmgray">{moment(event.date).format("MMM D, YYYY")} · {event.location_name}</p>
                     <div className="flex items-center gap-3 mt-1.5">
@@ -358,6 +382,32 @@ export default function Dashboard() {
           <InventoryManager events={events} />
         </TabsContent>
       </Tabs>
+
+      {/* Share success dialog */}
+      <Dialog open={!!createdEvent} onOpenChange={(open) => { if (!open) setCreatedEvent(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-primary" strokeWidth={2} />
+              </div>
+              Event created successfully
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#888]">Share your event with your audience and start inviting guests.</p>
+          {createdEvent && (
+            <EventShareButtons
+              eventName={createdEvent.title}
+              eventUrl={`${window.location.origin}/events/${createdEvent.id}`}
+              visibility={createdEvent.visibility}
+              eventDate={createdEvent.date}
+            />
+          )}
+          <Button onClick={() => setCreatedEvent(null)} className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl">
+            Done
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

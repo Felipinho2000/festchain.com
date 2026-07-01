@@ -35,8 +35,9 @@ export default function Events() {
   }, [genre]);
 
   const filtered = events.filter(e =>
-    !search || e.title?.toLowerCase().includes(search.toLowerCase()) ||
-    e.location_name?.toLowerCase().includes(search.toLowerCase())
+    e.visibility !== "private" &&
+    (!search || e.title?.toLowerCase().includes(search.toLowerCase()) ||
+    e.location_name?.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
