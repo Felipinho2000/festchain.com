@@ -11,17 +11,13 @@ const genreLabels = {
   rock: "Rock", sertanejo: "Sertanejo", other: "Other"
 };
 
-// 1 FTC ≈ R$0.50 — so FTC price = BRL / 0.5 = BRL * 2
-const brlToFtc = (brl) => Math.round(brl * 2);
-
 export default function EventCard({ event }) {
   const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
   const soldPct = Math.min(100, Math.round(((event.tickets_sold || 0) / event.total_capacity) * 100));
-  const ftcPrice = event.festcoin_price || brlToFtc(event.ticket_price);
 
   return (
     <Link to={`/events/${event.id}`} className="group block">
-      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_20px_-4px_rgba(17,197,137,0.2)]">
+      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_20px_-4px_rgba(255,85,0,0.2)]">
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
           {event.image_url ? (
@@ -82,21 +78,14 @@ export default function EventCard({ event }) {
           {/* Pricing row */}
           <div className="flex items-end justify-between pt-3 border-t border-border">
             <div>
-              <span className="text-[10px] text-[#555] block mb-0.5">From</span>
-              <div className="flex items-center gap-2">
-                <span className="font-heading font-bold text-white text-sm">
-                  R$ {event.ticket_price?.toFixed(2)}
-                </span>
-                <span className="text-[10px] text-[#555]">or</span>
-                <span className="flex items-center gap-0.5 font-heading font-bold text-primary text-sm">
-                  <Zap className="w-3 h-3" strokeWidth={2} />
-                  {ftcPrice.toLocaleString()} FTC
-                </span>
-              </div>
+              <span className="text-[10px] text-[#555] block mb-0.5">Pilot reservation</span>
+              <span className="font-heading font-bold text-white text-sm">
+                R$ {event.ticket_price?.toFixed(2)}
+              </span>
             </div>
             <div className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-lg">
               <Zap className="w-3 h-3" strokeWidth={2} />
-              +{event.festcoin_reward || 50}
+              +{event.festcoin_reward || 50} FTC pilot reward
             </div>
           </div>
         </div>

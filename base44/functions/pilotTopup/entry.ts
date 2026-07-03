@@ -1,6 +1,6 @@
 // pilotTopup — adds FTC test credits for pilot users.
-// Limits: 500 FTC per request, max 1000 FTC per calendar day per user.
-// No real payment is processed. Credits have no cash value.
+// ADMIN-ONLY during the MVP pilot. Partygoers earn credits from ticket rewards,
+// admin/manual grants, and organizer/brand campaign allocation — not self-topup.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
@@ -8,11 +8,17 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin') {
+      return Response.json({
+        status: 'error',
+        message: 'Pilot top-up is admin-only during the pilot. Credits come from ticket rewards and admin grants.'
+      }, { status: 403 });
+    }
 
     const body = await req.json().catch(() => ({}));
     const amount = Math.min(500, Math.max(1, parseInt(body.amount) || 100));
 
-    // Daily limit check — sum today's confirmed pilot_topup transactions for this user
+    // Daily limit check
     const today = new Date().toISOString().slice(0, 10);
     const existingTopups = await base44.entities.PilotTopup.filter({ created_by_id: user.id }).catch(() => []);
     const todayTotal = existingTopups
@@ -29,7 +35,7 @@ Deno.serve(async (req) => {
 
     const allowed = Math.min(amount, DAILY_LIMIT - todayTotal);
 
-    // Compute current balance from FestCoinTransactions
+    // Compute current balance
     const allTx = await base44.entities.FestCoinTransaction.filter({ created_by_id: user.id }).catch(() => []);
     const validTx = allTx.filter(t => !['cancelled', 'failed'].includes(t.status));
     const currentBalance = validTx.reduce((s, t) => {
@@ -40,8 +46,8 @@ Deno.serve(async (req) => {
 
     const balanceAfter = currentBalance + allowed;
 
-    // Create FestCoinTransaction (type: pilot_topup is stored as "earned" for wallet compat, with description)
-    await base44.entities.FestCoinTransaction.create({
+    // Create FestCoinTransaction (service role to bypass admin-only PilotTopup RLS)
+    await base44.asServiceRole.entities.FestCoinTransaction.create({
       created_by_id: user.id,
       type: 'earned',
       amount: allowed,
@@ -51,8 +57,7 @@ Deno.serve(async (req) => {
       source: 'pilot_beta'
     });
 
-    // Log in PilotTopup for rate-limiting audit
-    await base44.entities.PilotTopup.create({
+    await base44.asServiceRole.entities.PilotTopup.create({
       created_by_id: user.id,
       amount: allowed,
       status: 'confirmed',

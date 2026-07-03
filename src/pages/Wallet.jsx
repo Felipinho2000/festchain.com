@@ -157,14 +157,16 @@ export default function WalletPage() {
           <h1 className="font-heading font-bold text-3xl text-white mb-1">Wallet</h1>
           <p className="text-[#888] text-sm">Your pilot tickets &amp; loyalty credits.</p>
         </div>
-        <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
-          <Zap className="w-3.5 h-3.5" /> Add Pilot Credits
-        </button>
+        {currentUser?.role === "admin" && (
+          <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
+            <Zap className="w-3.5 h-3.5" /> Add Pilot Credits
+          </button>
+        )}
       </div>
 
       {/* Pilot disclaimer */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-[#bbb]">
-        <span className="text-primary font-semibold">Public beta.</span> FestCoin is an in-app loyalty/test credit — no cash value, not an investment, not tradable. <Link to="/legal" className="text-primary hover:underline">Learn more</Link>.
+        <span className="text-primary font-semibold">Public beta.</span> FestCoin is a pilot reward and utility credit used for event perks, loyalty, and future FestChain experiences. During the pilot it has no cash value, is not an investment, and cannot be sold or withdrawn. <Link to="/legal" className="text-primary hover:underline">Learn more</Link>.
       </div>
 
       {showTopup && (

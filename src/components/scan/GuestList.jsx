@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Download, RefreshCw, Ticket as TicketIcon, Check, X } from "lucide-react";
+import { Download, RefreshCw, Ticket as TicketIcon, Check, X, AlertTriangle } from "lucide-react";
 import moment from "moment";
 
 export default function GuestList({ eventId, eventTitle }) {
@@ -68,6 +68,11 @@ export default function GuestList({ eventId, eventTitle }) {
             <Download className="w-3.5 h-3.5" /> Export CSV
           </button>
         </div>
+      </div>
+
+      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-400 flex items-start gap-2">
+        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+        <p>If camera or internet fails, use this guest list and manual code validation.</p>
       </div>
 
       {tickets.length === 0 ? (

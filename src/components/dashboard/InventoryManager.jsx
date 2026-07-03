@@ -66,10 +66,10 @@ export default function InventoryManager({ events }) {
       is_available: form.is_available,
     };
     if (editingId) {
-      await base44.entities.VenueMenuItem.update(editingId, data);
+      await base44.functions.invoke("updateMenuItem", { id: editingId, ...data });
       toast({ title: "Product updated" });
     } else {
-      await base44.entities.VenueMenuItem.create(data);
+      await base44.functions.invoke("createMenuItem", data);
       toast({ title: "Product added to menu" });
     }
     setSaving(false);
@@ -94,13 +94,13 @@ export default function InventoryManager({ events }) {
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.VenueMenuItem.delete(id);
+    await base44.functions.invoke("deleteMenuItem", { id });
     toast({ title: "Product removed" });
     loadItems(selectedEventId);
   };
 
   const toggleAvailability = async (item) => {
-    await base44.entities.VenueMenuItem.update(item.id, { is_available: !item.is_available });
+    await base44.functions.invoke("updateMenuItem", { id: item.id, is_available: !item.is_available });
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_available: !i.is_available } : i));
   };
 

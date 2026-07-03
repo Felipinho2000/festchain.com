@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import EventShareButtons from "@/components/events/EventShareButtons";
+import RedemptionManager from "@/components/dashboard/RedemptionManager";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import moment from "moment";
 
@@ -302,7 +303,7 @@ export default function Dashboard() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#888" }} />
               <YAxis tick={{ fontSize: 11, fill: "#888" }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #333", background: "#1a1a1a", color: "#fff", fontSize: 12 }} />
-              <Line type="monotone" dataKey="tickets" stroke="hsl(160 84% 42%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(160 84% 42%)" }} />
+              <Line type="monotone" dataKey="tickets" stroke="hsl(24 95% 50%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(24 95% 50%)" }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -316,6 +317,9 @@ export default function Dashboard() {
           </TabsTrigger>
           <TabsTrigger value="inventory" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white">
             Inventory
+          </TabsTrigger>
+          <TabsTrigger value="redemptions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white">
+            Redemptions
           </TabsTrigger>
         </TabsList>
 
@@ -380,6 +384,10 @@ export default function Dashboard() {
 
         <TabsContent value="inventory">
           <InventoryManager events={events} />
+        </TabsContent>
+
+        <TabsContent value="redemptions">
+          <RedemptionManager events={events} />
         </TabsContent>
       </Tabs>
 

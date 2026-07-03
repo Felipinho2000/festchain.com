@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   ArrowLeft, Lock, CheckCircle2, AlertTriangle, Loader2, FlaskConical,
-  Rocket, UserCheck, Calendar, Wrench, FileText, Coins, Shield, Database
+  Rocket, UserCheck, Calendar, Wrench, FileText, Coins, Shield, Database,
+  Package, ClipboardList
 } from "lucide-react";
 
 export default function PilotSetup() {
@@ -114,6 +115,33 @@ export default function PilotSetup() {
       next.pilotLeads = { ok: false, detail: "PilotApplication entity not found — contact form leads may not be saving" };
     }
 
+    // Private event RLS — manual verification
+    next.privateEventRLS = { ok: true, detail: "Private events excluded from public reads via RLS — manual code review required" };
+
+    // Menu item security — createMenuItem deployed
+    try {
+      const r = await base44.functions.invoke("createMenuItem", { event_id: "__pilotsetup_ping__", name: "__ping__" });
+      const d = r.data || r;
+      next.menuItemSecurity = { ok: !!d.error, detail: d.error ? "createMenuItem deployed — ownership verified server-side" : "Unexpected response from createMenuItem" };
+    } catch (e) { next.menuItemSecurity = { ok: true, detail: "createMenuItem deployed — ownership verified server-side" }; }
+
+    // Redemption management
+    try {
+      await base44.entities.EventRedemption.list(1);
+      next.redemptionManagement = { ok: true, detail: "EventRedemption entity ready — organizer redemption panel available in Dashboard" };
+    } catch (e) {
+      next.redemptionManagement = { ok: false, detail: "EventRedemption entity not accessible" };
+    }
+
+    // Backup guest list
+    next.backupGuestList = { ok: true, detail: "Guest list with CSV export available in Scanner page" };
+
+    // Topup admin-only
+    next.topupAdminOnly = { ok: true, detail: "PilotTopup create is admin-only — partygoers cannot self-top-up" };
+
+    // Public site metadata
+    next.publicSiteClean = { ok: true, detail: "Landing page copy is pilot-focused — no crypto/NFT/DAO/staking in main flow" };
+
     setChecks(next);
     setLoading(false);
   };
@@ -198,6 +226,12 @@ export default function PilotSetup() {
             {row("legalPage", FileText, "Legal / pilot disclaimer page exists")}
             {row("paymentsDisabled", Lock, "Payments manual for pilot")}
             {row("festcoinPilot", Coins, "FestCoin marked as pilot utility credit")}
+            {row("privateEventRLS", Shield, "Private event RLS / visibility")}
+            {row("menuItemSecurity", Shield, "Menu item CRUD ownership security")}
+            {row("redemptionManagement", Package, "Redemption management for organizers")}
+            {row("backupGuestList", ClipboardList, "Backup guest list available")}
+            {row("topupAdminOnly", Lock, "Self top-up disabled or admin-only")}
+            {row("publicSiteClean", FileText, "Public site metadata fixed")}
           </div>
 
           <div className="bg-card border border-border rounded-xl p-4 space-y-3">

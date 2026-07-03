@@ -28,7 +28,7 @@ export const translations = {
     ftc: {
       topupTitle: "Get FTC Test Credits",
       topupSubtitle: "Add pilot FTC credits for beta testing. No real payment. No cash value.",
-      disclaimer: "FTC pilot credits are for beta testing only. No real payment is processed. FTC has no cash value, no investment value, and no guaranteed future value.",
+      disclaimer: "FestCoin is a pilot reward and utility credit used for event perks, loyalty, and future FestChain experiences. During the pilot it has no cash value, is not an investment, and cannot be sold or withdrawn.",
       amount100: "100 FTC",
       amount250: "250 FTC",
       amount500: "500 FTC",
@@ -71,7 +71,7 @@ export const translations = {
       hero: {
         badge: "Pilot Access · Launching with Selected Organizers & DJs",
         title: "Smarter events for organizers, DJs, brands, and partygoers.",
-        sub: "FestChain helps organizers sell tickets, validate guests with QR code, reward attendees with FestCoin, and create more connected event experiences.",
+        sub: "FestChain helps organizers run pilot events with QR tickets, fast check-in, and FestCoin pilot rewards.",
         joinPilot: "Join the Pilot",
         forOrganizers: "I'm an Organizer",
         forDJs: "I'm a DJ",
@@ -514,7 +514,7 @@ export const translations = {
     ftc: {
       topupTitle: "Obter Créditos FTC de Teste",
       topupSubtitle: "Adicione créditos FTC do piloto para testes beta. Sem pagamento real. Sem valor em dinheiro.",
-      disclaimer: "Os créditos FTC do piloto são apenas para testes beta. Nenhum pagamento real é processado. O FTC não tem valor em dinheiro, valor de investimento nem valor futuro garantido.",
+      disclaimer: "FestCoin é um crédito de recompensa e utilidade do piloto usado para benefícios de eventos, fidelidade e futuras experiências FestChain. Durante o piloto não tem valor em dinheiro, não é um investimento e não pode ser vendido ou retirado.",
       amount100: "100 FTC",
       amount250: "250 FTC",
       amount500: "500 FTC",
@@ -556,7 +556,7 @@ export const translations = {
       hero: {
         badge: "Acesso Piloto · Lançando com Organizadores e DJs Selecionados",
         title: "Eventos mais inteligentes para organizadores, DJs, marcas e participantes.",
-        sub: "O FestChain ajuda organizadores a vender ingressos, validar convidados com QR code, recompensar participantes com FestCoin e criar experiências de eventos mais conectadas.",
+        sub: "O FestChain ajuda organizadores a rodar eventos piloto com ingressos QR, check-in rápido e recompensas FestCoin piloto.",
         joinPilot: "Participar do Piloto",
         forOrganizers: "Sou Organizador",
         forDJs: "Sou DJ",
