@@ -105,10 +105,24 @@
     "read": {
       "$or": [
         {
-          "data.status": "published"
+          "$and": [
+            {
+              "data.status": "published"
+            },
+            {
+              "data.visibility": "public"
+            }
+          ]
         },
         {
-          "data.status": "live"
+          "$and": [
+            {
+              "data.status": "live"
+            },
+            {
+              "data.visibility": "public"
+            }
+          ]
         },
         {
           "created_by_id": "{{user.id}}"
