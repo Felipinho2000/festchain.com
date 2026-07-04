@@ -17,13 +17,10 @@ const BADGE_DEFS = [
   { key: "ten_events", emoji: "💎", name: "Festival Veteran", desc: "Attended 10 events" },
   { key: "twenty_events", emoji: "👑", name: "Party Royalty", desc: "Attended 20 events" },
   { key: "first_moment", emoji: "📸", name: "Moment Maker", desc: "Shared your first moment" },
-  { key: "tip_sender", emoji: "⚡", name: "FTC Tipper", desc: "Sent FTC to another raver" },
-  { key: "poap_collector", emoji: "🏆", name: "POAP Collector", desc: "Collected a POAP NFT" },
   { key: "night_owl", emoji: "🦉", name: "Night Owl", desc: "Attended a late-night event" },
   { key: "genre_techno", emoji: "🤖", name: "Techno Head", desc: "Attended a techno event" },
   { key: "genre_house", emoji: "🏠", name: "House Lover", desc: "Attended a house event" },
   { key: "festcoin_holder", emoji: "🪙", name: "FTC Holder", desc: "Hold 1000+ FTC" },
-  { key: "social_butterfly", emoji: "🦋", name: "Social Butterfly", desc: "Have 5+ connections" },
 ];
 
 export default function Profile() {
@@ -249,7 +246,6 @@ export default function Profile() {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] text-[#555] uppercase">{t.ticket_type || "General"}</p>
-                  {t.poap_minted && <span className="text-[10px] text-primary">🏆 POAP</span>}
                 </div>
               </div>
             ))

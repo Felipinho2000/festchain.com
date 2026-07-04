@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
       const qr = `FC-DEMO-${event.id}-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 8)}`;
       await base44.asServiceRole.entities.Ticket.create({
         event_id: event.id,
+        organizer_id: String(user.id),
         event_title: event.title,
         event_date: event.date,
         event_location: event.location_name,

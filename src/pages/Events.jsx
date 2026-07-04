@@ -26,7 +26,7 @@ export default function Events() {
   const [genre, setGenre] = useState("all");
 
   useEffect(() => {
-    const query = { status: "published" };
+    const query = { status: "published", visibility: "public" };
     if (genre !== "all") query.genre = genre;
     base44.entities.Event.filter(query, "-date", 50)
       .then(setEvents)

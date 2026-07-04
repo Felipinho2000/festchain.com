@@ -20,7 +20,6 @@ import Home from '@/pages/Home';
 import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
 import WalletPage from '@/pages/Wallet';
-import FestCoin from '@/pages/FestCoin';
 import Dashboard from '@/pages/Dashboard';
 import BuyFTC from '@/pages/BuyFTC';
 import Profile from '@/pages/Profile';

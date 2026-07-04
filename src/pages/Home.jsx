@@ -49,7 +49,7 @@ export default function Home() {
         <div className="relative max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            Public Beta · QR Ticketing
+            Private Pilot · QR Ticketing
           </div>
           <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4">
             Secure QR tickets.<br />

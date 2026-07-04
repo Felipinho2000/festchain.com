@@ -11,8 +11,6 @@ import moment from "moment";
 const typeConfig = {
   earned: { icon: ArrowDownRight, color: "text-emerald-400", bg: "bg-emerald-900/30", label: "Earned" },
   spent: { icon: ArrowUpRight, color: "text-red-400", bg: "bg-red-900/20", label: "Spent" },
-  staked: { icon: Lock, color: "text-primary", bg: "bg-primary/20", label: "Staked" },
-  unstaked: { icon: Lock, color: "text-[#888]", bg: "bg-[#222]", label: "Unstaked" },
   transferred_in: { icon: ArrowDownRight, color: "text-blue-400", bg: "bg-blue-900/20", label: "Received" },
   transferred_out: { icon: ArrowUpRight, color: "text-primary", bg: "bg-primary/15", label: "Sent" }
 };
@@ -40,7 +38,7 @@ export default function FestCoin() {
   const maxEarned = Math.max(totalEarned, 1);
   const tierThresholds = [
     { label: "Holder Perk: Priority Access", target: 1000, color: "bg-primary" },
-    { label: "Holder Perk: VIP Backstage NFT", target: 5000, color: "bg-orange-400" },
+    { label: "Holder Perk: VIP Access", target: 5000, color: "bg-orange-400" },
     { label: "Holder Perk: Lifetime Pass", target: 20000, color: "bg-yellow-400" },
   ];
   const nextTier = tierThresholds.find(t => balance < t.target);
@@ -53,7 +51,7 @@ export default function FestCoin() {
           <p className="text-[#888] text-sm">Your event balance — use it to buy tickets and pre-order at the venue.</p>
         </div>
         <a href="/buy-ftc" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
-          <Zap className="w-4 h-4" /> Add Balance
+          <Zap className="w-4 h-4" /> About FestCoin Credits
         </a>
       </div>
 
@@ -160,7 +158,7 @@ export default function FestCoin() {
             <Zap className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
             <p className="text-[#666] text-sm">No transactions yet. Add balance or buy a ticket to get started.</p>
             <a href="/buy-ftc" className="inline-flex items-center gap-1.5 mt-4 bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl">
-              <Zap className="w-3.5 h-3.5" /> Add Balance
+              <Zap className="w-3.5 h-3.5" /> About FestCoin Credits
             </a>
           </div>
         ) : (
