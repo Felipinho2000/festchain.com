@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/components/shared/Logo";
 import LandingFAQ from "@/components/landing/LandingFAQ";
-import CinematicVideoSection from "@/components/landing/CinematicVideoSection";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const HOW_ICONS = [LayoutDashboard, Ticket, QrCode, Wallet];
@@ -45,7 +44,7 @@ export default function Landing() {
       });
       // Send email notification (best-effort, don't fail on it)
       base44.integrations.Core.SendEmail({
-        to: "hello@festchain.com",
+        to: "feelipe.oliveeira@hotmail.com",
         subject: `Pilot application — ${form.name}${form.role ? ` (${form.role})` : ""}`,
         body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
       }).catch(() => {});
@@ -163,9 +162,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      {/* ── CINEMATIC VIDEO ── */}
-      <CinematicVideoSection />
 
       {/* ── WHAT IS FESTCHAIN ── */}
       <section className="py-12 px-5 bg-[#111]">
