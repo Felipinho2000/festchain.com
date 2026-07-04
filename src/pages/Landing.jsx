@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/components/shared/Logo";
 import LandingFAQ from "@/components/landing/LandingFAQ";
+import CinematicVideoSection from "@/components/landing/CinematicVideoSection";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const HOW_ICONS = [LayoutDashboard, Ticket, QrCode, Wallet];
@@ -162,6 +163,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ── CINEMATIC VIDEO ── */}
+      <CinematicVideoSection />
 
       {/* ── WHAT IS FESTCHAIN ── */}
       <section className="py-12 px-5 bg-[#111]">
