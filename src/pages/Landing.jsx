@@ -5,8 +5,8 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard,
-  Mail, MapPin, Send, Check, ChevronRight, Menu, X, Target,
-  Music, Star, Building2, Users, ArrowRight,
+  Mail, MapPin, Send, Check, ChevronRight, Menu, X, ArrowRight,
+  Music, Users, Building2, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -14,63 +14,58 @@ import Logo from "@/components/shared/Logo";
 import LandingFAQ from "@/components/landing/LandingFAQ";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
-const HOW_ICONS = [LayoutDashboard, Ticket, QrCode, Wallet];
+const STEP_ICONS = [Music, Ticket, Sparkles, Wallet];
 
 export default function Landing() {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const { currentUser } = useAuth();
   const authed = !!currentUser;
-  const isOrganizer = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
   const { toast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", message: "", role: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "", role: "Organizer" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const partygoerTo = authed ? "/events" : "/register";
+  const findEventsTo = authed ? "/events" : "/register";
+  const createEventTo = authed ? "/dashboard" : "/register";
 
   const handleContact = async (e) => {
     e.preventDefault();
     setSending(true);
     try {
-      // Save lead to database first — this is the source of truth
       await base44.entities.PilotApplication.create({
-        name: form.name,
-        email: form.email,
-        role: form.role || "",
-        message: form.message,
-        status: "new",
-        source: "landing_form"
+        name: form.name, email: form.email, role: form.role || "",
+        message: form.message, status: "new", source: "landing_form"
       });
-      // Send email notification (best-effort, don't fail on it)
       base44.integrations.Core.SendEmail({
         to: "feelipe.oliveeira@hotmail.com",
         subject: `Pilot application — ${form.name}${form.role ? ` (${form.role})` : ""}`,
         body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
       }).catch(() => {});
       setSent(true);
-      toast({ title: t("landing.contact.sentTitle"), description: t("landing.contact.sentSub") });
+      toast({ title: "Application sent!", description: "We'll be in touch soon." });
     } catch (err) {
-      toast({ title: "Error", description: "Could not submit your application. Please try again.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not submit. Please try again.", variant: "destructive" });
     } finally {
       setSending(false);
     }
   };
 
+  const steps = [
+    { title: "Discover or create a party", desc: "Find live events near you, or launch your own in minutes." },
+    { title: "Get a secure QR ticket", desc: "Reserve your spot. Each ticket has a unique QR code for entry." },
+    { title: "Earn FestCoin rewards", desc: "Show up, get rewarded. FestCoin lands in your balance after check-in." },
+    { title: "Redeem perks inside", desc: "Use FestCoin for drinks, VIP access, and perks at the event." },
+  ];
+
   const NavLinks = ({ onClick }) => (
     <>
-      <a href="#how" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.howItWorks")}</a>
-      <a href="#audiences" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.audiences")}</a>
-      <a href="#roadmap" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.roadmap")}</a>
-      <a href="#contact" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.contact")}</a>
-      <Link to="/legal" onClick={onClick} className="hover:text-white transition-colors">{t("landing.nav.legal")}</Link>
+      <a href="#how" onClick={onClick} className="hover:text-white transition-colors">How it works</a>
+      <a href="#audiences" onClick={onClick} className="hover:text-white transition-colors">For You</a>
+      <Link to="/legal" onClick={onClick} className="hover:text-white transition-colors">Trust &amp; Safety</Link>
+      <a href="#contact" onClick={onClick} className="hover:text-white transition-colors">Create Event</a>
     </>
   );
-
-  const audiences = t("landing.audiences.cards");
-  const howSteps = t("landing.how.steps");
-  const trustPills = t("landing.hero.trustPills");
-  const phases = t("landing.roadmap.phases");
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white font-body">
@@ -85,13 +80,13 @@ export default function Landing() {
             {authed ? (
               <Link to="/events">
                 <Button className="hidden sm:flex bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold">
-                  {t("landing.nav.launchApp")} <ChevronRight className="w-4 h-4 ml-1" />
+                  Find Events <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             ) : (
               <Link to="/register" className="hidden sm:block">
                 <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold">
-                  {t("landing.hero.joinPilot")}
+                  Join the Pilot
                 </Button>
               </Link>
             )}
@@ -104,72 +99,46 @@ export default function Landing() {
           <div className="md:hidden border-t border-[#1f1f1f] px-5 py-4 flex flex-col gap-3 text-sm text-[#888]">
             <NavLinks onClick={() => setMenuOpen(false)} />
             <Link to={authed ? "/events" : "/register"} onClick={() => setMenuOpen(false)} className="text-primary font-semibold">
-              {authed ? t("landing.nav.launchApp") : t("landing.hero.joinPilot")}
+              {authed ? "Find Events" : "Join the Pilot"}
             </Link>
           </div>
         )}
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-32 pb-16 px-5 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/6 rounded-full blur-3xl pointer-events-none" />
+      <section className="pt-36 pb-20 px-5 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[700px] bg-primary/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-3xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-4 py-2 rounded-full mb-7 uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            {t("landing.hero.badge")}
+            Private Pilot · Now Onboarding
           </div>
-          <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight mb-5">
-            Sell tickets. Scan guests. Reward your crowd.
+          <h1 className="font-heading font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.02] tracking-tight mb-6">
+            The new way<br />to <span className="text-primary">party.</span>
           </h1>
-          <p className="text-[#aaa] text-base sm:text-lg leading-relaxed mb-9 max-w-2xl mx-auto">
-            FestChain helps organizers run pilot events with QR tickets, fast check-in, and FestCoin pilot rewards.
+          <p className="text-[#aaa] text-base sm:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
+            Discover events, enter with secure tickets, earn FestCoin rewards, and unlock perks inside the party.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
-            <a href="#contact">
-              <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-base">
-                Join the Pilot <ArrowRight className="w-5 h-5 ml-1" />
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-10">
+            <Link to={findEventsTo}>
+              <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white h-12 px-8 rounded-xl font-bold text-base">
+                <Ticket className="w-5 h-5 mr-2" strokeWidth={2} /> Find Events
               </Button>
-            </a>
-            <a href="#contact" onClick={() => setForm(f => ({ ...f, role: "Organizer" }))}>
-              <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                I'm an Organizer
+            </Link>
+            <Link to={createEventTo}>
+              <Button variant="outline" className="w-full sm:w-auto h-12 px-7 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
+                <LayoutDashboard className="w-5 h-5 mr-2" strokeWidth={2} /> Create Event
               </Button>
-            </a>
-            <a href="#contact" onClick={() => setForm(f => ({ ...f, role: "DJ" }))}>
-              <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                I'm a DJ
-              </Button>
-            </a>
-            <a href="#contact" onClick={() => setForm(f => ({ ...f, role: "Brand" }))}>
-              <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                I'm a Brand
-              </Button>
-            </a>
+            </Link>
           </div>
-
-          {!authed && (
-            <p className="text-sm text-[#666] mb-8">
-              {t("landing.hero.already")}{" "}
-              <Link to="/login" className="text-primary hover:underline font-medium">{t("landing.cta.login")}</Link>
-            </p>
-          )}
 
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#666]">
-            {trustPills.map((p, i) => (
-              <span key={i} className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> {p}</span>
-            ))}
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Secure QR tickets</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Real rewards</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Fast check-in</span>
           </div>
-        </div>
-      </section>
-
-      {/* ── WHAT IS FESTCHAIN ── */}
-      <section className="py-12 px-5 bg-[#111]">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.whatIs.kicker")}</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-4">{t("landing.whatIs.title")}</h2>
-          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed mb-4">{t("landing.whatIs.short")}</p>
-          <p className="text-[#777] text-sm leading-relaxed">{t("landing.whatIs.long")}</p>
         </div>
       </section>
 
@@ -177,22 +146,21 @@ export default function Landing() {
       <section id="how" className="py-16 px-5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.how.kicker")}</p>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-2">{t("landing.how.title")}</h2>
-            <p className="text-[#888] text-sm">{t("landing.how.subtitle")}</p>
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">How it works</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">Your night, in four steps.</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {howSteps.map((step, i) => {
-              const Icon = HOW_ICONS[i] || Ticket;
+            {steps.map((step, i) => {
+              const Icon = STEP_ICONS[i];
               return (
-                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 hover:border-primary/30 transition-all relative">
-                  <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-primary">{i + 1}</span>
+                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 hover:border-primary/30 transition-all relative">
+                  <div className="absolute top-5 right-5 w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">{i + 1}</span>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
+                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
                     <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
                   </div>
-                  <h3 className="font-heading font-bold text-white text-sm mb-1.5">{step.title}</h3>
+                  <h3 className="font-heading font-bold text-white text-base mb-1.5">{step.title}</h3>
                   <p className="text-[#888] text-sm leading-relaxed">{step.desc}</p>
                 </div>
               );
@@ -204,183 +172,119 @@ export default function Landing() {
       {/* ── AUDIENCES ── */}
       <section id="audiences" className="py-16 px-5 bg-[#111]">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.audiences.kicker")}</p>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white">{t("landing.audiences.title")}</h2>
+          <div className="text-center mb-12">
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">Built for the night</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">One app. Two sides of the party.</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {audiences.map((card, i) => {
-              const icons = [LayoutDashboard, Music, Building2, Users];
-              const Icon = icons[i] || Ticket;
-              const to = i === 3 ? partygoerTo : (authed && isOrganizer ? "/dashboard" : "/register");
-              return (
-                <div key={i} className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-7 hover:border-primary/30 transition-all flex flex-col">
-                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
-                    <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="font-heading font-bold text-white text-xl mb-2">{card.name}</h3>
-                  <p className="text-[#888] text-sm leading-relaxed mb-5 flex-1">{card.desc}</p>
-                  <Link to={i === 3 ? partygoerTo : "/register"} className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
-                    {card.cta} <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHAT WORKS ── */}
-      <section id="works" className="py-16 px-5">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.works.kicker")}</p>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-2">{t("landing.works.title")}</h2>
-            <p className="text-[#888] text-sm">{t("landing.works.subtitle")}</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {t("landing.works.items").map((f, i) => {
-              const icons = [Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard];
-              const Icon = icons[i] || Ticket;
-              return (
-                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-5 hover:border-primary/30 transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="font-heading font-bold text-white text-base mb-1.5">{f.title}</h3>
-                  <p className="text-[#888] text-sm leading-relaxed">{f.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── ROADMAP ── */}
-      <section id="roadmap" className="py-16 px-5 bg-[#111]">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.roadmap.kicker")}</p>
-            <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-2">{t("landing.roadmap.title")}</h2>
-            <p className="text-[#888] text-sm">{t("landing.roadmap.subtitle")}</p>
-          </div>
-          <div className="relative">
-            <div className="absolute left-4 top-3 bottom-3 w-px bg-[#222]" />
-            <div className="space-y-6">
-              {phases.map((phase, i) => {
-                const styles = {
-                  live:    { dot: "bg-primary", label: "Live",    cls: "text-primary bg-primary/10 border-primary/30" },
-                  next:    { dot: "bg-amber-400", label: "Next",  cls: "text-amber-400 bg-amber-400/10 border-amber-400/30" },
-                  planned: { dot: "bg-[#555]", label: "Planned",  cls: "text-[#888] bg-[#1a1a1a] border-[#333]" },
-                  vision:  { dot: "bg-purple-500", label: "Vision", cls: "text-purple-400 bg-purple-900/20 border-purple-700/30" },
-                };
-                const s = styles[phase.status] || styles.planned;
-                return (
-                  <div key={i} className="relative pl-12">
-                    <div className={`absolute left-[13px] top-3 w-3 h-3 rounded-full border-2 border-[#0d0d0d] ${s.dot}`} />
-                    <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-5 hover:border-primary/20 transition-all">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <h3 className="font-heading font-bold text-white text-sm">{phase.label}</h3>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${s.cls}`}>{s.label}</span>
-                      </div>
-                      <p className="text-[#888] text-sm leading-relaxed">{phase.items}</p>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-8 hover:border-primary/30 transition-all flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
+                <Users className="w-6 h-6 text-primary" strokeWidth={1.5} />
+              </div>
+              <h3 className="font-heading font-bold text-white text-2xl mb-2">For Partygoers</h3>
+              <p className="text-[#888] text-sm leading-relaxed mb-6 flex-1">
+                Find parties, get secure QR tickets, skip the line at the door, and earn FestCoin rewards every time you show up.
+              </p>
+              <Link to={findEventsTo} className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
+                Find Events <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-8 hover:border-primary/30 transition-all flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
+                <Building2 className="w-6 h-6 text-primary" strokeWidth={1.5} />
+              </div>
+              <h3 className="font-heading font-bold text-white text-2xl mb-2">For Organizers</h3>
+              <p className="text-[#888] text-sm leading-relaxed mb-6 flex-1">
+                Create your party, sell tickets, scan guests at the door, and reward your crowd with FestCoin — all from one dashboard.
+              </p>
+              <Link to={createEventTo} className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
+                Create Event <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── MISSION ── */}
-      <section id="mission" className="py-16 px-5">
+      {/* ── TRUST STRIP ── */}
+      <section className="py-14 px-5">
         <div className="max-w-3xl mx-auto text-center">
           <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
-            <Target className="w-6 h-6 text-primary" strokeWidth={1.5} />
+            <ShieldCheck className="w-6 h-6 text-primary" strokeWidth={1.5} />
           </div>
-          <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.mission.kicker")}</p>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-4">{t("landing.mission.title")}</h2>
-          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed">{t("landing.mission.body")}</p>
+          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">Secure by design.</h2>
+          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-2">
+            Every ticket carries a unique QR code with secure ticket validation powered by blockchain technology — so no fakes, no doubles, no hassle at the door.
+          </p>
+          <Link to="/legal" className="inline-block mt-3 text-primary text-sm hover:underline font-medium">
+            Read our Trust &amp; Safety promise →
+          </Link>
         </div>
       </section>
 
-      {/* ── PILOT CTA ── */}
+      {/* ── CTA ── */}
       <section className="py-16 px-5 bg-[#111]">
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-[#0d0d0d] border border-primary/25 p-8 sm:p-12 text-center">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/12 to-[#0d0d0d] border border-primary/25 p-8 sm:p-12 text-center">
             <div className="absolute top-0 right-0 w-72 h-72 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
             <div className="relative">
               <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-[10px] font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-widest">
-                <Star className="w-3 h-3" /> {t("landing.pilotCta.badge")}
+                <Star className="w-3 h-3" /> Join the Pilot
               </div>
-              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">{t("landing.pilotCta.title")}</h2>
-              <p className="text-[#888] text-sm sm:text-base leading-relaxed mb-8 max-w-2xl mx-auto">{t("landing.pilotCta.sub")}</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                <Link to={authed ? "/events" : "/register"}>
+              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white mb-3">Your ticket. Your rewards. Your night.</h2>
+              <p className="text-[#888] text-sm sm:text-base leading-relaxed mb-8 max-w-2xl mx-auto">
+                FestChain is running a private pilot. Be among the first to party with secure tickets and real rewards.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Link to={findEventsTo}>
                   <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-base">
-                    {t("landing.hero.joinPilot")} <ArrowRight className="w-5 h-5 ml-1" />
+                    Find Events <ArrowRight className="w-5 h-5 ml-1" />
                   </Button>
                 </Link>
                 <a href="#contact">
-                  <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                    {t("landing.hero.forOrganizers")}
-                  </Button>
-                </a>
-                <a href="#contact">
-                  <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                    {t("landing.hero.forDJs")}
-                  </Button>
-                </a>
-                <a href="#contact">
-                  <Button variant="outline" className="h-12 px-5 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                    {t("landing.hero.forBrands")}
+                  <Button variant="outline" className="h-12 px-6 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
+                    I want to organize
                   </Button>
                 </a>
               </div>
+              {!authed && (
+                <p className="text-sm text-[#666] mt-6">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-primary hover:underline font-medium">Log in</Link>
+                </p>
+              )}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── BETA DISCLAIMER ── */}
-      <section className="py-10 px-5">
-        <div className="max-w-3xl mx-auto bg-primary/5 border border-primary/25 rounded-2xl p-6 text-center">
-          <ShieldCheck className="w-7 h-7 text-primary mx-auto mb-3" strokeWidth={1.5} />
-          <h3 className="font-heading font-bold text-white text-lg mb-2">{t("landing.disclaimer.title")}</h3>
-          <p className="text-[#aaa] text-sm leading-relaxed max-w-xl mx-auto">{t("beta.disclaimer")}</p>
-          <Link to="/legal" className="inline-block mt-3 text-primary text-sm hover:underline">{t("landing.disclaimer.readMore")}</Link>
         </div>
       </section>
 
       {/* ── CONTACT ── */}
-      <section id="contact" className="py-16 px-5 bg-[#111]">
+      <section id="contact" className="py-16 px-5">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{t("landing.contact.kicker")}</p>
-            <h2 className="font-heading font-bold text-2xl text-white mb-2">{t("landing.contact.title")}</h2>
-            <p className="text-[#888] text-sm">{t("landing.contact.subtitle")}</p>
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">Get in touch</p>
+            <h2 className="font-heading font-bold text-3xl text-white mb-2">Want to run a pilot event?</h2>
+            <p className="text-[#888] text-sm">Tell us about your party. We onboard organizers for the private pilot.</p>
           </div>
           {sent ? (
             <div className="bg-primary/10 border border-primary/30 rounded-2xl p-8 text-center">
               <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-7 h-7 text-primary" strokeWidth={2} />
               </div>
-              <h3 className="font-heading font-bold text-white text-lg mb-2">{t("landing.contact.sentTitle")}</h3>
-              <p className="text-[#888] text-sm">{t("landing.contact.sentSub")}</p>
+              <h3 className="font-heading font-bold text-white text-lg mb-2">Application sent!</h3>
+              <p className="text-[#888] text-sm">We'll be in touch soon.</p>
             </div>
           ) : (
-            <form onSubmit={handleContact} className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8 space-y-4">
+            <form onSubmit={handleContact} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{t("landing.contact.nameL")}</label>
+                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">Name</label>
                   <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                    className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder={t("landing.contact.namePh")} />
+                    className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder="Your name" />
                 </div>
                 <div>
-                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{t("landing.contact.emailL")}</label>
+                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">Email</label>
                   <input required type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                    className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder={t("landing.contact.emailPh")} />
+                    className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder="you@email.com" />
                 </div>
               </div>
               <div>
@@ -388,25 +292,25 @@ export default function Landing() {
                 <div className="flex flex-wrap gap-2">
                   {["Organizer", "DJ", "Brand", "Partygoer", "Investor"].map(r => (
                     <button key={r} type="button" onClick={() => setForm(p => ({ ...p, role: r }))}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${form.role === r ? "bg-primary/20 border-primary text-primary" : "bg-[#111] border-[#2a2a2a] text-[#666] hover:border-primary/50 hover:text-white"}`}>
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${form.role === r ? "bg-primary/20 border-primary text-primary" : "bg-[#0d0d0d] border-[#2a2a2a] text-[#666] hover:border-primary/50 hover:text-white"}`}>
                       {r}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{t("landing.contact.msgL")}</label>
+                <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">Message</label>
                 <textarea required value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} rows={3}
-                  className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors resize-none" placeholder={t("landing.contact.msgPh")} />
+                  className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors resize-none" placeholder="Tell us about your event or idea..." />
               </div>
               <Button type="submit" disabled={sending || !form.name || !form.email} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-base">
-                {sending ? t("landing.contact.sending") : t("landing.contact.send")} <Send className="w-4 h-4 ml-2" />
+                {sending ? "Sending..." : "Send Application"} <Send className="w-4 h-4 ml-2" />
               </Button>
             </form>
           )}
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center text-sm text-[#888]">
-            <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> {t("landing.contact.emailVal")}</span>
-            <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {t("landing.contact.locale")}</span>
+            <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> feelipe.oliveeira@hotmail.com</span>
+            <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> São Paulo, BR</span>
           </div>
         </div>
       </section>
@@ -418,11 +322,10 @@ export default function Landing() {
       <footer className="py-10 px-5 border-t border-[#1f1f1f] bg-[#0d0d0d]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5">
           <Link to="/"><Logo size={24} /></Link>
-          <p className="text-[#555] text-xs text-center max-w-md">{t("landing.footer.rights")}</p>
+          <p className="text-[#555] text-xs text-center max-w-md">© {new Date().getFullYear()} FestChain. Secure tickets. Real rewards. Better nights.</p>
           <div className="flex items-center gap-4 text-[#777] text-sm">
-            <Link to="/legal" className="hover:text-white transition-colors">{t("landing.footer.legal")}</Link>
-            <a href="#contact" className="hover:text-white transition-colors">{t("landing.footer.contact")}</a>
-            <Link to="/whitepaper" className="hover:text-white transition-colors">{t("landing.footer.whitepaper")}</Link>
+            <Link to="/legal" className="hover:text-white transition-colors">Trust &amp; Safety</Link>
+            <a href="#contact" className="hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>

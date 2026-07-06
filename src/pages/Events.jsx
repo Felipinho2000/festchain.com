@@ -43,8 +43,8 @@ export default function Events() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading font-bold text-3xl text-white mb-1">Discover Events</h1>
-        <p className="text-[#888] text-sm">Find your next pilot event, get a secure QR ticket, and earn FestCoin pilot credits.</p>
+        <h1 className="font-heading font-bold text-3xl text-white mb-1">Find your next party</h1>
+        <p className="text-[#888] text-sm">Secure QR tickets. Real rewards. Better nights.</p>
       </div>
 
       {/* Filters */}
@@ -94,9 +94,9 @@ export default function Events() {
             <p className="text-[#666] text-sm">No events match your filters. Try adjusting your search.</p>
           ) : (
             <>
-              <p className="text-[#888] text-sm font-medium mb-1">First pilot events coming soon</p>
-              <p className="text-[#555] text-sm mb-4">Want to run a pilot event? Get in touch.</p>
-              <a href="/#contact" className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">Contact us →</a>
+              <p className="text-white text-base font-semibold mb-1">No parties live yet.</p>
+              <p className="text-[#666] text-sm mb-4">Create the first FestChain event.</p>
+              <a href="/#contact" className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">Create an event →</a>
             </>
           )}
         </div>

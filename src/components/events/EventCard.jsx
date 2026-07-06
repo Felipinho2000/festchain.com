@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Users, Zap, Music } from "lucide-react";
+import { Calendar, MapPin, Zap, Music, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
 
 const genreLabels = {
@@ -12,8 +13,23 @@ const genreLabels = {
 };
 
 export default function EventCard({ event }) {
+  const { toast } = useToast();
   const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
   const soldPct = Math.min(100, Math.round(((event.tickets_sold || 0) / event.total_capacity) * 100));
+  const sellingFast = soldPct >= 70 && spotsLeft > 0;
+
+  const handleShare = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/events/${event.id}`;
+    if (navigator.share) {
+      navigator.share({ title: event.title, text: `Join me at ${event.title} on FestChain 🎟️`, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        toast({ title: "Event link copied!", description: "Share it on WhatsApp or Instagram." });
+      }).catch(() => {});
+    }
+  };
 
   return (
     <Link to={`/events/${event.id}`} className="group block">
@@ -31,17 +47,38 @@ export default function EventCard({ event }) {
               <Music className="w-10 h-10 text-primary/30" strokeWidth={1.5} />
             </div>
           )}
-          {event.status === "live" && (
-            <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-              LIVE
+
+          {/* Top-left status badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+            {event.status === "live" && (
+              <div className="flex items-center gap-1.5 bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                LIVE
+              </div>
+            )}
+            {sellingFast && event.status !== "live" && (
+              <div className="bg-amber-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">Selling Fast</div>
+            )}
+            <div className={`text-xs font-semibold px-2.5 py-1 rounded-full ${event.visibility === "private" ? "bg-amber-900/80 text-amber-300" : "bg-black/70 text-white backdrop-blur-sm"}`}>
+              {event.visibility === "private" ? "Private" : "Public"}
             </div>
-          )}
-          {event.genre && (
-            <Badge className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs border-0">
-              {genreLabels[event.genre] || event.genre}
-            </Badge>
-          )}
+          </div>
+
+          {/* Top-right: genre + share */}
+          <div className="absolute top-3 right-3 flex items-center gap-1.5">
+            {event.genre && (
+              <Badge className="bg-black/70 backdrop-blur-sm text-white text-xs border-0">
+                {genreLabels[event.genre] || event.genre}
+              </Badge>
+            )}
+            <button
+              onClick={handleShare}
+              className="w-7 h-7 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center justify-center hover:bg-primary transition-colors"
+              aria-label="Share event"
+            >
+              <Share2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -69,7 +106,7 @@ export default function EventCard({ event }) {
             </div>
             <div className="h-1 bg-[#252525] rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary rounded-full transition-all"
+                className={`h-full rounded-full transition-all ${sellingFast ? "bg-amber-500" : "bg-primary"}`}
                 style={{ width: `${soldPct}%` }}
               />
             </div>
@@ -78,14 +115,16 @@ export default function EventCard({ event }) {
           {/* Pricing row */}
           <div className="flex items-end justify-between pt-3 border-t border-border">
             <div>
-              <span className="text-[10px] text-[#555] block mb-0.5">Pilot reservation</span>
+              <span className="text-[10px] text-[#555] block mb-0.5">
+                {event.ticket_price === 0 ? "Free / RSVP" : "Ticket"}
+              </span>
               <span className="font-heading font-bold text-white text-sm">
-                R$ {event.ticket_price?.toFixed(2)}
+                {event.ticket_price === 0 ? "Free" : `R$ ${event.ticket_price?.toFixed(2)}`}
               </span>
             </div>
             <div className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-lg">
               <Zap className="w-3 h-3" strokeWidth={2} />
-              +{event.festcoin_reward || 50} FTC pilot reward
+              +{event.festcoin_reward || 50} FTC
             </div>
           </div>
         </div>

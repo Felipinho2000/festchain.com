@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2 } from "lucide-react";
+import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2, Sparkles } from "lucide-react";
 import EventShareButtons from "@/components/events/EventShareButtons";
 import EventMenuPanel from "@/components/events/EventMenuPanel";
 import { Button } from "@/components/ui/button";
@@ -228,7 +228,11 @@ export default function EventDetail() {
             <div>
               <p className="text-xs text-warmgray mb-1">Pilot Ticket</p>
               <p className="font-heading font-bold text-3xl text-foreground">R$ {event.ticket_price?.toFixed(2)}</p>
-              <p className="text-xs text-warmgray mt-1">Pilot reservation — payment handled manually during MVP.</p>
+              <p className="text-xs text-warmgray mt-1">Secure QR ticket · payment handled manually during pilot.</p>
+              <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
+                <Sparkles className="w-3.5 h-3.5" strokeWidth={2} />
+                +{event.festcoin_reward || 50} FTC reward when you attend
+              </div>
             </div>
 
             <Button
@@ -237,8 +241,11 @@ export default function EventDetail() {
               disabled={spotsLeft <= 0}
             >
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
-              {spotsLeft > 0 ? "Reserve Pilot Ticket" : "Sold Out"}
+              {spotsLeft > 0 ? "Get Ticket" : "Sold Out"}
             </Button>
+            <p className="text-[10px] text-[#666] text-center leading-relaxed">
+              FestCoin rewards are part of the pilot experience and can be used for event perks where available.
+            </p>
             <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
 
             <div className="border-t border-border pt-4">
