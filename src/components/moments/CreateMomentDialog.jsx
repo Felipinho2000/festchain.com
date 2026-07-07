@@ -30,32 +30,27 @@ export default function CreateMomentDialog({ currentUser, onCreated }) {
     if (!form.image) return;
     setPosting(true);
     const alias = aliases[Math.floor(Math.random() * aliases.length)];
-    await base44.entities.Moment.create({
-      image_url: form.image,
-      caption: form.caption,
-      is_anonymous: form.isAnonymous,
-      author_alias: form.isAnonymous ? alias : (currentUser?.full_name || "User"),
-    });
-    await base44.entities.FestCoinTransaction.create({
-      type: "earned",
-      amount: 10,
-      description: "Shared a moment",
-    });
-    // Check badge for first moment
-    const existing = await base44.entities.UserBadge.filter({ created_by_id: currentUser?.id, badge_key: "first_moment" });
-    if (existing.length === 0) {
-      await base44.entities.UserBadge.create({
-        badge_key: "first_moment",
-        badge_name: "Moment Maker",
-        badge_emoji: "📸",
-        badge_description: "Shared your first moment",
+    try {
+      const res = await base44.functions.invoke("createMoment", {
+        image_url: form.image,
+        caption: form.caption,
+        is_anonymous: form.isAnonymous,
+        author_alias: form.isAnonymous ? alias : (currentUser?.full_name || "User"),
       });
+      const data = res.data || res;
+      if (data.status !== "success") {
+        toast({ title: "Error", description: data.message || "Could not share moment", variant: "destructive" });
+        return;
+      }
+      setForm({ caption: "", isAnonymous: true, image: null });
+      setOpen(false);
+      toast({ title: "Moment shared! +10 FTC 🎉", description: "Your moment is now live." });
+      onCreated?.();
+    } catch (e) {
+      toast({ title: "Error", description: e.message || "Could not share moment", variant: "destructive" });
+    } finally {
+      setPosting(false);
     }
-    setForm({ caption: "", isAnonymous: true, image: null });
-    setPosting(false);
-    setOpen(false);
-    toast({ title: "Moment shared! +10 FTC 🎉", description: "Your moment is now live." });
-    onCreated?.();
   };
 
   return (

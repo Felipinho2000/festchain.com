@@ -24,25 +24,24 @@ export default function MomentCard({ m, currentUser, onLike }) {
   const handleTip = async () => {
     if (!finalAmount || finalAmount < 1) return;
     setTipping(true);
-    // Deduct from sender
-    await base44.entities.FestCoinTransaction.create({
-      type: "transferred_out",
-      amount: finalAmount,
-      description: `Tipped ${m.author_alias || "a raver"}`,
-    });
-    // Credit to receiver as FTC credits
-    await base44.entities.FTCTip.create({
-      from_user_id: currentUser.id,
-      to_user_id: m.created_by_id,
-      moment_id: m.id,
-      amount: finalAmount,
-    });
-    // Moment tip counter
-    await base44.entities.Moment.update(m.id, { festcoin_tips: (m.festcoin_tips || 0) + finalAmount });
-    setTipping(false);
-    setTipped(true);
-    setShowTip(false);
-    toast({ title: `⚡ ${finalAmount} FTC sent!`, description: "They can exchange tips for tickets or perks." });
+    try {
+      const res = await base44.functions.invoke("sendMomentTip", {
+        moment_id: m.id,
+        amount: finalAmount,
+      });
+      const data = res.data || res;
+      if (data.status !== "success") {
+        toast({ title: "Could not send tip", description: data.message || "Try again", variant: "destructive" });
+        return;
+      }
+      setTipped(true);
+      setShowTip(false);
+      toast({ title: `⚡ ${finalAmount} FTC sent!`, description: "They can exchange tips for tickets or perks." });
+    } catch (e) {
+      toast({ title: "Could not send tip", description: e.message, variant: "destructive" });
+    } finally {
+      setTipping(false);
+    }
   };
 
   const handleConnect = async () => {
