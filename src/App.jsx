@@ -29,6 +29,7 @@ import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
 import TrustSafety from '@/pages/TrustSafety';
 import TicketDetail from '@/pages/TicketDetail';
+import EventEditor from '@/pages/EventEditor';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -83,6 +84,8 @@ const AuthenticatedApp = () => {
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/events/new" element={<EventEditor />} />
+          <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
           <Route path="/scan" element={<Scan />} />
           <Route path="/pilot-setup" element={<PilotSetup />} />
         </Route>

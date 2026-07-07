@@ -150,9 +150,10 @@ export default function TicketDetail() {
 
           {/* Ticket type + price */}
           <div className="flex items-center justify-between bg-[#111] border border-[#1f1f1f] rounded-xl p-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <TicketIcon className="w-4 h-4 text-primary" strokeWidth={1.5} />
               <span className="text-sm text-white font-medium">{ticketTypeLabels[ticket.ticket_type] || "Ticket"}</span>
+              {ticket.ticket_phase && <Badge className="text-[10px] border-0 bg-primary/15 text-primary">{ticket.ticket_phase}</Badge>}
             </div>
             <span className="text-sm font-heading font-bold text-white">
               {ticket.price_paid === 0 ? "Free / RSVP" : `R$ ${ticket.price_paid?.toFixed(2)}`}

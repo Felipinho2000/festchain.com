@@ -30,6 +30,9 @@
       ],
       "default": "general"
     },
+    "ticket_phase": {
+      "type": "string"
+    },
     "price_paid": {
       "type": "number"
     },

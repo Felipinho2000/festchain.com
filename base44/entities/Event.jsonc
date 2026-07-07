@@ -87,6 +87,75 @@
         "type": "string"
       }
     },
+    "ticket_phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sales_start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sales_end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "festcoin_reward": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "lineup": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "social_link": {
+            "type": "string"
+          },
+          "set_time": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "schedule": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "organizer_name": {
       "type": "string"
     }

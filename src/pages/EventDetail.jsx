@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2, Sparkles } from "lucide-react";
+import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2, Sparkles, Clock, Instagram } from "lucide-react";
 import EventShareButtons from "@/components/events/EventShareButtons";
 import EventMenuPanel from "@/components/events/EventMenuPanel";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,19 @@ const genreLabels = {
   rock: "Rock", sertanejo: "Sertanejo", other: "Other"
 };
 
+function getActivePhase(event) {
+  if (!event.ticket_phases || !event.ticket_phases.length) return null;
+  const now = new Date();
+  return event.ticket_phases.find(p => {
+    if (!p.active) return false;
+    const start = p.sales_start ? new Date(p.sales_start) : null;
+    const end = p.sales_end ? new Date(p.sales_end) : null;
+    if (start && now < start) return false;
+    if (end && now > end) return false;
+    return true;
+  }) || null;
+}
+
 export default function EventDetail() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -30,13 +43,9 @@ export default function EventDetail() {
   const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
-    base44.entities.Event.get(id)
-      .then(setEvent)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    base44.entities.Event.get(id).then(setEvent).catch(() => {}).finally(() => setLoading(false));
   }, [id]);
 
-  // Load FTC balance for menu redemptions
   useEffect(() => {
     if (!currentUser?.id) return;
     base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id })
@@ -67,7 +76,6 @@ export default function EventDetail() {
           };
           localStorage.setItem("fc_tickets", JSON.stringify(cached));
         } catch (_) {}
-        // Badge awarding removed from critical path
         setBuyOpen(false);
         toast({ title: "Ticket secured!", description: `Your ticket for ${event.title} is in your wallet.` });
         setEvent(prev => ({ ...prev, tickets_sold: (prev.tickets_sold || 0) + 1 }));
@@ -101,12 +109,18 @@ export default function EventDetail() {
   }
 
   const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
+  const hasPhases = event.ticket_phases && event.ticket_phases.length > 0;
+  const phase = getActivePhase(event);
+  const reward = phase ? (phase.festcoin_reward ?? event.festcoin_reward ?? 0) : (event.festcoin_reward || 0);
+  const displayPrice = phase ? phase.price : (hasPhases ? null : (event.ticket_price || 0));
+  const canBuy = spotsLeft > 0 && (!hasPhases || !!phase);
+  const lineup = (event.lineup && event.lineup.length) ? event.lineup : (event.dj_lineup || []).map(n => ({ name: n }));
+  const schedule = event.schedule || [];
 
   return (
     <div className="space-y-6">
       <Link to="/events" className="inline-flex items-center gap-2 text-warmgray hover:text-foreground text-sm transition-colors">
-        <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
-        Back to Events
+        <ArrowLeft className="w-4 h-4" strokeWidth={1.5} /> Back to Events
       </Link>
 
       {/* Hero image */}
@@ -120,8 +134,7 @@ export default function EventDetail() {
         )}
         {event.status === "live" && (
           <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-red-500 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            LIVE NOW
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse" /> LIVE NOW
           </div>
         )}
       </div>
@@ -131,45 +144,32 @@ export default function EventDetail() {
         <div className="lg:col-span-2 space-y-6">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              {event.genre && (
-                <Badge variant="secondary" className="text-xs">{genreLabels[event.genre]}</Badge>
-              )}
+              {event.genre && <Badge variant="secondary" className="text-xs">{genreLabels[event.genre]}</Badge>}
               <Badge className={`text-xs border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>
                 {event.visibility === "private" ? "Private Event" : "Public Event"}
               </Badge>
             </div>
             <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-2">{event.title}</h1>
-            {event.organizer_name && (
-              <p className="text-warmgray text-sm">by {event.organizer_name}</p>
-            )}
+            {event.organizer_name && <p className="text-warmgray text-sm">by {event.organizer_name}</p>}
           </div>
 
           <div className="bg-card border border-border rounded-xl p-5 space-y-4">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              </div>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"><Calendar className="w-5 h-5 text-primary" strokeWidth={1.5} /></div>
               <div>
                 <p className="font-medium text-foreground text-sm">{moment(event.date).format("dddd, MMMM D, YYYY")}</p>
-                <p className="text-warmgray text-sm">
-                  {moment(event.date).format("h:mm A")}
-                  {event.end_date && ` – ${moment(event.end_date).format("h:mm A")}`}
-                </p>
+                <p className="text-warmgray text-sm">{moment(event.date).format("h:mm A")}{event.end_date && ` – ${moment(event.end_date).format("h:mm A")}`}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              </div>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"><MapPin className="w-5 h-5 text-primary" strokeWidth={1.5} /></div>
               <div>
                 <p className="font-medium text-foreground text-sm">{event.location_name}</p>
                 {event.location_address && <p className="text-warmgray text-sm">{event.location_address}</p>}
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Users className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              </div>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"><Users className="w-5 h-5 text-primary" strokeWidth={1.5} /></div>
               <div>
                 <p className="font-medium text-foreground text-sm">{event.tickets_sold || 0} / {event.total_capacity} tickets issued</p>
                 <p className="text-warmgray text-sm">{spotsLeft > 0 ? `${spotsLeft} spots remaining` : "Sold out"}</p>
@@ -184,40 +184,64 @@ export default function EventDetail() {
             </div>
           )}
 
-          {event.dj_lineup && event.dj_lineup.length > 0 && (
+          {/* Schedule timeline */}
+          {schedule.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-3">Lineup</h3>
-              <div className="flex flex-wrap gap-2">
-                {event.dj_lineup.map((dj, i) => (
-                  <Badge key={i} variant="outline" className="text-sm py-1.5 px-3">
-                    <Music className="w-3 h-3 mr-1.5" strokeWidth={1.5} />
-                    {dj}
-                  </Badge>
+              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-primary" strokeWidth={1.5} /> Schedule</h3>
+              <div className="space-y-3">
+                {schedule.map((s, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="text-xs font-mono text-primary w-16 flex-shrink-0 pt-0.5">{s.time}</div>
+                    <div className="border-l border-border pl-3 flex-1">
+                      <p className="text-sm text-white font-medium">{s.title}</p>
+                      {s.description && <p className="text-xs text-[#888] mt-0.5">{s.description}</p>}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Pilot Event Menu */}
+          {/* Lineup */}
+          {lineup.length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-5">
+              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Lineup</h3>
+              <div className="space-y-3">
+                {lineup.map((dj, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Music className="w-4 h-4 text-primary" strokeWidth={1.5} /></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-white text-sm">{dj.name}</p>
+                        {dj.set_time && <span className="text-xs text-primary flex items-center gap-1"><Clock className="w-3 h-3" /> {dj.set_time}</span>}
+                      </div>
+                      {dj.bio && <p className="text-xs text-[#888] mt-0.5">{dj.bio}</p>}
+                      {dj.social_link && (
+                        <a href={dj.social_link} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1">
+                          <Instagram className="w-3 h-3" /> {dj.social_link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Event Menu (FestCoin redemptions) */}
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.5} />
-                <h3 className="font-heading font-semibold text-foreground">Event Menu · Pilot</h3>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
+                <h3 className="font-heading font-semibold text-foreground">Drinks &amp; Perks</h3>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">FTC</span>
               </div>
-              <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">
-                {showMenu ? "Hide" : "Show"} menu
-              </button>
+              <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? "Hide" : "Show"}</button>
             </div>
             {showMenu ? (
-              <EventMenuPanel
-                eventId={id}
-                userBalance={userBalance}
-                onRedeemed={(newBal) => setUserBalance(newBal)}
-              />
+              <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} />
             ) : (
-              <p className="text-xs text-[#666]">Use FTC pilot credits to redeem items at this event. No real payment.</p>
+              <p className="text-xs text-[#666]">Use your FestCoin balance to redeem drinks, merch, and VIP perks at this event.</p>
             )}
           </div>
         </div>
@@ -226,38 +250,31 @@ export default function EventDetail() {
         <div className="lg:col-span-1">
           <div className="bg-card border border-border rounded-xl p-5 sticky top-8 space-y-5">
             <div>
-              <p className="text-xs text-warmgray mb-1">Pilot Ticket</p>
-              <p className="font-heading font-bold text-3xl text-foreground">R$ {event.ticket_price?.toFixed(2)}</p>
+              <p className="text-xs text-warmgray mb-1">{phase ? `${phase.name} Phase` : "Pilot Ticket"}</p>
+              {displayPrice !== null ? (
+                <p className="font-heading font-bold text-3xl text-foreground">R$ {displayPrice.toFixed(2)}</p>
+              ) : (
+                <p className="font-heading font-bold text-2xl text-warmgray">Coming soon</p>
+              )}
               <p className="text-xs text-warmgray mt-1">Secure QR ticket · payment handled manually during pilot.</p>
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
-                <Sparkles className="w-3.5 h-3.5" strokeWidth={2} />
-                +{event.festcoin_reward || 50} FTC reward when you attend
+                <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC reward when you attend
               </div>
+              {hasPhases && (
+                <p className="text-[10px] text-[#666] mt-2">Price reflects the current ticket phase and updates automatically as phases open and sell out.</p>
+              )}
             </div>
 
-            <Button
-              className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl"
-              onClick={() => setBuyOpen(true)}
-              disabled={spotsLeft <= 0}
-            >
+            <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={() => setBuyOpen(true)} disabled={!canBuy}>
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
-              {spotsLeft > 0 ? "Get Ticket" : "Sold Out"}
+              {spotsLeft <= 0 ? "Sold Out" : (hasPhases && !phase) ? "Tickets Coming Soon" : "Get Ticket"}
             </Button>
-            <p className="text-[10px] text-[#666] text-center leading-relaxed">
-              FestCoin rewards are part of the pilot experience and can be used for event perks where available.
-            </p>
+            <p className="text-[10px] text-[#666] text-center leading-relaxed">FestCoin rewards are part of the pilot experience and can be used for event perks where available.</p>
             <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
 
             <div className="border-t border-border pt-4">
-              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5">
-                <Share2 className="w-3.5 h-3.5 text-primary" /> Share Event
-              </p>
-              <EventShareButtons
-                eventName={event.title}
-                eventUrl={`${window.location.origin}/events/${event.id}`}
-                visibility={event.visibility}
-                eventDate={event.date}
-              />
+              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-primary" /> Share Event</p>
+              <EventShareButtons eventName={event.title} eventUrl={`${window.location.origin}/events/${event.id}`} visibility={event.visibility} eventDate={event.date} />
             </div>
           </div>
         </div>
@@ -266,25 +283,17 @@ export default function EventDetail() {
       {/* Confirm Ticket Dialog */}
       <Dialog open={buyOpen} onOpenChange={setBuyOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-heading">Confirm your ticket</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle className="font-heading">Confirm your ticket</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray">
+              {phase && <p className="text-foreground font-medium mb-1">{phase.name} phase</p>}
               <p>You'll receive a secure QR ticket in your wallet. <strong className="text-foreground">No real payment is processed during the public beta</strong> — tickets are issued for testing and check-in.</p>
             </div>
-            <Button
-              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl"
-              onClick={handlePurchase}
-              disabled={purchasing}
-            >
+            <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={handlePurchase} disabled={purchasing}>
               {purchasing ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Issuing...
-                </span>
+                <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Issuing...</span>
               ) : (
-                `Reserve Pilot Ticket · R$ ${event.ticket_price?.toFixed(2)}`
+                displayPrice !== null ? `Reserve Ticket · R$ ${displayPrice.toFixed(2)}` : "Reserve Ticket"
               )}
             </Button>
             <p className="text-[10px] text-[#555] text-center">By getting a ticket you accept the <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.</p>

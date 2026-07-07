@@ -55,6 +55,7 @@ Deno.serve(async (req) => {
         event_location: ticket.event_location,
         organizer_id: ticket.organizer_id,
         ticket_type: ticket.ticket_type,
+        ticket_phase: ticket.ticket_phase,
         price_paid: ticket.price_paid,
         payment_method: ticket.payment_method,
         status: ticket.status,
