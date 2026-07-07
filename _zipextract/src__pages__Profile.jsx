@@ -102,6 +102,24 @@ export default function Profile() {
 
       <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
         <div>
+          <p className="text-white text-sm font-medium">Organizer Access</p>
+          <p className="text-[#666] text-xs">
+            {currentUser?.role === "admin" || currentUser?.approved_organizer === true
+              ? "Your organizer tools are enabled for the private pilot."
+              : "Organizer tools are available only for approved organizers."}
+          </p>
+        </div>
+        {(currentUser?.role === "admin" || currentUser?.approved_organizer === true) ? (
+          <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:underline">
+            Go to Dashboard <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        ) : (
+          <Badge className="bg-secondary text-[#888] border-0">Private Pilot</Badge>
+        )}
+      </div>
+
+      <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+        <div>
           <p className="text-white text-sm font-medium">{t("profile.language")}</p>
           <p className="text-[#666] text-xs">{t("profile.languageHint")}</p>
         </div>

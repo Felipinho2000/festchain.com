@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
-  Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard,
+  Ticket, Wallet, ShieldCheck, Sparkles, LayoutDashboard,
   Mail, MapPin, Send, Check, ChevronRight, Menu, X, ArrowRight,
   Music, Users, Building2, Star,
 } from "lucide-react";

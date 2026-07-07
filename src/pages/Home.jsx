@@ -147,7 +147,7 @@ export default function Home() {
               Run check-in<br />at scale.
             </h2>
             <p className="text-[#666] text-sm leading-relaxed mb-5">
-              Create events, issue QR tickets, and scan guests at the door with double-entry protection and a live attendance view — built for the public beta.
+              Create events, issue QR tickets, and scan guests at the door with double-entry protection and a live attendance view — built for the private pilot.
             </p>
             <Link to="/dashboard">
               <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 rounded-xl text-sm">

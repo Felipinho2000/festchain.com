@@ -146,7 +146,6 @@ export default function Scan() {
         </div>
         <h2 className="font-heading font-bold text-2xl text-white mb-2">Organizers only</h2>
         <p className="text-[#888] text-sm mb-2">The scanner is for approved organizers and door staff.</p>
-        <p className="text-[#555] text-xs mb-6">Organizer access is granted manually by the admin team during the private pilot.</p>
         <Link to="/" className="text-primary font-semibold text-sm hover:underline">Back to Home</Link>
       </div>
     );

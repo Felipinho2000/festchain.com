@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   ArrowLeft, Calendar, MapPin, Music, QrCode, Sparkles, Clock,
-  Ticket as TicketIcon, Users, Share2, ShoppingBag, Loader2,
+  Ticket as TicketIcon, Users, Share2, ShoppingBag,
   ShieldCheck, CheckCircle2, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,7 @@ export default function TicketDetail() {
   }
 
   const { ticket, event, perks } = data;
+  const lineup = event ? ((event.lineup && event.lineup.length) ? event.lineup : (event.dj_lineup || []).map(name => ({ name }))) : [];
   const sc = statusConfig[ticket.status] || statusConfig.active;
   const isUsed = ticket.checked_in || ticket.status === "used";
   const effectiveStatus = isUsed && ticket.status === "active" ? "used" : ticket.status;
@@ -203,33 +204,29 @@ export default function TicketDetail() {
             </div>
           )}
 
-          {(() => {
-            const lineup = (event.lineup && event.lineup.length) ? event.lineup : (event.dj_lineup || []).map(name => ({ name }));
-            if (!lineup.length) return null;
-            return (
-              <div className="bg-card border border-border rounded-2xl p-5">
-                <h3 className="font-heading font-semibold text-white text-base mb-3 flex items-center gap-2">
-                  <Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Lineup
-                </h3>
-                <div className="space-y-3">
-                  {lineup.map((dj, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Music className="w-4 h-4 text-primary" strokeWidth={1.5} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-white text-sm">{dj.name}</p>
-                          {dj.set_time && <span className="text-xs text-primary flex items-center gap-1"><Clock className="w-3 h-3" /> {dj.set_time}</span>}
-                        </div>
-                        {dj.bio && <p className="text-xs text-[#888] mt-0.5">{dj.bio}</p>}
-                      </div>
+          {lineup.length > 0 && (
+            <div className="bg-card border border-border rounded-2xl p-5">
+              <h3 className="font-heading font-semibold text-white text-base mb-3 flex items-center gap-2">
+                <Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Lineup
+              </h3>
+              <div className="space-y-3">
+                {lineup.map((dj, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Music className="w-4 h-4 text-primary" strokeWidth={1.5} />
                     </div>
-                  ))}
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium text-white text-sm">{dj.name}</p>
+                        {dj.set_time && <span className="text-xs text-primary flex items-center gap-1"><Clock className="w-3 h-3" /> {dj.set_time}</span>}
+                      </div>
+                      {dj.bio && <p className="text-xs text-[#888] mt-0.5">{dj.bio}</p>}
+                    </div>
+                  </div>
+                ))}
               </div>
-            );
-          })()}
+            </div>
+          )}
 
           {/* Available perks */}
           <div className="bg-card border border-border rounded-2xl p-5">

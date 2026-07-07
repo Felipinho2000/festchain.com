@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
   Ticket, QrCode, Calendar, MapPin, Check, Music, ChevronRight,
-  ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Info, Zap
+  ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Zap
 } from "lucide-react";
 import PilotTopupCard from "@/components/wallet/PilotTopupCard";
 import { Badge } from "@/components/ui/badge";

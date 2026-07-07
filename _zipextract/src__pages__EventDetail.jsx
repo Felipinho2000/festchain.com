@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const genreLabels = {
   techno: "Techno", house: "House", trance: "Trance",
@@ -35,6 +36,7 @@ export default function EventDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -45,24 +47,33 @@ export default function EventDetail() {
   const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
+    let active = true;
     setLoading(true);
     setEvent(null);
     setNotFound(false);
     setDeniedMessage(null);
+
     base44.functions.invoke("getEventDetails", { event_id: id })
       .then(res => {
+        if (!active) return;
         const data = res.data || res;
         if (data.status === "success" && data.event) {
           setEvent(data.event);
         } else if (data.status === "denied") {
-          setDeniedMessage(data.message || "This is a private event. You need an invitation or a valid ticket to view the details.");
+          setDeniedMessage(data.message || t("eventDetail.privateGateMessage"));
         } else {
           setNotFound(true);
         }
       })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
-  }, [id]);
+      .catch(() => {
+        if (active) setNotFound(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
+  }, [id, t]);
 
   useEffect(() => {
     if (!currentUser?.id) return;
@@ -123,9 +134,9 @@ export default function EventDetail() {
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
           <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
-        <h1 className="font-heading font-bold text-2xl text-white mb-2">Private Event</h1>
+        <h1 className="font-heading font-bold text-2xl text-white mb-2">{t("eventDetail.privateEvent")}</h1>
         <p className="text-warmgray text-sm mb-6">{deniedMessage}</p>
-        <Link to="/events"><Button variant="outline">Back to Events</Button></Link>
+        <Link to="/events"><Button variant="outline">{t("eventDetail.backToEvents")}</Button></Link>
       </div>
     );
   }
@@ -133,8 +144,8 @@ export default function EventDetail() {
   if (notFound || !event) {
     return (
       <div className="text-center py-20">
-        <p className="text-warmgray mb-4">Event not found.</p>
-        <Link to="/events"><Button variant="outline">Back to Events</Button></Link>
+        <p className="text-warmgray mb-4">{t("eventDetail.notFound")}</p>
+        <Link to="/events"><Button variant="outline">{t("eventDetail.backToEvents")}</Button></Link>
       </div>
     );
   }
@@ -151,7 +162,7 @@ export default function EventDetail() {
   return (
     <div className="space-y-6">
       <Link to="/events" className="inline-flex items-center gap-2 text-warmgray hover:text-foreground text-sm transition-colors">
-        <ArrowLeft className="w-4 h-4" strokeWidth={1.5} /> Back to Events
+        <ArrowLeft className="w-4 h-4" strokeWidth={1.5} /> {t("eventDetail.backToEvents")}
       </Link>
 
       {/* Hero image */}
@@ -177,7 +188,7 @@ export default function EventDetail() {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {event.genre && <Badge variant="secondary" className="text-xs">{genreLabels[event.genre]}</Badge>}
               <Badge className={`text-xs border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>
-                {event.visibility === "private" ? "Private Event" : "Public Event"}
+                {event.visibility === "private" ? t("eventDetail.privateEvent") : t("eventDetail.publicEvent")}
               </Badge>
             </div>
             <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-2">{event.title}</h1>
@@ -210,7 +221,7 @@ export default function EventDetail() {
 
           {event.description && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-2">About</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-2">{t("eventDetail.about")}</h3>
               <p className="text-warmgray text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
             </div>
           )}
@@ -218,7 +229,7 @@ export default function EventDetail() {
           {/* Schedule timeline */}
           {schedule.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-primary" strokeWidth={1.5} /> Schedule</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-primary" strokeWidth={1.5} /> {t("eventDetail.schedule")}</h3>
               <div className="space-y-3">
                 {schedule.map((s, i) => (
                   <div key={i} className="flex gap-3">
@@ -236,7 +247,7 @@ export default function EventDetail() {
           {/* Lineup */}
           {lineup.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Lineup</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> {t("eventDetail.lineup")}</h3>
               <div className="space-y-3">
                 {lineup.map((dj, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -264,15 +275,15 @@ export default function EventDetail() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.5} />
-                <h3 className="font-heading font-semibold text-foreground">Drinks &amp; Perks</h3>
+                <h3 className="font-heading font-semibold text-foreground">{t("eventDetail.drinksPerks")}</h3>
                 <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">FTC</span>
               </div>
-              <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? "Hide" : "Show"}</button>
+              <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? t("eventDetail.hide") : t("eventDetail.show")}</button>
             </div>
             {showMenu ? (
               <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} />
             ) : (
-              <p className="text-xs text-[#666]">Use your FestCoin balance to redeem drinks, merch, and VIP perks at this event.</p>
+              <p className="text-xs text-[#666]">{t("eventDetail.menuHint")}</p>
             )}
           </div>
         </div>
@@ -285,26 +296,26 @@ export default function EventDetail() {
               {displayPrice !== null ? (
                 <p className="font-heading font-bold text-3xl text-foreground">R$ {displayPrice.toFixed(2)}</p>
               ) : (
-                <p className="font-heading font-bold text-2xl text-warmgray">Coming soon</p>
+                <p className="font-heading font-bold text-2xl text-warmgray">{t("eventDetail.comingSoon")}</p>
               )}
-              <p className="text-xs text-warmgray mt-1">Secure QR ticket · payment handled manually during pilot.</p>
+              <p className="text-xs text-warmgray mt-1">{t("eventDetail.secureQrHint")}</p>
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
                 <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC reward when you attend
               </div>
               {hasPhases && (
-                <p className="text-[10px] text-[#666] mt-2">Price reflects the current ticket phase and updates automatically as phases open and sell out.</p>
+                <p className="text-[10px] text-[#666] mt-2">{t("eventDetail.phaseHint")}</p>
               )}
             </div>
 
             <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={() => setBuyOpen(true)} disabled={!canBuy}>
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
-              {spotsLeft <= 0 ? "Sold Out" : (hasPhases && !phase) ? "Tickets Coming Soon" : "Get Ticket"}
+              {spotsLeft <= 0 ? t("eventDetail.soldOut") : (hasPhases && !phase) ? t("eventDetail.ticketsComingSoon") : t("eventDetail.getTicket")}
             </Button>
-            <p className="text-[10px] text-[#666] text-center leading-relaxed">FestCoin rewards are part of the pilot experience and can be used for event perks where available.</p>
-            <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
+            <p className="text-[10px] text-[#666] text-center leading-relaxed">{t("eventDetail.rewardsHint")}</p>
+            <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">{t("eventDetail.pilotTerms")}</Link>
 
             <div className="border-t border-border pt-4">
-              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-primary" /> Share Event</p>
+              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-primary" /> {t("eventDetail.shareEvent")}</p>
               <EventShareButtons eventName={event.title} eventUrl={`${window.location.origin}/events/${event.id}`} visibility={event.visibility} eventDate={event.date} />
             </div>
           </div>
@@ -314,7 +325,7 @@ export default function EventDetail() {
       {/* Confirm Ticket Dialog */}
       <Dialog open={buyOpen} onOpenChange={setBuyOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle className="font-heading">Confirm your ticket</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-heading">{t("eventDetail.confirmTicket")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray">
               {phase && <p className="text-foreground font-medium mb-1">{phase.name} phase</p>}
@@ -322,12 +333,12 @@ export default function EventDetail() {
             </div>
             <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={handlePurchase} disabled={purchasing}>
               {purchasing ? (
-                <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Issuing...</span>
+                <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t("eventDetail.issuing")}</span>
               ) : (
-                displayPrice !== null ? `Reserve Ticket · R$ ${displayPrice.toFixed(2)}` : "Reserve Ticket"
+                displayPrice !== null ? `${t("eventDetail.reserveTicket")} · R$ ${displayPrice.toFixed(2)}` : t("eventDetail.reserveTicket")
               )}
             </Button>
-            <p className="text-[10px] text-[#555] text-center">By getting a ticket you accept the <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.</p>
+            <p className="text-[10px] text-[#555] text-center">{t("eventDetail.acceptPrefix")} <Link to="/legal" className="text-primary hover:underline">{t("eventDetail.pilotTermsLower")}</Link>.</p>
           </div>
         </DialogContent>
       </Dialog>

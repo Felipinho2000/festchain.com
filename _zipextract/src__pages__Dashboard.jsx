@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
-  LayoutDashboard, Plus, Calendar, TrendingUp,
+  Plus, Calendar, TrendingUp,
   Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -73,6 +73,8 @@ export default function Dashboard() {
     chartData.push({ name: dayLabel, tickets: count });
   }
 
+  const hasActivity = totalTicketsSold > 0 || totalRevenue > 0 || checkedIn > 0 || chartData.some(d => d.tickets > 0);
+
   const handleDelete = async (id) => {
     await base44.entities.Event.delete(id);
     toast({ title: "Event deleted" });
@@ -118,10 +120,10 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Sales Velocity Chart — shown once there is real activity */}
-      {totalTicketsSold > 0 || tickets.length > 0 ? (
-        <div className="bg-card border border-border rounded-xl p-5">
-          <h3 className="font-heading font-semibold text-white mb-4">Sales Velocity (7 days)</h3>
+      {/* Sales Velocity Chart */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-heading font-semibold text-white mb-4">Sales Velocity (7 days)</h3>
+        {hasActivity ? (
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
@@ -133,18 +135,14 @@ export default function Dashboard() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      ) : (
-        <div className="bg-card border border-border rounded-xl p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
+        ) : (
+          <div className="min-h-36 flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-border bg-secondary/20 p-6">
+            <TrendingUp className="w-8 h-8 text-primary/60 mb-3" strokeWidth={1.5} />
+            <p className="text-white text-sm font-medium">No event activity yet.</p>
+            <p className="text-[#666] text-sm max-w-sm mt-1">Create or publish an event to start seeing ticket sales, check-ins, and FestCoin activity.</p>
           </div>
-          <div>
-            <p className="font-heading font-semibold text-white text-sm">No sales yet</p>
-            <p className="text-[#888] text-xs">Once guests reserve tickets, your sales velocity and check-in stats will appear here.</p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList className="bg-transparent p-0 gap-4 border-b border-border rounded-none h-auto">
