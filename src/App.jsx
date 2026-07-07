@@ -28,6 +28,7 @@ import Scan from '@/pages/Scan';
 import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
 import TrustSafety from '@/pages/TrustSafety';
+import TicketDetail from '@/pages/TicketDetail';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
           <Route path="/app" element={<Home />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/:id" element={<EventDetail />} />
+          <Route path="/tickets/:id" element={<TicketDetail />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/festcoin" element={<Navigate to="/wallet" replace />} />
           <Route path="/tickets" element={<Navigate to="/wallet" replace />} />

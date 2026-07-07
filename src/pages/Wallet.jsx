@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
-  Ticket, QrCode, Calendar, MapPin, Check, Music,
+  Ticket, QrCode, Calendar, MapPin, Check, Music, ChevronRight,
   ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Info, Zap
 } from "lucide-react";
 import PilotTopupCard from "@/components/wallet/PilotTopupCard";
@@ -38,7 +38,7 @@ function TicketCard({ ticket }) {
   const qrCode = ticket.qr_code || cachedQR;
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all">
+    <Link to={`/tickets/${ticket.id}`} className="group block bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-[0_0_20px_-4px_rgba(255,85,0,0.2)] transition-all">
       <div className="flex">
         <div className="w-24 sm:w-32 flex-shrink-0 bg-secondary relative">
           {ticket.event_image ? (
@@ -57,7 +57,7 @@ function TicketCard({ ticket }) {
         <div className="flex-1 p-4 flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-heading font-semibold text-white text-sm line-clamp-1">{ticket.event_title}</h3>
+              <h3 className="font-heading font-semibold text-white text-sm line-clamp-1 group-hover:text-primary transition-colors">{ticket.event_title}</h3>
               <Badge className={`text-[10px] px-2 py-0.5 ${ticketStatusColors[ticket.status] || ""} border-0 flex-shrink-0`}>
                 {ticket.status}
               </Badge>
@@ -79,13 +79,18 @@ function TicketCard({ ticket }) {
           </div>
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#222]">
             <span className="text-xs text-[#666]">{ticket.payment_method === "test" ? "Pilot ticket" : `R$${ticket.price_paid?.toFixed(2)}`}</span>
-            <button
-              onClick={() => setShowQR(!showQR)}
-              className="text-primary text-xs font-medium hover:underline flex items-center gap-1"
-            >
-              <QrCode className="w-3 h-3" strokeWidth={1.5} />
-              {showQR ? "Hide QR" : "Show QR"}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowQR(!showQR); }}
+                className="text-[#888] text-xs font-medium hover:text-primary flex items-center gap-1 transition-colors"
+              >
+                <QrCode className="w-3 h-3" strokeWidth={1.5} />
+                {showQR ? "Hide QR" : "Show QR"}
+              </button>
+              <span className="text-primary text-xs font-semibold flex items-center gap-0.5 group-hover:gap-1.5 transition-all">
+                Open Ticket <ChevronRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
           </div>
           {showQR && (
             <div className="mt-3 pt-3 border-t border-[#222] text-center">
@@ -99,7 +104,7 @@ function TicketCard({ ticket }) {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -154,8 +159,8 @@ export default function WalletPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-heading font-bold text-3xl text-white mb-1">Wallet</h1>
-          <p className="text-[#888] text-sm">Your pilot tickets &amp; loyalty credits.</p>
+          <h1 className="font-heading font-bold text-3xl text-white mb-1">Tickets &amp; Rewards</h1>
+          <p className="text-[#888] text-sm">Your tickets, QR codes &amp; FestCoin rewards.</p>
         </div>
         {currentUser?.role === "admin" && (
           <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
