@@ -91,30 +91,34 @@ export default function Scan() {
     };
 
     const config = { fps: 10, qrbox: { width: 230, height: 230 } };
+    const videoConstraint = { video: { facingMode: { ideal: "environment" } } };
 
-    // A failed start() leaves an Html5Qrcode instance unusable, so construct a
-    // fresh instance for each constraint attempt (prefer back camera on mobile,
-    // then fall back to any available camera for desktop).
-    const attempts = [
-      { facingMode: { ideal: "environment" } },
-      { video: true },
-    ];
-
-    let lastErr = null;
-    for (const constraint of attempts) {
-      const html5 = new Html5Qrcode("reader");
-      html5Ref.current = html5;
-      try {
-        await html5.start(constraint, config, onScan, () => {});
-        setCameraState("active");
-        return;
-      } catch (err) {
-        lastErr = err;
-        try { await html5.clear(); } catch (_) {}
-        html5Ref.current = null;
-      }
+    // Step 1: Ask the browser for camera permission via the standard Web API
+    // first. This triggers the OS/browser permission prompt reliably on both
+    // mobile and desktop, and surfaces denials before html5-qrcode touches the
+    // camera.
+    let probe = null;
+    try {
+      probe = await navigator.mediaDevices.getUserMedia(videoConstraint);
+    } catch (err) {
+      handleCameraError(err);
+      return;
     }
-    handleCameraError(lastErr);
+    // Release the probe stream so html5-qrcode can acquire the camera cleanly.
+    probe.getTracks().forEach((t) => t.stop());
+    // Brief settle (esp. iOS Safari) so the track fully releases before re-acquire.
+    await new Promise((r) => setTimeout(r, 150));
+
+    // Step 2: Start html5-qrcode. Permission is already granted, so this won't
+    // re-prompt and `ideal` won't throw on desktop (no back camera).
+    const html5 = new Html5Qrcode("reader");
+    html5Ref.current = html5;
+    try {
+      await html5.start(videoConstraint, config, onScan, () => {});
+      setCameraState("active");
+    } catch (err) {
+      handleCameraError(err);
+    }
   };
 
   const runValidation = async (qr) => {
