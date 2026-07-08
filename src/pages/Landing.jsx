@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/components/shared/Logo";
 import LandingFAQ from "@/components/landing/LandingFAQ";
+import BeyondTheTicket from "@/components/landing/BeyondTheTicket";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const STEP_ICONS = [Music, Ticket, Sparkles, Wallet];
@@ -168,6 +169,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ── BEYOND THE TICKET ── */}
+      <BeyondTheTicket />
 
       {/* ── AUDIENCES ── */}
       <section id="audiences" className="py-16 px-5 bg-[#111]">
