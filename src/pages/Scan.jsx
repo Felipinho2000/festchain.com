@@ -69,43 +69,52 @@ export default function Scan() {
   };
 
   const startCamera = async () => {
-    if (!eventId || html5Ref.current) return;
+    if (!eventId) return;
     if (!isHTTPS) {
       setCamError("Camera access requires HTTPS. Please open FestChain from the secure live URL.");
       setCameraState("error");
       return;
     }
+    // Clear any instance left over from a previous attempt or error
+    if (html5Ref.current) {
+      try { await html5Ref.current.clear(); } catch (_) {}
+      html5Ref.current = null;
+    }
     setCameraState("requesting");
     setCamError(null);
-
-    const html5 = new Html5Qrcode("reader");
-    html5Ref.current = html5;
 
     const onScan = async (decoded) => {
       if (lockedRef.current) return;
       lockedRef.current = true;
-      try { await html5.pause(); } catch (_) {}
+      try { if (html5Ref.current) await html5Ref.current.pause(); } catch (_) {}
       await runValidation(decoded);
     };
 
     const config = { fps: 10, qrbox: { width: 230, height: 230 } };
 
-    try {
-      await html5.start({ facingMode: { ideal: "environment" } }, config, onScan, () => {});
-      setCameraState("active");
-    } catch (err) {
+    // A failed start() leaves an Html5Qrcode instance unusable, so construct a
+    // fresh instance for each constraint attempt (prefer back camera on mobile,
+    // then fall back to any available camera for desktop).
+    const attempts = [
+      { facingMode: { ideal: "environment" } },
+      { video: true },
+    ];
+
+    let lastErr = null;
+    for (const constraint of attempts) {
+      const html5 = new Html5Qrcode("reader");
+      html5Ref.current = html5;
       try {
-        await html5.start({ facingMode: "environment" }, config, onScan, () => {});
+        await html5.start(constraint, config, onScan, () => {});
         setCameraState("active");
-      } catch (err2) {
-        try {
-          await html5.start({ video: true }, config, onScan, () => {});
-          setCameraState("active");
-        } catch (err3) {
-          handleCameraError(err3);
-        }
+        return;
+      } catch (err) {
+        lastErr = err;
+        try { await html5.clear(); } catch (_) {}
+        html5Ref.current = null;
       }
     }
+    handleCameraError(lastErr);
   };
 
   const runValidation = async (qr) => {
