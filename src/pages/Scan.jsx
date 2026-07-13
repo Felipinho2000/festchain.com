@@ -59,6 +59,11 @@ export default function Scan() {
       msg = "Camera is already in use by another app. Close other camera apps and try again.";
     } else if (name === "OverconstrainedError") {
       msg = "Your browser does not support camera scanning. Please try another browser.";
+    } else {
+      // Not a DOMException (e.g. html5-qrcode threw a plain string because of a
+      // malformed constraints object) — log it so the real cause is visible
+      // instead of silently falling back to the generic message.
+      console.error("Camera start failed:", err);
     }
     setCamError(msg);
     setCameraState("error");
@@ -91,7 +96,21 @@ export default function Scan() {
     };
 
     const config = { fps: 10, qrbox: { width: 230, height: 230 } };
-    const videoConstraint = { video: { facingMode: { ideal: "environment" } } };
+
+    // IMPORTANT: navigator.mediaDevices.getUserMedia() and Html5Qrcode.start()
+    // expect DIFFERENT shapes for their constraints argument. Reusing one
+    // object for both (as before) makes html5-qrcode throw on every browser:
+    //   - getUserMedia() wants   { video: { facingMode: {...} } }
+    //   - Html5Qrcode.start() wants  { facingMode: "environment" }  or
+    //     { facingMode: { exact: "environment" } } — NEVER wrapped in
+    //     "video", and NEVER with an "ideal" key (html5-qrcode's internal
+    //     createVideoConstraints() only recognizes "exact"; anything else,
+    //     including an unexpected top-level "video" key, makes it `throw` a
+    //     plain string rather than a DOMException). That's why `err?.name`
+    //     was always empty and you only ever saw the generic fallback
+    //     message, on every device.
+    const probeConstraint = { video: { facingMode: { ideal: "environment" } } };
+    const html5StartConstraint = { facingMode: "environment" }; // soft preference, won't hard-fail on desktops with no back camera
 
     // Step 1: Ask the browser for camera permission via the standard Web API
     // first. This triggers the OS/browser permission prompt reliably on both
@@ -99,7 +118,7 @@ export default function Scan() {
     // camera.
     let probe = null;
     try {
-      probe = await navigator.mediaDevices.getUserMedia(videoConstraint);
+      probe = await navigator.mediaDevices.getUserMedia(probeConstraint);
     } catch (err) {
       handleCameraError(err);
       return;
@@ -110,11 +129,11 @@ export default function Scan() {
     await new Promise((r) => setTimeout(r, 150));
 
     // Step 2: Start html5-qrcode. Permission is already granted, so this won't
-    // re-prompt and `ideal` won't throw on desktop (no back camera).
+    // re-prompt.
     const html5 = new Html5Qrcode("reader");
     html5Ref.current = html5;
     try {
-      await html5.start(videoConstraint, config, onScan, () => {});
+      await html5.start(html5StartConstraint, config, onScan, () => {});
       setCameraState("active");
     } catch (err) {
       handleCameraError(err);
