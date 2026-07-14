@@ -68,6 +68,22 @@ Deno.serve(async (req) => {
       created_by_id: String(user.id),
     });
 
+    // 5b. Credit the recipient (moment author) — without this, tipped FTC is
+    // debited from the sender but never lands anywhere, effectively burning it.
+    // Skipped only if the moment has no attributable author (e.g. legacy/anon data).
+    if (moment.created_by_id) {
+      await base44.asServiceRole.entities.FestCoinTransaction.create({
+        type: 'transferred_in',
+        amount,
+        description: `Tip received on your moment`,
+        source: 'moment_tip',
+        status: 'confirmed',
+        event_id: moment.event_id || undefined,
+        event_title: moment.event_title || undefined,
+        created_by_id: String(moment.created_by_id),
+      });
+    }
+
     // 6. Increment the moment tip counter (cross-user — service role)
     try {
       await base44.asServiceRole.entities.Moment.update(moment.id, {
