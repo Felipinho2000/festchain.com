@@ -212,6 +212,62 @@ Deno.serve(async (req) => {
     }
 
     // ===================================================================
+    // DIAGNOSTIC: Does asServiceRole.entities.FestCoinTransaction.create
+    // respect an explicit created_by_id? Uses a fabricated ID so there's
+    // zero ambiguity about what "correct" looks like.
+    // ===================================================================
+    try {
+      const FAKE_ID = 'diagnostic-fake-id-xyz123';
+      const created = await base44.asServiceRole.entities.FestCoinTransaction.create({
+        type: 'earned',
+        amount: 1,
+        description: '[DIAGNOSTIC-DELETE-ME]',
+        status: 'confirmed',
+        created_by_id: FAKE_ID,
+      });
+
+      // Fetch that EXACT record back by ID (direct .get, not filter/sum)
+      const fetched = await base44.asServiceRole.entities.FestCoinTransaction.get(created.id);
+      const rawCby = fetched && fetched.created_by_id;
+
+      // Delete the diagnostic record regardless of result
+      try { await base44.asServiceRole.entities.FestCoinTransaction.delete(created.id); } catch (_) {}
+
+      const respectsField = rawCby === FAKE_ID;
+      record(
+        'DIAGNOSTIC: asServiceRole.FestCoinTransaction.create respects explicit created_by_id',
+        respectsField,
+        `Passed created_by_id="${FAKE_ID}" → stored as "${rawCby}". ` +
+        (respectsField
+          ? '✓ FestCoinTransaction RESPECTS the explicit field (unlike Moment).'
+          : (rawCby && String(rawCby).startsWith('service_')
+            ? '✗ FestCoinTransaction IGNORES created_by_id and stamps service role ID (SAME BUG as Moment).'
+            : '✗ FestCoinTransaction stored an unexpected value.'))
+      );
+    } catch (e) {
+      record('DIAGNOSTIC: asServiceRole.FestCoinTransaction.create respects explicit created_by_id', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // AUDIT: Count existing Moment records with created_by_id starting
+    // with "service_" — read-only, no fixes applied.
+    // ===================================================================
+    try {
+      const allMoments = await base44.asServiceRole.entities.Moment.list('-created_date', 500);
+      const serviceOwned = allMoments.filter(m => m.created_by_id && String(m.created_by_id).startsWith('service_'));
+      const userOwned = allMoments.filter(m => m.created_by_id && !String(m.created_by_id).startsWith('service_'));
+      record(
+        'AUDIT: Moment records with service_ created_by_id (blast radius)',
+        true, // informational — always "passes", the count is the data
+        `Total moments queried: ${allMoments.length}. ` +
+        `service_ owned: ${serviceOwned.length}. ` +
+        `user owned: ${userOwned.length}.`
+      );
+    } catch (e) {
+      record('AUDIT: Moment records with service_ created_by_id (blast radius)', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
     // CLEANUP — delete all test fixtures
     // ===================================================================
     const cleanupResults = [];
