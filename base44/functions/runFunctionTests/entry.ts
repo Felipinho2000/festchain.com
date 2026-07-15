@@ -268,6 +268,55 @@ Deno.serve(async (req) => {
     }
 
     // ===================================================================
+    // DIAGNOSTIC 2: Can we create a FestCoinTransaction via asServiceRole
+    // (stamps service_...) then UPDATE its created_by_id to a different
+    // user? If yes, create-then-update is a viable path for crediting a
+    // different user's wallet (sendMomentTip's recipient credit).
+    // ===================================================================
+    try {
+      // 1. Create via asServiceRole (will stamp service_...)
+      const created = await base44.asServiceRole.entities.FestCoinTransaction.create({
+        type: 'earned',
+        amount: 1,
+        description: '[DIAG2-DELETE-ME] created_by_id update test',
+        status: 'confirmed',
+        source: 'diag2_fixture',
+      });
+      TRACK('FestCoinTransaction', created.id);
+
+      // 2. Attempt to update created_by_id to a different real user id.
+      //    Use a second admin (or any real user id) if available; otherwise
+      //    use a fabricated-but-realistic id. We use a fabricated id to
+      //    prove the field is writable — we don't need a real wallet owner.
+      const TARGET_ID = 'diag2-target-user-456';
+      let updateError = null;
+      try {
+        await base44.asServiceRole.entities.FestCoinTransaction.update(created.id, {
+          created_by_id: TARGET_ID,
+        });
+      } catch (e) {
+        updateError = e.message;
+      }
+
+      // 3. Re-fetch by ID and read the raw created_by_id
+      const refetched = await base44.asServiceRole.entities.FestCoinTransaction.get(created.id);
+      const rawCby = refetched && refetched.created_by_id;
+
+      const updateWorks = rawCby === TARGET_ID;
+      record(
+        'DIAGNOSTIC 2: update created_by_id on FestCoinTransaction (create-then-update path)',
+        updateWorks,
+        updateError
+          ? `Update threw: "${updateError}". Raw created_by_id after attempt: "${rawCby}".`
+          : (updateWorks
+            ? `✓ Update succeeded — created_by_id changed from "service_..." to "${rawCby}". Create-then-update IS a viable path for recipient credits.`
+            : `✗ Update did not throw but field unchanged. Raw created_by_id: "${rawCby}" (still service_...). Update is silently ignored.`)
+      );
+    } catch (e) {
+      record('DIAGNOSTIC 2: update created_by_id on FestCoinTransaction (create-then-update path)', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
     // CLEANUP — delete all test fixtures
     // ===================================================================
     const cleanupResults = [];

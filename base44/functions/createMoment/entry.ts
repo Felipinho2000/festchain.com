@@ -30,15 +30,16 @@ Deno.serve(async (req) => {
       author_alias,
     });
 
-    // 2. Award fixed FestCoin reward — amount and type are server-controlled
+    // 2. Award fixed FestCoin reward — amount and type are server-controlled.
+    //    User-scoped so created_by_id is stamped correctly (asServiceRole
+    //    ignores the field and stamps service_... — see runFunctionTests diag).
     try {
-      await base44.asServiceRole.entities.FestCoinTransaction.create({
+      await base44.entities.FestCoinTransaction.create({
         type: 'earned',
         amount: MOMENT_REWARD,
         description: 'Shared a moment',
         source: 'moment_reward',
         status: 'confirmed',
-        created_by_id: String(user.id),
       });
     } catch (_) {}
 
@@ -48,12 +49,11 @@ Deno.serve(async (req) => {
         created_by_id: String(user.id), badge_key: 'first_moment'
       });
       if (!existing || existing.length === 0) {
-        await base44.asServiceRole.entities.UserBadge.create({
+        await base44.entities.UserBadge.create({
           badge_key: 'first_moment',
           badge_name: 'Moment Maker',
           badge_emoji: '📸',
           badge_description: 'Shared your first moment',
-          created_by_id: String(user.id),
         });
       }
     } catch (_) {}

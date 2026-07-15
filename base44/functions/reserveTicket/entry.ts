@@ -82,17 +82,16 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.Event.update(event.id, { tickets_sold: currentSold + 1 });
     } catch (_) {}
 
-    // 9. FestCoin reward
+    // 9. FestCoin reward — user-scoped so created_by_id stamps correctly
     if (reward > 0) {
       try {
-        await base44.asServiceRole.entities.FestCoinTransaction.create({
+        await base44.entities.FestCoinTransaction.create({
           type: 'earned',
           amount: reward,
           description: `Pilot reward: ${event.title}`,
           event_id: event.id,
           event_title: event.title,
           status: 'confirmed',
-          created_by_id: String(user.id)
         });
       } catch (_) {}
     }

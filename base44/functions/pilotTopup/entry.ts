@@ -46,9 +46,9 @@ Deno.serve(async (req) => {
 
     const balanceAfter = currentBalance + allowed;
 
-    // Create FestCoinTransaction (service role to bypass admin-only PilotTopup RLS)
-    await base44.asServiceRole.entities.FestCoinTransaction.create({
-      created_by_id: user.id,
+    // Create FestCoinTransaction — user-scoped so created_by_id stamps correctly
+    // (asServiceRole ignores the field and stamps service_...).
+    await base44.entities.FestCoinTransaction.create({
       type: 'earned',
       amount: allowed,
       description: `Pilot FTC top-up · ${allowed} test credits added`,

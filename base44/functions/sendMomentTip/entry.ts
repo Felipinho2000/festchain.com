@@ -47,8 +47,9 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // 4. Debit sender (server-controlled amount and type)
-    await base44.asServiceRole.entities.FestCoinTransaction.create({
+    // 4. Debit sender (server-controlled amount and type).
+    //    User-scoped so created_by_id stamps correctly (asServiceRole stamps service_...).
+    await base44.entities.FestCoinTransaction.create({
       type: 'transferred_out',
       amount,
       description: `Tipped ${moment.author_alias || 'a raver'}`,
@@ -56,16 +57,14 @@ Deno.serve(async (req) => {
       status: 'confirmed',
       event_id: moment.event_id || undefined,
       event_title: moment.event_title || undefined,
-      created_by_id: String(user.id),
     });
 
-    // 5. Record the tip
-    await base44.asServiceRole.entities.FTCTip.create({
+    // 5. Record the tip (user-scoped — caller is the tipper)
+    await base44.entities.FTCTip.create({
       from_user_id: String(user.id),
       to_user_id: String(moment.created_by_id),
       moment_id: moment.id,
       amount,
-      created_by_id: String(user.id),
     });
 
     // 5b. Credit the recipient (moment author) — without this, tipped FTC is
