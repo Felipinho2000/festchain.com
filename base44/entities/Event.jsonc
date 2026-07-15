@@ -158,6 +158,38 @@
     },
     "organizer_name": {
       "type": "string"
+    },
+    "currency_code": {
+      "type": "string",
+      "default": "BRL"
+    },
+    "ftc_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "ftc_conversion_rate": {
+      "type": "number",
+      "default": 1
+    },
+    "ftc_discount_percent": {
+      "type": "number",
+      "default": 0
+    },
+    "ftc_cashback_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "ftc_cashback_percent": {
+      "type": "number",
+      "default": 0
+    },
+    "ftc_cashback_on_ftc_purchase": {
+      "type": "boolean",
+      "default": false
+    },
+    "ftc_pilot_mode": {
+      "type": "boolean",
+      "default": true
     }
   },
   "required": [

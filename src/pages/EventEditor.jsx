@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   ArrowLeft, Plus, Trash2, ImagePlus, Loader2, Music, Calendar,
-  Ticket as TicketIcon, Save, Clock
+  Ticket as TicketIcon, Save, Clock, Coins
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,14 @@ const emptyForm = {
   ticket_phases: defaultPhases(),
   lineup: [],
   schedule: [],
+  currency_code: "BRL",
+  ftc_enabled: false,
+  ftc_conversion_rate: "1",
+  ftc_discount_percent: "0",
+  ftc_cashback_enabled: false,
+  ftc_cashback_percent: "0",
+  ftc_cashback_on_ftc_purchase: false,
+  ftc_pilot_mode: true,
 };
 
 function Section({ title, icon: Icon, subtitle, children }) {
@@ -92,6 +100,14 @@ export default function EventEditor() {
           ticket_phases: ev.ticket_phases?.length ? ev.ticket_phases : defaultPhases(),
           lineup: ev.lineup?.length ? ev.lineup : (ev.dj_lineup || []).map(n => ({ name: n, bio: "", social_link: "", set_time: "" })),
           schedule: ev.schedule || [],
+          currency_code: ev.currency_code || "BRL",
+          ftc_enabled: ev.ftc_enabled || false,
+          ftc_conversion_rate: ev.ftc_conversion_rate?.toString() || "1",
+          ftc_discount_percent: ev.ftc_discount_percent?.toString() || "0",
+          ftc_cashback_enabled: ev.ftc_cashback_enabled || false,
+          ftc_cashback_percent: ev.ftc_cashback_percent?.toString() || "0",
+          ftc_cashback_on_ftc_purchase: ev.ftc_cashback_on_ftc_purchase || false,
+          ftc_pilot_mode: ev.ftc_pilot_mode !== false,
         });
       })
       .catch(() => { toast({ title: "Event not found", variant: "destructive" }); navigate("/dashboard"); })
@@ -161,6 +177,14 @@ export default function EventEditor() {
       lineup: form.lineup.filter(d => d.name).map(d => ({ name: d.name, bio: d.bio, social_link: d.social_link, set_time: d.set_time })),
       schedule: form.schedule.filter(s => s.title).map(s => ({ time: s.time, title: s.title, description: s.description })),
       dj_lineup: form.lineup.filter(d => d.name).map(d => d.name),
+      currency_code: form.currency_code || "BRL",
+      ftc_enabled: form.ftc_enabled,
+      ftc_conversion_rate: parseFloat(form.ftc_conversion_rate) || 1,
+      ftc_discount_percent: Math.max(0, Math.min(100, parseFloat(form.ftc_discount_percent) || 0)),
+      ftc_cashback_enabled: form.ftc_cashback_enabled,
+      ftc_cashback_percent: Math.max(0, Math.min(100, parseFloat(form.ftc_cashback_percent) || 0)),
+      ftc_cashback_on_ftc_purchase: form.ftc_cashback_on_ftc_purchase,
+      ftc_pilot_mode: form.ftc_pilot_mode,
     };
     try {
       if (isEdit) {
@@ -316,6 +340,63 @@ export default function EventEditor() {
           {form.schedule.length === 0 && <p className="text-xs text-[#666]">No schedule items yet.</p>}
         </div>
         <button onClick={addSchedule} className="flex items-center gap-1.5 text-primary text-sm font-medium hover:underline mt-2"><Plus className="w-4 h-4" /> {t("eventEditor.addScheduleItem")}</button>
+      </Section>
+
+      {/* FESTCOIN CONFIG */}
+      <Section title={t("festcoin.orgSectionTitle")} icon={Coins} subtitle="Configure how FestCoin works at this event.">
+        <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
+          <div className="flex-1 mr-3">
+            <Label className="text-xs">{t("festcoin.orgFtcEnabled")}</Label>
+          </div>
+          <Switch checked={!!form.ftc_enabled} onCheckedChange={v => set("ftc_enabled", v)} />
+        </div>
+
+        {form.ftc_enabled && (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t("festcoin.orgCurrencyCode")}>
+                <Input value={form.currency_code} onChange={e => set("currency_code", e.target.value)} className="rounded-xl" placeholder="BRL" />
+              </Field>
+              <Field label={t("festcoin.orgConversionRate")}>
+                <Input type="number" value={form.ftc_conversion_rate} onChange={e => set("ftc_conversion_rate", e.target.value)} className="rounded-xl" placeholder="1" />
+              </Field>
+            </div>
+
+            <Field label={t("festcoin.orgDiscountPercent")}>
+              <Input type="number" value={form.ftc_discount_percent} onChange={e => set("ftc_discount_percent", e.target.value)} className="rounded-xl" placeholder="0" />
+              <p className="text-[10px] text-[#666] mt-1">{t("festcoin.orgDiscountHint")}</p>
+            </Field>
+
+            <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
+              <div className="flex-1 mr-3">
+                <Label className="text-xs">{t("festcoin.orgCashbackEnabled")}</Label>
+                <p className="text-[10px] text-[#666] mt-0.5">{t("festcoin.orgCashbackHint")}</p>
+              </div>
+              <Switch checked={!!form.ftc_cashback_enabled} onCheckedChange={v => set("ftc_cashback_enabled", v)} />
+            </div>
+
+            {form.ftc_cashback_enabled && (
+              <>
+                <Field label={t("festcoin.orgCashbackPercent")}>
+                  <Input type="number" value={form.ftc_cashback_percent} onChange={e => set("ftc_cashback_percent", e.target.value)} className="rounded-xl" placeholder="0" />
+                </Field>
+                <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
+                  <div className="flex-1 mr-3">
+                    <Label className="text-xs">{t("festcoin.orgCashbackOnFtc")}</Label>
+                  </div>
+                  <Switch checked={!!form.ftc_cashback_on_ftc_purchase} onCheckedChange={v => set("ftc_cashback_on_ftc_purchase", v)} />
+                </div>
+              </>
+            )}
+
+            <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
+              <div className="flex-1 mr-3">
+                <Label className="text-xs">{t("festcoin.orgPilotMode")}</Label>
+              </div>
+              <Switch checked={!!form.ftc_pilot_mode} onCheckedChange={v => set("ftc_pilot_mode", v)} />
+            </div>
+          </>
+        )}
       </Section>
 
       {/* Sticky save */}

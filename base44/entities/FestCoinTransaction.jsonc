@@ -41,6 +41,19 @@
     },
     "source": {
       "type": "string"
+    },
+    "reference_id": {
+      "type": "string"
+    },
+    "native_amount": {
+      "type": "number"
+    },
+    "conversion_rate": {
+      "type": "number"
+    },
+    "is_pilot": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

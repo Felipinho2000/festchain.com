@@ -22,6 +22,7 @@ import EventDetail from '@/pages/EventDetail';
 import WalletPage from '@/pages/Wallet';
 import Dashboard from '@/pages/Dashboard';
 import BuyFTC from '@/pages/BuyFTC';
+import FestCoin from '@/pages/FestCoin';
 import Profile from '@/pages/Profile';
 import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
           <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/tickets/:id" element={<TicketDetail />} />
           <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/festcoin" element={<FestCoin />} />
           <Route path="/festcoin" element={<Navigate to="/wallet" replace />} />
           <Route path="/tickets" element={<Navigate to="/wallet" replace />} />
           <Route path="/moments" element={<Navigate to="/app" replace />} />

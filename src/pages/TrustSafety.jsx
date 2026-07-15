@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {
-  ShieldCheck, QrCode, Lock, Eye, Camera, Coins, Users, ArrowLeft,
+  ShieldCheck, QrCode, Lock, Eye, Camera, Coins, Users, ArrowLeft, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/shared/Logo";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const items = [
   {
@@ -45,6 +46,7 @@ const items = [
 ];
 
 export default function TrustSafety() {
+  const { t } = useLanguage();
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white font-body">
       <nav className="border-b border-[#1f1f1f] bg-[#0d0d0d]/95 backdrop-blur-sm sticky top-0 z-40">
@@ -77,6 +79,53 @@ export default function TrustSafety() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* FestCoin in the MVP */}
+        <div className="mt-10 bg-[#111] border border-primary/20 rounded-2xl p-6 sm:p-8 space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+              <Zap className="w-5 h-5 text-primary" strokeWidth={1.5} />
+            </div>
+            <h2 className="font-heading font-bold text-2xl text-white">{t("festcoin.wpTitle")}</h2>
+          </div>
+          <p className="text-[#aaa] text-sm leading-relaxed">{t("festcoin.wpIntro")}</p>
+          <p className="text-[#aaa] text-sm leading-relaxed">{t("festcoin.wpIntro2")}</p>
+          <p className="text-[#aaa] text-sm leading-relaxed">{t("festcoin.wpIntro3")}</p>
+
+          <div>
+            <h3 className="font-heading font-bold text-white text-base mb-3">{t("festcoin.wpPrinciplesTitle")}</h3>
+            <div className="space-y-3">
+              {[
+                { title: t("festcoin.wpP1Title"), body: t("festcoin.wpP1Body") },
+                { title: t("festcoin.wpP2Title"), body: t("festcoin.wpP2Body") },
+                { title: t("festcoin.wpP3Title"), body: t("festcoin.wpP3Body") },
+                { title: t("festcoin.wpP4Title"), body: t("festcoin.wpP4Body") },
+                { title: t("festcoin.wpP5Title"), body: t("festcoin.wpP5Body") },
+                { title: t("festcoin.wpP6Title"), body: t("festcoin.wpP6Body") },
+                { title: t("festcoin.wpP7Title"), body: t("festcoin.wpP7Body") },
+              ].map((p, i) => (
+                <div key={i} className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-xl p-4">
+                  <p className="text-primary font-semibold text-sm mb-1">{p.title}</p>
+                  <p className="text-[#888] text-xs leading-relaxed">{p.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-heading font-bold text-white text-base mb-3">{t("festcoin.wpHowTitle")}</h3>
+            <ol className="space-y-2">
+              {t("festcoin.wpHowSteps").map((step, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/15 text-primary text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                  <span className="text-[#888] text-xs leading-relaxed">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <p className="text-[#666] text-xs italic">{t("festcoin.wpPilotNote")}</p>
         </div>
 
         <div className="mt-10 bg-primary/5 border border-primary/25 rounded-2xl p-6 text-center">

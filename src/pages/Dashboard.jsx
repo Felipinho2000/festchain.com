@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import RedemptionManager from "@/components/dashboard/RedemptionManager";
+import FestCoinReport from "@/components/dashboard/FestCoinReport";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import moment from "moment";
 
@@ -156,6 +157,7 @@ export default function Dashboard() {
           <TabsTrigger value="events" className={tabClass}>Events</TabsTrigger>
           <TabsTrigger value="inventory" className={tabClass}>Inventory</TabsTrigger>
           <TabsTrigger value="redemptions" className={tabClass}>Redemptions</TabsTrigger>
+          <TabsTrigger value="festcoin" className={tabClass}>FestCoin</TabsTrigger>
         </TabsList>
 
         <TabsContent value="events">
@@ -206,6 +208,7 @@ export default function Dashboard() {
 
         <TabsContent value="inventory"><InventoryManager events={events} /></TabsContent>
         <TabsContent value="redemptions"><RedemptionManager events={events} /></TabsContent>
+        <TabsContent value="festcoin"><FestCoinReport events={events} /></TabsContent>
       </Tabs>
     </div>
   );

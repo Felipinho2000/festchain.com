@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   LayoutDashboard, Calendar, Wallet,
-  LogOut, User, ScanLine, FileText,
+  LogOut, User, ScanLine, FileText, Zap,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Logo from "@/components/shared/Logo";
@@ -13,6 +13,7 @@ import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 const navItems = [
   { icon: Calendar, labelKey: "events",   path: "/events" },
+  { icon: Zap,      labelKey: "festcoin", path: "/festcoin" },
   { icon: Wallet,   labelKey: "tickets", path: "/wallet" },
   { icon: User,     labelKey: "profile", path: "/profile" },
   { icon: LayoutDashboard, labelKey: "dashboard", path: "/dashboard", staffOnly: true },
@@ -32,7 +33,7 @@ export default function AppLayout() {
   const visibleItems = navItems.filter(i => !i.staffOnly || isOrganizer);
 
   const labelFor = (key) => {
-    const map = { events: "Events", tickets: "Tickets & Rewards", profile: "Profile", dashboard: "Dashboard", scan: "Scanner" };
+    const map = { events: "Events", festcoin: "FestCoin", tickets: "Tickets & Rewards", profile: "Profile", dashboard: "Dashboard", scan: "Scanner" };
     return map[key] || t(`nav.${key}`);
   };
 

@@ -44,6 +44,14 @@
     },
     "emoji": {
       "type": "string"
+    },
+    "accepts_ftc": {
+      "type": "boolean",
+      "default": true
+    },
+    "cashback_eligible": {
+      "type": "boolean",
+      "default": true
     }
   },
   "required": [

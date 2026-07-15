@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2, Sparkles, Clock, Instagram, Lock } from "lucide-react";
+import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2, Sparkles, Clock, Instagram, Lock, Zap } from "lucide-react";
 import EventShareButtons from "@/components/events/EventShareButtons";
 import EventMenuPanel from "@/components/events/EventMenuPanel";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -35,6 +36,7 @@ export default function EventDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -206,6 +208,20 @@ export default function EventDetail() {
                 <p className="text-warmgray text-sm">{spotsLeft > 0 ? `${spotsLeft} spots remaining` : "Sold out"}</p>
               </div>
             </div>
+            {event.ftc_enabled && (
+              <div className="flex items-start gap-3 border-t border-border pt-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"><Zap className="w-5 h-5 text-primary" strokeWidth={1.5} /></div>
+                <div>
+                  <p className="font-medium text-foreground text-sm">{t("festcoin.acceptsFtc")}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                    <span className="text-xs text-warmgray">1 FTC = {event.currency_code || "BRL"} {event.ftc_conversion_rate || 1}</span>
+                    {event.ftc_discount_percent > 0 && <span className="text-xs text-primary">{t("festcoin.ftcDiscount")}: {event.ftc_discount_percent}%</span>}
+                    {event.ftc_cashback_enabled && event.ftc_cashback_percent > 0 && <span className="text-xs text-emerald-400">{t("festcoin.cashbackAvailable")}: {event.ftc_cashback_percent}%</span>}
+                  </div>
+                  <Link to="/festcoin" className="text-xs text-primary hover:underline mt-1 inline-block">Add FTC credits →</Link>
+                </div>
+              </div>
+            )}
           </div>
 
           {event.description && (

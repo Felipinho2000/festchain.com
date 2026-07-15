@@ -1,189 +1,132 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import {
-  Zap, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
-  Wallet, Lock, Gift, Calendar
-} from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import moment from "moment";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { Zap, Calendar } from "lucide-react";
+import TopupPanel from "@/components/festcoin/TopupPanel";
+import TransactionList from "@/components/festcoin/TransactionList";
+import FestCoinInfo from "@/components/festcoin/FestCoinInfo";
 
-const typeConfig = {
-  earned: { icon: ArrowDownRight, color: "text-emerald-400", bg: "bg-emerald-900/30", label: "Earned" },
-  spent: { icon: ArrowUpRight, color: "text-red-400", bg: "bg-red-900/20", label: "Spent" },
-  transferred_in: { icon: ArrowDownRight, color: "text-blue-400", bg: "bg-blue-900/20", label: "Received" },
-  transferred_out: { icon: ArrowUpRight, color: "text-primary", bg: "bg-primary/15", label: "Sent" }
+const symbolFor = (code) => {
+  if (code === "BRL") return "R$";
+  if (code === "USD") return "$";
+  if (code === "EUR") return "€";
+  return "";
 };
 
 export default function FestCoin() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
+  const [transactions, setTransactions] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    base44.entities.FestCoinTransaction.filter(
-      { created_by_id: currentUser?.id },
-      "-created_date",
-      100
-    )
-      .then(setTransactions)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const loadData = useCallback(async () => {
+    if (!currentUser?.id) return;
+    setLoading(true);
+    const [txs, evts] = await Promise.all([
+      base44.entities.FestCoinTransaction.filter(
+        { created_by_id: currentUser.id },
+        "-created_date",
+        100
+      ).catch(() => []),
+      base44.entities.Event.filter(
+        { ftc_enabled: true, status: "published" },
+        "-created_date",
+        20
+      ).catch(() => []),
+    ]);
+    setTransactions(txs);
+    setEvents(evts);
+    setSelectedEvent(prev => {
+      if (prev) return prev;
+      return evts.length > 0 ? evts[0] : null;
+    });
+    setLoading(false);
   }, [currentUser]);
 
-  const totalEarned = transactions.filter(t => t.type === "earned" || t.type === "transferred_in").reduce((s, t) => s + (t.amount || 0), 0);
-  const totalSpent = transactions.filter(t => t.type === "spent" || t.type === "transferred_out").reduce((s, t) => s + (t.amount || 0), 0);
-  const balance = totalEarned - totalSpent;
+  useEffect(() => { loadData(); }, [loadData]);
 
-  const maxEarned = Math.max(totalEarned, 1);
-  const tierThresholds = [
-    { label: "Holder Perk: Priority Access", target: 1000, color: "bg-primary" },
-    { label: "Holder Perk: VIP Access", target: 5000, color: "bg-orange-400" },
-    { label: "Holder Perk: Lifetime Pass", target: 20000, color: "bg-yellow-400" },
-  ];
-  const nextTier = tierThresholds.find(t => balance < t.target);
+  // Calculate balance from confirmed, non-demo transactions
+  const validTx = transactions.filter(
+    tx => !["cancelled", "failed"].includes(tx.status) && tx.source !== "demo_data"
+  );
+  const balance = validTx.reduce((s, tx) => {
+    if (["earned", "transferred_in", "pilot_topup"].includes(tx.type)) return s + (tx.amount || 0);
+    if (["spent", "transferred_out"].includes(tx.type)) return s - (tx.amount || 0);
+    return s;
+  }, 0);
+
+  const rate = selectedEvent?.ftc_conversion_rate || 1;
+  const estimatedValue = rate > 0 ? balance * rate : 0;
+  const currencyCode = selectedEvent?.currency_code || "BRL";
+  const symbol = symbolFor(currencyCode);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-heading font-bold text-3xl text-white mb-1">My Wallet</h1>
-          <p className="text-[#888] text-sm">Your event balance — use it to buy tickets and pre-order at the venue.</p>
-        </div>
-        <a href="/buy-ftc" className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
-          <Zap className="w-4 h-4" /> About FestCoin Credits
-        </a>
-      </div>
-
-      {/* Balance Card */}
-      <div className="bg-gradient-to-br from-[#1f1f1f] to-card border border-border rounded-2xl p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-        <div className="relative">
-          <p className="text-xs text-[#666] mb-1 uppercase tracking-wider font-medium">Total Balance</p>
-          <div className="flex items-baseline gap-3 mb-6">
-            <span className="font-heading font-bold text-5xl text-white tracking-tight">{balance.toLocaleString()}</span>
-            <span className="flex items-center gap-1 text-primary font-bold text-lg">
-              <Zap className="w-5 h-5" strokeWidth={1.5} />
-              FTC
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-emerald-900/30 border border-emerald-800/40 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
-                <span className="text-xs text-emerald-400 font-medium">Total Earned</span>
-              </div>
-              <p className="font-heading font-bold text-xl text-emerald-400">{totalEarned.toLocaleString()}</p>
-            </div>
-            <div className="bg-red-900/20 border border-red-800/30 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingDown className="w-4 h-4 text-red-400" strokeWidth={1.5} />
-                <span className="text-xs text-red-400 font-medium">Total Spent</span>
-              </div>
-              <p className="font-heading font-bold text-xl text-red-400">{totalSpent.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Holder tier progress bars */}
-      <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-        <p className="text-sm font-semibold text-white">Balance Perks</p>
-        {tierThresholds.map((t, i) => {
-          const pct = Math.min(100, Math.round((balance / t.target) * 100));
-          const achieved = balance >= t.target;
-          return (
-            <div key={i}>
-              <div className="flex justify-between text-xs mb-1.5">
-                <span className={achieved ? "text-emerald-400" : "text-[#888]"}>{t.label}</span>
-                <span className={achieved ? "text-emerald-400 font-bold" : "text-[#555]"}>
-                  {achieved ? "✓ Unlocked" : `${balance.toLocaleString()} / ${t.target.toLocaleString()} FTC`}
-                </span>
-              </div>
-              <div className="h-2 bg-[#222] rounded-full overflow-hidden">
-                <div className={`h-full ${achieved ? "bg-emerald-500" : t.color} rounded-full transition-all`} style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          );
-        })}
-        {nextTier && (
-          <p className="text-[11px] text-[#555] pt-1">
-            Hold <span className="text-primary font-bold">{(nextTier.target - balance).toLocaleString()} more FTC</span> to unlock your next perk.
-          </p>
-        )}
-      </div>
-
-      {/* Rewards Info */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-card border border-border rounded-xl p-4 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-            <Gift className="w-4 h-4 text-primary" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="font-medium text-sm text-white">Purchase Rewards</p>
-            <p className="text-xs text-[#666]">Earn 50+ FTC per ticket</p>
-          </div>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
-            <Wallet className="w-4 h-4 text-primary" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="font-medium text-sm text-white">Pay with wallet balance</p>
-            <p className="text-xs text-[#666]">10% off at venue bar</p>
-          </div>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
-            <Lock className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
-          </div>
-          <div>
-            <p className="font-medium text-sm text-white">Works offline</p>
-            <p className="text-xs text-[#666]">QR orders cached on device</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Transaction History */}
+      {/* Header */}
       <div>
-        <h2 className="font-heading font-semibold text-lg text-white mb-4">Transaction History</h2>
-        {loading ? (
-          <div className="space-y-3">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="bg-card border border-border rounded-xl h-16 animate-pulse" />
-            ))}
-          </div>
-        ) : transactions.length === 0 ? (
-          <div className="bg-card border border-border rounded-xl p-12 text-center">
-            <Zap className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-[#666] text-sm">No transactions yet. Add balance or buy a ticket to get started.</p>
-            <a href="/buy-ftc" className="inline-flex items-center gap-1.5 mt-4 bg-primary text-white text-sm font-bold px-4 py-2 rounded-xl">
-              <Zap className="w-3.5 h-3.5" /> About FestCoin Credits
-            </a>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {transactions.map(tx => {
-              const config = typeConfig[tx.type] || typeConfig.earned;
-              const isPositive = ["earned", "transferred_in", "unstaked"].includes(tx.type);
-              return (
-                <div key={tx.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-lg ${config.bg} flex items-center justify-center flex-shrink-0`}>
-                    <config.icon className={`w-4 h-4 ${config.color}`} strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-white truncate">{tx.description}</p>
-                    <p className="text-xs text-[#666]">{moment(tx.created_date).fromNow()}</p>
-                  </div>
-                  <span className={`font-heading font-bold text-sm ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
-                    {isPositive ? "+" : "-"}{tx.amount?.toLocaleString()} FTC
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <h1 className="font-heading font-bold text-3xl text-white mb-1">{t("festcoin.navLabel")}</h1>
+        <p className="text-[#888] text-sm">{t("festcoin.subtitle")}</p>
       </div>
+
+      {/* Balance card */}
+      <div className="bg-gradient-to-br from-[#1f1f1f] to-card border border-border rounded-2xl p-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-xs text-[#666] uppercase tracking-wider">{t("festcoin.balance")}</p>
+            {(!selectedEvent || selectedEvent?.ftc_pilot_mode !== false) && (
+              <span className="text-[9px] font-bold uppercase bg-amber-900/40 text-amber-400 px-1.5 py-0.5 rounded">
+                {t("festcoin.pilotLabel")}
+              </span>
+            )}
+          </div>
+          <div className="flex items-baseline gap-2 mb-2">
+            <span className="font-heading font-bold text-5xl text-white tracking-tight">{balance.toLocaleString()}</span>
+            <span className="text-[#888] text-sm">FTC</span>
+          </div>
+          {selectedEvent && (
+            <p className="text-xs text-[#888] mb-1">
+              {t("festcoin.estimatedValue")}:{" "}
+              <span className="text-white font-semibold">
+                {symbol}{estimatedValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </p>
+          )}
+          {selectedEvent && (
+            <p className="text-[10px] text-[#555]">{t("festcoin.conversionDisclaimer")}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Event selector */}
+      {events.length > 0 && (
+        <div className="flex items-center gap-3 bg-card border border-border rounded-xl p-3">
+          <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+          <select
+            value={selectedEvent?.id || ""}
+            onChange={e => setSelectedEvent(events.find(ev => ev.id === e.target.value))}
+            className="bg-transparent text-sm text-white flex-1 outline-none cursor-pointer"
+          >
+            {events.map(ev => (
+              <option key={ev.id} value={ev.id} className="bg-card text-white">
+                {ev.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Top-up panel */}
+      <TopupPanel selectedEvent={selectedEvent} onSuccess={loadData} />
+
+      {/* Explanation */}
+      <FestCoinInfo />
+
+      {/* Transaction history */}
+      <TransactionList transactions={transactions} loading={loading} />
     </div>
   );
 }

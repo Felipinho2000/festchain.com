@@ -6,7 +6,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard,
   Mail, MapPin, Send, Check, ChevronRight, Menu, X, ArrowRight,
-  Music, Users, Building2, Star,
+  Music, Users, Building2, Star, Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,7 +18,7 @@ import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 const STEP_ICONS = [Music, Ticket, Sparkles, Wallet];
 
 export default function Landing() {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const { currentUser } = useAuth();
   const authed = !!currentUser;
   const { toast } = useToast();
@@ -167,6 +167,23 @@ export default function Landing() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ── FESTCOIN STRIP ── */}
+      <section className="py-10 px-5">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mx-auto mb-4">
+            <Coins className="w-5 h-5 text-primary" strokeWidth={1.5} />
+          </div>
+          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+            {t("festcoin.landingFtc")}
+          </p>
+          {authed && (
+            <Link to="/festcoin" className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all mt-3">
+              Open FestCoin <ChevronRight className="w-4 h-4" />
+            </Link>
+          )}
         </div>
       </section>
 
