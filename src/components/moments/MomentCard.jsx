@@ -105,10 +105,15 @@ export default function MomentCard({ m, currentUser, onLike }) {
             <span className="text-sm font-medium">{m.likes || 0}</span>
           </button>
 
+          {/* Tip button disabled during pilot — recipient credit path is broken
+              (asServiceRole stamps service_ as owner, so tips never reach the
+              moment author's wallet). Re-enable when sendMomentTip's recipient
+              credit is fixed. */}
           {!isOwn && (
             <button
-              onClick={() => setShowTip(true)}
-              className={`flex items-center gap-1.5 transition-colors ${tipped ? "text-primary" : "text-[#888] hover:text-primary"}`}
+              disabled
+              title="Tipping is temporarily disabled"
+              className="flex items-center gap-1.5 text-[#555] cursor-not-allowed"
             >
               <Zap className="w-5 h-5" strokeWidth={1.5} />
               <span className="text-sm font-medium">{(m.festcoin_tips || 0) > 0 ? `${m.festcoin_tips} FTC` : "Tip FTC"}</span>
