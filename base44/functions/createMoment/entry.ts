@@ -20,13 +20,14 @@ Deno.serve(async (req) => {
 
     if (!image_url) return Response.json({ status: 'error', message: 'Image is required' }, { status: 400 });
 
-    // 1. Create the moment (service role; created_by_id set explicitly)
-    const moment = await base44.asServiceRole.entities.Moment.create({
+    // 1. Create the moment (user-scoped so created_by_id is the real user,
+    //    not the service role — sendMomentTip relies on this to credit the
+    //    recipient and to prevent self-tipping)
+    const moment = await base44.entities.Moment.create({
       image_url,
       caption,
       is_anonymous,
       author_alias,
-      created_by_id: String(user.id),
     });
 
     // 2. Award fixed FestCoin reward — amount and type are server-controlled

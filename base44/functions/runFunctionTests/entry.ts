@@ -3,9 +3,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // Test harness for backend functions that move money or gate entry.
 // Admin-only. Creates test fixtures, invokes target functions, asserts on
 // responses, and cleans up all test data afterwards.
-//
-// Currently tests sendMomentTip (3 cases). Structured so more test groups
-// can be added as additional sections.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -20,13 +17,6 @@ Deno.serve(async (req) => {
     const record = (name, passed, detail) => {
       results.push({ test: name, passed, detail });
     };
-
-    // Find a non-admin user to be the moment author (recipient)
-    const users = await base44.asServiceRole.entities.User.list(50);
-    const otherUser = users.find(u => u.role !== 'admin' && u.id !== user.id);
-    if (!otherUser) {
-      return Response.json({ error: 'No non-admin user found for test fixtures' }, { status: 500 });
-    }
 
     // Helper: invoke a function and handle both thrown and returned errors
     const invoke = async (fn, payload) => {
@@ -43,13 +33,13 @@ Deno.serve(async (req) => {
     // ===================================================================
 
     // --- TEST 1: Self-tip prevention ---
+    // Uses user-scoped SDK so created_by_id = admin (matches the calling user)
     try {
-      const ownMoment = await base44.asServiceRole.entities.Moment.create({
+      const ownMoment = await base44.entities.Moment.create({
         image_url: 'https://test.invalid/moments/test-self-tip.png',
         caption: '[TEST] self-tip prevention — safe to delete',
         is_anonymous: true,
         author_alias: 'TestSelfTip',
-        created_by_id: String(user.id),
       });
       TRACK('Moment', ownMoment.id);
 
@@ -65,12 +55,13 @@ Deno.serve(async (req) => {
 
     // --- TEST 2: Insufficient balance rejection ---
     try {
+      // Create moment via asServiceRole (created_by_id will be service_...)
+      // so the self-tip check won't trigger; the balance check should catch it
       const otherMoment = await base44.asServiceRole.entities.Moment.create({
         image_url: 'https://test.invalid/moments/test-insufficient.png',
         caption: '[TEST] insufficient balance — safe to delete',
         is_anonymous: true,
         author_alias: 'TestInsufficient',
-        created_by_id: String(otherUser.id),
       });
       TRACK('Moment', otherMoment.id);
 
@@ -85,17 +76,19 @@ Deno.serve(async (req) => {
     }
 
     // --- TEST 3: Recipient receives transferred_in credit (REGRESSION) ---
-    // This is the key test: confirms the fix at lines 71-85 of sendMomentTip
-    // actually creates a transferred_in transaction for the moment author.
-    // Without the fix, the tip is debited from the sender but never credited
-    // to the recipient — effectively burning the FTC.
+    // Confirms the fix at lines 71-85 of sendMomentTip creates a
+    // transferred_in transaction for the moment's author.
+    //
+    // We can't create a moment as another user from this function, so we
+    // create via asServiceRole (created_by_id = service role). The tip will
+    // succeed (not self-tip), and we verify a transferred_in transaction
+    // IS created with the correct amount, description, and status.
     try {
       const tipMoment = await base44.asServiceRole.entities.Moment.create({
         image_url: 'https://test.invalid/moments/test-recipient-credit.png',
         caption: '[TEST] recipient credit regression — safe to delete',
         is_anonymous: true,
         author_alias: 'TestRecipient',
-        created_by_id: String(otherUser.id),
       });
       TRACK('Moment', tipMoment.id);
 
@@ -110,15 +103,14 @@ Deno.serve(async (req) => {
       });
       TRACK('FestCoinTransaction', topupTx.id);
 
-      // Record recipient's transferred_in count BEFORE the tip
-      const recipientTxsBefore = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-        created_by_id: String(otherUser.id),
+      // Record ALL transferred_in transactions with source=moment_tip BEFORE
+      const beforeTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
         type: 'transferred_in',
         source: 'moment_tip',
       });
-      const countBefore = recipientTxsBefore.length;
+      const beforeIds = new Set(beforeTxs.map(t => t.id));
 
-      // Tip 5 FTC to otherUser's moment
+      // Tip 5 FTC
       const tipAmount = 5;
       const d = await invoke('sendMomentTip', { moment_id: tipMoment.id, amount: tipAmount });
 
@@ -126,32 +118,30 @@ Deno.serve(async (req) => {
         record('sendMomentTip: recipient receives transferred_in credit', false,
           `Tip call itself failed (expected success): ${d.status} — ${d.message}`);
       } else {
-        // Query recipient's transferred_in AFTER the tip
-        const recipientTxsAfter = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-          created_by_id: String(otherUser.id),
+        // Query ALL transferred_in with source=moment_tip AFTER
+        const afterTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
           type: 'transferred_in',
           source: 'moment_tip',
         });
-        const countAfter = recipientTxsAfter.length;
 
-        // Find the new transaction (should be exactly 1 more than before)
-        const newCredits = recipientTxsAfter.filter(t => !recipientTxsBefore.some(b => b.id === t.id));
+        // Find transactions that are new (not in before set)
+        const newCredits = afterTxs.filter(t => !beforeIds.has(t.id));
         const matchingCredit = newCredits.find(t =>
           t.amount === tipAmount &&
           t.description === 'Tip received on your moment' &&
           t.status === 'confirmed'
         );
 
-        // Clean up recipient's transferred_in test transaction
+        // Clean up the new transferred_in transaction(s)
         for (const t of newCredits) TRACK('FestCoinTransaction', t.id);
 
-        // Clean up sender's transferred_out test transaction
+        // Clean up sender's transferred_out
         const senderDebits = await base44.asServiceRole.entities.FestCoinTransaction.filter({
           created_by_id: String(user.id),
           type: 'transferred_out',
           source: 'moment_tip',
         });
-        const testDebit = senderDebits.find(t => t.amount === tipAmount && t.description === 'Tipped TestRecipient');
+        const testDebit = senderDebits.find(t => t.amount === tipAmount);
         if (testDebit) TRACK('FestCoinTransaction', testDebit.id);
 
         // Clean up FTCTip records for this moment
@@ -160,14 +150,65 @@ Deno.serve(async (req) => {
 
         record(
           'sendMomentTip: recipient receives transferred_in credit',
-          !!matchingCredit && countAfter === countBefore + 1,
+          !!matchingCredit,
           matchingCredit
-            ? `✓ Recipient received transferred_in of ${tipAmount} FTC (count: ${countBefore} → ${countAfter})`
-            : `✗ No transferred_in transaction found for recipient. Tip succeeded but recipient was NOT credited. (transferred_in count: ${countBefore} → ${countAfter})`
+            ? `✓ transferred_in created: ${tipAmount} FTC, created_by_id=${matchingCredit.created_by_id}`
+            : `✗ Tip succeeded but NO transferred_in created. (before=${beforeTxs.length}, after=${afterTxs.length}, new=${newCredits.length})`
         );
       }
     } catch (e) {
       record('sendMomentTip: recipient receives transferred_in credit', false, `Exception: ${e.message}`);
+    }
+
+    // --- TEST 4: createMoment stores correct created_by_id ---
+    // After fixing createMoment to use user-scoped SDK, the moment's
+    // created_by_id should be the real user ID, not a service role ID.
+    // This is what makes the recipient credit actually land in the right wallet.
+    try {
+      const d = await invoke('createMoment', {
+        image_url: 'https://test.invalid/moments/test-createdby.png',
+        caption: '[TEST] created_by_id check — safe to delete',
+        is_anonymous: true,
+        author_alias: 'TestCreatedBy',
+      });
+
+      if (d.status !== 'success' || !d.moment) {
+        record('createMoment: stores real user ID as created_by_id', false,
+          `createMoment failed: ${d.status} — ${d.message}`);
+      } else {
+        TRACK('Moment', d.moment.id);
+
+        // Also clean up the 10 FTC reward transaction
+        const rewardTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+          created_by_id: String(user.id),
+          type: 'earned',
+          source: 'moment_reward',
+        });
+        const testReward = rewardTxs.find(t => t.description === 'Shared a moment');
+        if (testReward) TRACK('FestCoinTransaction', testReward.id);
+
+        // Clean up badge if created
+        const badges = await base44.asServiceRole.entities.UserBadge.filter({
+          created_by_id: String(user.id),
+          badge_key: 'first_moment',
+        });
+        if (badges.length > 0) {
+          // Don't delete the badge if it already existed before our test
+          // Only track if this was the first time (badge was just created)
+        }
+
+        const cby = d.moment.created_by_id;
+        const isRealUser = cby && !String(cby).startsWith('service_') && String(cby) === String(user.id);
+        record(
+          'createMoment: stores real user ID as created_by_id',
+          isRealUser,
+          isRealUser
+            ? `✓ created_by_id=${cby} (matches user ${user.id})`
+            : `✗ created_by_id=${cby} (expected ${user.id}) — recipient credits would go to wrong owner`
+        );
+      }
+    } catch (e) {
+      record('createMoment: stores real user ID as created_by_id', false, `Exception: ${e.message}`);
     }
 
     // ===================================================================
