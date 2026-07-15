@@ -217,6 +217,76 @@ Deno.serve(async (req) => {
     }
 
     // ===================================================================
+    // TEST 5: reserveTicket with cashback
+    // ===================================================================
+    // Creates a test event with cashback enabled, reserves a ticket,
+    // and verifies that a cashback transaction lands in the buyer's wallet
+    // with the correct amount.
+    try {
+      const testEvent = await base44.asServiceRole.entities.Event.create({
+        title: '[TEST] Cashback Event — safe to delete',
+        description: 'Test event for cashback verification',
+        genre: 'techno',
+        date: new Date(Date.now() + 7 * 86400000).toISOString(),
+        location_name: 'Test Venue',
+        ticket_price: 100,
+        total_capacity: 50,
+        status: 'published',
+        visibility: 'public',
+        ftc_cashback_enabled: true,
+        ftc_cashback_percent: 10,
+        ftc_conversion_rate: 1,
+        organizer_name: 'Test',
+      });
+      TRACK('Event', testEvent.id);
+
+      // Record cashback transactions BEFORE
+      const beforeCashback = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+        created_by_id: String(user.id),
+        source: 'cashback',
+      });
+      const beforeIds = new Set(beforeCashback.map(t => t.id));
+
+      // Reserve a ticket (triggers cashback via processCashback)
+      const d = await invoke('reserveTicket', { event_id: testEvent.id, payment_method: 'test' });
+
+      if (d.status !== 'success') {
+        record('reserveTicket: cashback lands in buyer wallet', false,
+          `Ticket reservation failed: ${d.status} — ${d.message}`);
+      } else {
+        TRACK('Ticket', d.ticket.id);
+
+        // Track all FTC transactions for this test event for cleanup
+        const eventTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+          event_id: testEvent.id,
+        });
+        for (const t of eventTxs) TRACK('FestCoinTransaction', t.id);
+
+        // Check for cashback AFTER
+        const afterCashback = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+          created_by_id: String(user.id),
+          source: 'cashback',
+        });
+        const newCashback = afterCashback.filter(t => !beforeIds.has(t.id));
+
+        const expectedCashback = 10; // price=100, percent=10%, rate=1 → 100*0.10/1 = 10 FTC
+        const matchingCashback = newCashback.find(t =>
+          t.amount === expectedCashback && t.status === 'confirmed'
+        );
+
+        record(
+          'reserveTicket: cashback lands in buyer wallet',
+          !!matchingCashback,
+          matchingCashback
+            ? `✓ Cashback found: ${matchingCashback.amount} FTC (expected ${expectedCashback}), created_by_id=${matchingCashback.created_by_id}`
+            : `✗ No matching cashback. Expected ${expectedCashback} FTC. Found ${newCashback.length} new cashback tx(s): ${newCashback.map(t => t.amount).join(', ') || 'none'}`
+        );
+      }
+    } catch (e) {
+      record('reserveTicket: cashback lands in buyer wallet', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
     // DIAGNOSTIC: Does asServiceRole.entities.FestCoinTransaction.create
     // respect an explicit created_by_id? Uses a fabricated ID so there's
     // zero ambiguity about what "correct" looks like.

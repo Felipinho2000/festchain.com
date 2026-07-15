@@ -12,6 +12,11 @@ Deno.serve(async (req) => {
     try { body = await req.json(); } catch (_) {}
     const event_id = body && body.event_id;
     const payment_method = (body && body.payment_method) || 'test';
+    const ticket_type = (body && body.ticket_type) || 'general';
+    const VALID_TYPES = ['general', 'vip', 'backstage'];
+    if (!VALID_TYPES.includes(ticket_type)) {
+      return Response.json({ status: 'error', message: `Invalid ticket_type: ${ticket_type}. Must be one of: general, vip, backstage` });
+    }
     if (!event_id) return Response.json({ status: 'error', message: 'Missing event' }, { status: 400 });
 
     // 1. Load event (service role reads regardless of RLS — works for private events)
@@ -55,7 +60,22 @@ Deno.serve(async (req) => {
     // 6. Generate QR securely server-side; use phase price/reward if available
     const qrCode = `FC-${crypto.randomUUID()}`;
     const reward = phase ? (phase.festcoin_reward ?? event.festcoin_reward ?? 0) : (event.festcoin_reward || 0);
-    const price = phase ? phase.price : (event.ticket_price || 0);
+    let price = phase ? phase.price : (event.ticket_price || 0);
+
+    // For non-general tiers, require a distinct price — reject if none configured
+    if (ticket_type !== 'general') {
+      const tierPriceField = `${ticket_type}_price`;
+      const phaseTierPrice = phase ? phase[tierPriceField] : null;
+      const eventTierPrice = event[tierPriceField];
+      if (phaseTierPrice == null && eventTierPrice == null) {
+        return Response.json({
+          status: 'error',
+          message: `${ticket_type.charAt(0).toUpperCase() + ticket_type.slice(1)} tickets are not available for this event — no distinct price configured.`
+        });
+      }
+      price = phaseTierPrice != null ? phaseTierPrice : eventTierPrice;
+    }
+
     const organizerId = event.created_by_id ? String(event.created_by_id) : null;
 
     // 7. Create ticket as the user (created_by_id = user for wallet access)
@@ -66,7 +86,7 @@ Deno.serve(async (req) => {
       event_image: event.image_url,
       event_location: event.location_name,
       organizer_id: organizerId,
-      ticket_type: 'general',
+      ticket_type: ticket_type,
       ticket_phase: phase ? phase.name : null,
       price_paid: price,
       payment_method,
@@ -92,6 +112,18 @@ Deno.serve(async (req) => {
           event_id: event.id,
           event_title: event.title,
           status: 'confirmed',
+        });
+      } catch (_) {}
+    }
+
+    // 10. Cashback — if event has cashback enabled, credit the buyer's wallet.
+    //     Reuses processCashback's calculation + duplicate-prevention as-is.
+    if (event.ftc_cashback_enabled && (event.ftc_cashback_percent || 0) > 0) {
+      try {
+        await base44.functions.invoke('processCashback', {
+          event_id: event.id,
+          purchase_reference: ticket.id,
+          native_amount: price,
         });
       } catch (_) {}
     }

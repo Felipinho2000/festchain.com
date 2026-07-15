@@ -47,6 +47,18 @@ Deno.serve(async (req) => {
       is_pilot: true,
     });
 
+    // Cashback on FTC purchase — if event has cashback enabled and applies
+    // to FTC purchases, credit the buyer's wallet via processCashback.
+    if (event.ftc_cashback_enabled && event.ftc_cashback_on_ftc_purchase && (event.ftc_cashback_percent || 0) > 0) {
+      try {
+        await base44.functions.invoke('processCashback', {
+          event_id: event.id,
+          purchase_reference: reference_id,
+          native_amount: native_amount,
+        });
+      } catch (_) {}
+    }
+
     return Response.json({
       status: 'success',
       message: `${ftc_amount} FTC credits added`,

@@ -24,7 +24,7 @@ export default function AppLayout() {
   const location = useLocation();
   const { currentUser } = useAuth();
   const { t } = useLanguage();
-  const isOrganizer = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
+  const isOrganizer = !!currentUser;
 
   const initials = currentUser?.full_name
     ? currentUser.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
@@ -33,7 +33,7 @@ export default function AppLayout() {
   const visibleItems = navItems.filter(i => !i.staffOnly || isOrganizer);
 
   const labelFor = (key) => {
-    const map = { events: "Events", festcoin: "FestCoin", tickets: "Tickets & Rewards", profile: "Profile", dashboard: "Dashboard", scan: "Scanner" };
+    const map = { events: "Events", festcoin: "FestCoin", tickets: "Tickets", profile: "Profile", dashboard: "Dashboard", scan: "Scanner" };
     return map[key] || t(`nav.${key}`);
   };
 

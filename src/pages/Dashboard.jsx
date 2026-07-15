@@ -47,7 +47,7 @@ export default function Dashboard() {
 
   useEffect(() => { loadData(); }, [currentUser]);
 
-  const canOrganize = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
+  const canOrganize = !!currentUser;
   if (!canOrganize) {
     return (
       <div className="max-w-md mx-auto text-center py-20">
