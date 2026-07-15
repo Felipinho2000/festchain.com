@@ -91,7 +91,12 @@ export default function GuestList({ eventId, eventTitle }) {
             {tickets.map(t => (
               <div key={t.id} className="grid grid-cols-12 gap-2 px-4 py-2.5 items-center text-xs">
                 <div className="col-span-5">
-                  <p className="text-white font-medium truncate">{t.id.slice(0, 8)}…</p>
+                  <p className="text-white font-medium truncate flex items-center gap-1.5">
+                    {t.id.slice(0, 8)}…
+                    {(t.ticket_phase === '[DEMO]' || (t.event_title || '').startsWith('[DEMO]')) && (
+                      <span className="text-[9px] font-bold uppercase bg-amber-900/40 text-amber-400 px-1.5 py-0.5 rounded">Demo</span>
+                    )}
+                  </p>
                   <p className="text-[#555] font-mono text-[10px] truncate">{t.qr_code || "—"}</p>
                 </div>
                 <div className="col-span-3">

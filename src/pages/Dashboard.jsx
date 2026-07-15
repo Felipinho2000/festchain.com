@@ -61,15 +61,20 @@ export default function Dashboard() {
     );
   }
 
+  // Exclude demo tickets (tagged ticket_phase:'[DEMO]' or [DEMO] event title)
+  // from KPIs and charts so synthetic data never inflates real analytics.
+  const isDemoTicket = (t) => t.ticket_phase === '[DEMO]' || (t.event_title || '').startsWith('[DEMO]');
+  const realTickets = tickets.filter(t => !isDemoTicket(t));
+
   const totalTicketsSold = events.reduce((s, e) => s + (e.tickets_sold || 0), 0);
-  const totalRevenue = tickets.reduce((s, t) => s + (t.price_paid || 0), 0);
-  const checkedIn = tickets.filter(t => t.checked_in).length;
+  const totalRevenue = realTickets.reduce((s, t) => s + (t.price_paid || 0), 0);
+  const checkedIn = realTickets.filter(t => t.checked_in).length;
 
   const chartData = [];
   for (let i = 6; i >= 0; i--) {
     const day = moment().subtract(i, "days").format("YYYY-MM-DD");
     const dayLabel = moment().subtract(i, "days").format("MMM D");
-    const count = tickets.filter(t => moment(t.created_date).format("YYYY-MM-DD") === day).length;
+    const count = realTickets.filter(t => moment(t.created_date).format("YYYY-MM-DD") === day).length;
     chartData.push({ name: dayLabel, tickets: count });
   }
 
@@ -119,7 +124,7 @@ export default function Dashboard() {
       </div>
 
       {/* Sales Velocity Chart — shown once there is real activity */}
-      {totalTicketsSold > 0 || tickets.length > 0 ? (
+      {totalTicketsSold > 0 || realTickets.length > 0 ? (
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="font-heading font-semibold text-white mb-4">Sales Velocity (7 days)</h3>
           <div className="h-48">
