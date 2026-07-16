@@ -44,7 +44,7 @@ export default function Landing() {
         body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
       }).catch(() => {});
       setSent(true);
-      toast({ title: "Application sent!", description: "We'll be in touch soon." });
+      toast({ title: "Thanks!", description: "Start building your event right now — we'll also reach out to help with your first pilot." });
     } catch (err) {
       toast({ title: "Error", description: "Could not submit. Please try again.", variant: "destructive" });
     } finally {
@@ -284,15 +284,15 @@ export default function Landing() {
           <div className="text-center mb-8">
             <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">Get in touch</p>
             <h2 className="font-heading font-bold text-3xl text-white mb-2">Want to run a pilot event?</h2>
-            <p className="text-[#888] text-sm">Tell us about your party. We onboard organizers for the private pilot.</p>
+            <p className="text-[#888] text-sm">Sign up and create your event today — no approval needed. Tell us about it below and our team will personally reach out to help with your first pilot.</p>
           </div>
           {sent ? (
             <div className="bg-primary/10 border border-primary/30 rounded-2xl p-8 text-center">
               <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-7 h-7 text-primary" strokeWidth={2} />
               </div>
-              <h3 className="font-heading font-bold text-white text-lg mb-2">Application sent!</h3>
-              <p className="text-[#888] text-sm">We'll be in touch soon.</p>
+              <h3 className="font-heading font-bold text-white text-lg mb-2">Thanks for reaching out!</h3>
+              <p className="text-[#888] text-sm">Start creating your event right now — we'll also reach out personally to help with your first pilot.</p>
             </div>
           ) : (
             <form onSubmit={handleContact} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8 space-y-4">
@@ -325,7 +325,7 @@ export default function Landing() {
                   className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors resize-none" placeholder="Tell us about your event or idea..." />
               </div>
               <Button type="submit" disabled={sending || !form.name || !form.email} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-base">
-                {sending ? "Sending..." : "Send Application"} <Send className="w-4 h-4 ml-2" />
+                {sending ? "Sending..." : "Send"} <Send className="w-4 h-4 ml-2" />
               </Button>
             </form>
           )}
