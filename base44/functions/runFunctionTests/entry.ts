@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
 
       const d = await invoke('sendMomentTip', { moment_id: ownMoment.id, amount: 1 });
       record(
-        'sendMomentTip: self-tip prevention',
-        d.status === 'error' && /cannot tip your own/i.test(d.message || ''),
-        `Expected error "cannot tip your own", got: ${d.status} — ${d.message}`
+        'sendMomentTip: self-tip prevention (endpoint now hard-disabled)',
+        d.status === 'error' && /disabled/i.test(d.message || ''),
+        `Expected "disabled" error (endpoint is hard-disabled), got: ${d.status} — ${d.message}`
       );
     } catch (e) {
       record('sendMomentTip: self-tip prevention', false, `Exception: ${e.message}`);
@@ -72,9 +72,9 @@ Deno.serve(async (req) => {
 
       const d = await invoke('sendMomentTip', { moment_id: otherMoment.id, amount: 999999 });
       record(
-        'sendMomentTip: insufficient balance rejection',
-        d.status === 'error' && /insufficient balance/i.test(d.message || ''),
-        `Expected error "Insufficient balance", got: ${d.status} — ${d.message}`
+        'sendMomentTip: insufficient balance rejection (endpoint now hard-disabled)',
+        d.status === 'error' && /disabled/i.test(d.message || ''),
+        `Expected "disabled" error (endpoint is hard-disabled), got: ${d.status} — ${d.message}`
       );
     } catch (e) {
       record('sendMomentTip: insufficient balance rejection', false, `Exception: ${e.message}`);
@@ -390,6 +390,223 @@ Deno.serve(async (req) => {
     } catch (e) {
       record('DIAGNOSTIC 2: update created_by_id on FestCoinTransaction (create-then-update path)', false, `Exception: ${e.message}`);
     }
+
+    // ===================================================================
+    // TEST 6: sendMomentTip is hard-disabled (rejects all requests)
+    // ===================================================================
+    try {
+      const d = await invoke('sendMomentTip', { moment_id: 'any-id', amount: 1 });
+      record(
+        'sendMomentTip: endpoint is hard-disabled',
+        d.status === 'error' && /disabled/i.test(d.message || ''),
+        `Expected "disabled" error, got: ${d.status} — ${d.message}`
+      );
+    } catch (e) {
+      record('sendMomentTip: endpoint is hard-disabled', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // TEST 7: seedDemoData attributes FTC transactions to the admin
+    // ===================================================================
+    try {
+      const beforeDemo = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+        source: 'demo_data',
+      });
+      const beforeIds = new Set(beforeDemo.map(t => t.id));
+
+      const d = await invoke('seedDemoData', {});
+
+      if (d.status !== 'success') {
+        record('seedDemoData: FTC transactions attributed to admin with is_pilot', false,
+          `seedDemoData failed: ${d.status} — ${d.message || d.error}`);
+      } else {
+        const afterDemo = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+          source: 'demo_data',
+        });
+        const newDemoTxs = afterDemo.filter(t => !beforeIds.has(t.id));
+        for (const t of newDemoTxs) TRACK('FestCoinTransaction', t.id);
+
+        if (d.event_id) {
+          TRACK('Event', d.event_id);
+          const demoTickets = await base44.asServiceRole.entities.Ticket.filter({
+            event_id: d.event_id, ticket_phase: '[DEMO]',
+          });
+          for (const t of demoTickets) TRACK('Ticket', t.id);
+        }
+
+        const allAttributed = newDemoTxs.length > 0 && newDemoTxs.every(t =>
+          t.is_pilot === true &&
+          String(t.created_by_id) === String(user.id)
+        );
+
+        record(
+          'seedDemoData: FTC transactions attributed to admin with is_pilot',
+          allAttributed,
+          allAttributed
+            ? `✓ ${newDemoTxs.length} demo FTC tx(s) all have is_pilot=true and created_by_id=${user.id}`
+            : `✗ Found ${newDemoTxs.length} tx(s). ${newDemoTxs.map(t => `is_pilot=${t.is_pilot}, cby=${t.created_by_id}`).join('; ') || 'none found'}`
+        );
+      }
+    } catch (e) {
+      record('seedDemoData: FTC transactions attributed to admin with is_pilot', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // TEST 8: redeemEventItem prevents duplicate + enforces stock=0
+    // ===================================================================
+    try {
+      const testEvent = await base44.asServiceRole.entities.Event.create({
+        title: '[TEST] Redemption Guard Event — safe to delete',
+        genre: 'techno',
+        date: new Date(Date.now() + 7 * 86400000).toISOString(),
+        location_name: 'Test Venue',
+        ticket_price: 50,
+        total_capacity: 50,
+        status: 'published',
+        visibility: 'public',
+        ftc_enabled: true,
+        organizer_name: 'Test',
+      });
+      TRACK('Event', testEvent.id);
+
+      const menuItem = await base44.asServiceRole.entities.VenueMenuItem.create({
+        event_id: testEvent.id,
+        event_title: testEvent.title,
+        name: '[TEST] Test Drink',
+        category: 'drinks',
+        price_ftc: 5,
+        price_brl: 10,
+        is_available: true,
+        stock: 1,
+        accepts_ftc: true,
+      });
+      TRACK('VenueMenuItem', menuItem.id);
+
+      const ticket = await base44.entities.Ticket.create({
+        event_id: testEvent.id,
+        organizer_id: String(user.id),
+        event_title: testEvent.title,
+        event_date: testEvent.date,
+        ticket_type: 'general',
+        price_paid: 50,
+        payment_method: 'test',
+        qr_code: `TEST-RDM-${Date.now()}`,
+        status: 'active',
+      });
+      TRACK('Ticket', ticket.id);
+
+      const topup = await base44.entities.FestCoinTransaction.create({
+        type: 'earned',
+        amount: 100,
+        description: '[TEST] FTC for redemption test — safe to delete',
+        source: 'test_fixture',
+        status: 'confirmed',
+      });
+      TRACK('FestCoinTransaction', topup.id);
+
+      // First redemption — should succeed
+      const d1 = await invoke('redeemEventItem', { event_id: testEvent.id, menu_item_id: menuItem.id });
+      const firstSucceeded = d1.status === 'success';
+
+      // Track redemption + spent tx if created
+      if (firstSucceeded) {
+        const redemptions = await base44.asServiceRole.entities.EventRedemption.filter({
+          event_id: testEvent.id,
+        });
+        for (const r of redemptions) TRACK('EventRedemption', r.id);
+        const spentTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+          created_by_id: String(user.id),
+          type: 'spent',
+          event_id: testEvent.id,
+        });
+        for (const t of spentTxs) TRACK('FestCoinTransaction', t.id);
+      }
+
+      // Second redemption — should fail with "already redeemed"
+      const d2 = await invoke('redeemEventItem', { event_id: testEvent.id, menu_item_id: menuItem.id });
+      const duplicateBlocked = d2.status === 'error' && /already redeemed/i.test(d2.message || '');
+
+      // Create out-of-stock item
+      const oosItem = await base44.asServiceRole.entities.VenueMenuItem.create({
+        event_id: testEvent.id,
+        event_title: testEvent.title,
+        name: '[TEST] OOS Item',
+        category: 'drinks',
+        price_ftc: 5,
+        price_brl: 10,
+        is_available: true,
+        stock: 0,
+        accepts_ftc: true,
+      });
+      TRACK('VenueMenuItem', oosItem.id);
+
+      // Try to redeem out-of-stock — should fail
+      const d3 = await invoke('redeemEventItem', { event_id: testEvent.id, menu_item_id: oosItem.id });
+      const stockBlocked = d3.status === 'error' && /out of stock/i.test(d3.message || '');
+
+      record(
+        'redeemEventItem: duplicate + stock guards',
+        firstSucceeded && duplicateBlocked && stockBlocked,
+        `First redemption: ${firstSucceeded ? '✓ succeeded' : '✗ failed'}. ` +
+        `Duplicate blocked: ${duplicateBlocked ? '✓' : '✗ (' + d2.status + ': ' + d2.message + ')'}. ` +
+        `Stock=0 blocked: ${stockBlocked ? '✓' : '✗ (' + d3.status + ': ' + d3.message + ')'}.`
+      );
+    } catch (e) {
+      record('redeemEventItem: duplicate + stock guards', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // TEST 9: likeMoment increments likes for non-author
+    // ===================================================================
+    try {
+      // Create moment via asServiceRole (owner = service_..., not the admin)
+      const testMoment = await base44.asServiceRole.entities.Moment.create({
+        image_url: 'https://test.invalid/moments/test-like.png',
+        caption: '[TEST] likeMoment — safe to delete',
+        is_anonymous: true,
+        author_alias: 'TestLike',
+        likes: 0,
+      });
+      TRACK('Moment', testMoment.id);
+
+      const beforeLikes = testMoment.likes || 0;
+
+      // Call likeMoment (user is NOT the author — service_ owns it)
+      const d = await invoke('likeMoment', { moment_id: testMoment.id });
+
+      // Re-fetch to verify
+      const refetched = await base44.asServiceRole.entities.Moment.get(testMoment.id);
+      const afterLikes = refetched?.likes || 0;
+
+      record(
+        'likeMoment: increments likes for non-author',
+        d.status === 'success' && afterLikes === beforeLikes + 1,
+        d.status === 'success'
+          ? `✓ likes went from ${beforeLikes} to ${afterLikes} (expected ${beforeLikes + 1})`
+          : `✗ likeMoment failed: ${d.status} — ${d.message}`
+      );
+    } catch (e) {
+      record('likeMoment: increments likes for non-author', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // DOCUMENTED GAPS — not fixed, called out explicitly
+    // ===================================================================
+    record(
+      'GAP: Pre-existing orphaned ledger rows (pre-fix seedDemoData) not retroactively cleaned',
+      true,
+      'Demo FTC transactions created before the is_pilot/created_by_id fix still have ' +
+      'service_ owners and is_pilot=false (or null). They are not retroactively cleaned up. ' +
+      'They can be identified by source="demo_data" and is_pilot != true.'
+    );
+    record(
+      'GAP: Ticket asServiceRole stamping issue unverified',
+      true,
+      'Whether Ticket.create via asServiceRole has the same phantom-owner stamping ' +
+      'issue as Moment (service_ instead of real user) is unverified. If it does, ' +
+      'tickets created via seedDemoData may have incorrect ownership. ' +
+      'This should be tested before relying on asServiceRole for ticket creation.'
+    );
 
     // ===================================================================
     // CLEANUP — delete all test fixtures

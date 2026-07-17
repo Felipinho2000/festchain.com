@@ -20,8 +20,13 @@ export default function Moments() {
   useEffect(() => { loadMoments(); }, []);
 
   const handleLike = async (m) => {
-    await base44.entities.Moment.update(m.id, { likes: (m.likes || 0) + 1 });
-    setMoments(prev => prev.map(x => x.id === m.id ? { ...x, likes: (x.likes || 0) + 1 } : x));
+    try {
+      const res = await base44.functions.invoke("likeMoment", { moment_id: m.id });
+      const data = res.data || res;
+      if (data.status === "success") {
+        setMoments(prev => prev.map(x => x.id === m.id ? { ...x, likes: data.likes } : x));
+      }
+    } catch (e) {}
   };
 
   const totalTips = moments.reduce((s, m) => s + (m.festcoin_tips || 0), 0);

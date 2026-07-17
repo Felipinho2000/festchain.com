@@ -32,6 +32,19 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'You need an active ticket for this event to redeem items' }, { status: 403 });
     }
 
+    // Prevent duplicate redemption of the same item by the same user
+    const existingRedemptions = await base44.entities.EventRedemption.filter({
+      created_by_id: user.id, menu_item_id, status: 'redeemed'
+    }).catch(() => []);
+    if (existingRedemptions.length > 0) {
+      return Response.json({ status: 'error', message: 'You have already redeemed this item' }, { status: 409 });
+    }
+
+    // Enforce stock — block redemption when stock reaches zero
+    if (item.stock != null && item.stock <= 0) {
+      return Response.json({ status: 'error', message: 'This item is out of stock' }, { status: 409 });
+    }
+
     // Compute FTC balance
     const allTx = await base44.entities.FestCoinTransaction.filter({ created_by_id: user.id }).catch(() => []);
     const validTx = allTx.filter(t => !['cancelled', 'failed'].includes(t.status));

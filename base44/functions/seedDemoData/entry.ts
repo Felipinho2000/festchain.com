@@ -47,12 +47,16 @@ Deno.serve(async (req) => {
         festcoin_earned: 50,
         created_by_id: String(user.id)
       });
-      await base44.asServiceRole.entities.FestCoinTransaction.create({
+      // User-scoped (not asServiceRole) so created_by_id stamps as the admin
+      // who ran the seed — asServiceRole ignores created_by_id and stamps
+      // service_... (proven by runFunctionTests DIAGNOSTIC).
+      await base44.entities.FestCoinTransaction.create({
         type: 'earned',
         amount: 50,
         description: '[DEMO] Pilot reward: ' + event.title,
         source: 'demo_data',
-        status: 'confirmed'
+        status: 'confirmed',
+        is_pilot: true
       });
     }
 
