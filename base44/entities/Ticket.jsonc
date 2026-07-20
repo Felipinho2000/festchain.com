@@ -52,6 +52,7 @@
     "status": {
       "type": "string",
       "enum": [
+        "pending",
         "active",
         "used",
         "transferred",
@@ -78,6 +79,9 @@
     "festcoin_earned": {
       "type": "number",
       "default": 0
+    },
+    "stripe_session_id": {
+      "type": "string"
     }
   },
   "required": [

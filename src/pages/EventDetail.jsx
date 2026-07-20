@@ -80,30 +80,29 @@ export default function EventDetail() {
       }).catch(() => {});
   }, [currentUser]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") === "cancelled") {
+      toast({ title: "Payment cancelled", description: "Your ticket was not purchased." });
+    }
+  }, [toast]);
+
   const handlePurchase = async () => {
+    if (window.self !== window.top) {
+      toast({ title: "Open in a new tab", description: "Checkout works only from a published app, not in the preview.", variant: "destructive" });
+      return;
+    }
     setPurchasing(true);
     try {
-      const res = await base44.functions.invoke("reserveTicket", { event_id: event.id, payment_method: "test" });
+      const res = await base44.functions.invoke("createCheckoutSession", { event_id: event.id, ticket_type: "general" });
       const data = res.data || res;
-      if (data.status === "success") {
-        try {
-          const cached = JSON.parse(localStorage.getItem("fc_tickets") || "{}");
-          cached[data.ticket.id] = {
-            qr_code: data.ticket.qr_code,
-            event_title: data.ticket.event_title,
-            event_date: data.ticket.event_date,
-            event_location: data.ticket.event_location
-          };
-          localStorage.setItem("fc_tickets", JSON.stringify(cached));
-        } catch (_) {}
-        setBuyOpen(false);
-        toast({ title: "Ticket secured!", description: `Your ticket for ${event.title} is in your wallet.` });
-        setEvent(prev => ({ ...prev, tickets_sold: (prev.tickets_sold || 0) + 1 }));
+      if (data.status === "success" && data.checkout_url) {
+        window.location.href = data.checkout_url;
       } else {
-        toast({ title: "Could not issue ticket", description: data.message || "Try again", variant: "destructive" });
+        toast({ title: "Checkout failed", description: data.message || "Try again", variant: "destructive" });
       }
     } catch (e) {
-      toast({ title: "Could not issue ticket", description: e.message, variant: "destructive" });
+      toast({ title: "Checkout failed", description: e.message, variant: "destructive" });
     } finally {
       setPurchasing(false);
     }
@@ -303,7 +302,7 @@ export default function EventDetail() {
               ) : (
                 <p className="font-heading font-bold text-2xl text-warmgray">Coming soon</p>
               )}
-              <p className="text-xs text-warmgray mt-1">Secure QR ticket · payment handled manually during pilot.</p>
+              <p className="text-xs text-warmgray mt-1">Secure QR ticket · pay with Pix or credit card.</p>
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
                 <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC reward when you attend
               </div>
@@ -334,13 +333,13 @@ export default function EventDetail() {
           <div className="space-y-4">
             <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray">
               {phase && <p className="text-foreground font-medium mb-1">{phase.name} phase</p>}
-              <p>You'll receive a secure QR ticket in your wallet. <strong className="text-foreground">No real payment is processed during the private pilot</strong> — tickets are issued for testing and check-in.</p>
+              <p>You'll be redirected to Stripe to complete your payment with <strong className="text-foreground">Pix or credit card</strong>. Your QR ticket will appear in your wallet once payment is confirmed.</p>
             </div>
             <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={handlePurchase} disabled={purchasing}>
               {purchasing ? (
-                <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Issuing...</span>
+                <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecting...</span>
               ) : (
-                displayPrice !== null ? `Reserve Ticket · R$ ${displayPrice.toFixed(2)}` : "Reserve Ticket"
+                displayPrice !== null ? `Pay R$ ${displayPrice.toFixed(2)}` : "Pay"
               )}
             </Button>
             <p className="text-[10px] text-[#555] text-center">By getting a ticket you accept the <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.</p>
