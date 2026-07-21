@@ -4,31 +4,190 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
-  Ticket, QrCode, Wallet, ShieldCheck, Sparkles, LayoutDashboard,
-  Mail, MapPin, Send, Check, ChevronRight, Menu, X, ArrowRight,
-  Music, Users, Building2, Star, Coins,
+  Users, Zap, Gift, ShieldCheck, Check, ChevronRight, Menu, X, ArrowRight,
+  Mail, MapPin, Send, MessageCircle, Ticket, TrendingUp, CalendarPlus,
+  DoorOpen, Repeat, Search, Wallet as WalletIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/components/shared/Logo";
-import LandingFAQ from "@/components/landing/LandingFAQ";
-import BeyondTheTicket from "@/components/landing/BeyondTheTicket";
 import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
-const STEP_ICONS = [Music, Ticket, Sparkles, Wallet];
+/* ─────────────────────────────────────────────────────────────
+   CONFIG — swap these two before going live:
+     WHATSAPP_NUMBER: international format, 55 + DDD + number
+     CONTACT_EMAIL:   where the pilot form + footer point
+   ───────────────────────────────────────────────────────────── */
+const WHATSAPP_NUMBER = "5511999999999";
+const CONTACT_EMAIL = "contato@festchain.com";
+
+/* Bilingual copy, self-contained so it rides on the existing LanguageSwitcher
+   (lang comes from useLanguage) without touching the shared translations file. */
+const COPY = {
+  "pt-BR": {
+    nav: { organizers: "Para organizadores", how: "Como funciona", crowd: "Para a galera", openApp: "Abrir app", login: "Entrar", cta: "Quero levar minha festa" },
+    hero: {
+      badge: "Feito para a vida noturna do Brasil",
+      title1: "O sistema operacional", title2: "da vida noturna.",
+      sub: "A FestChain ajuda clubs, festivais, coletivos e promoters a vender mais ingressos, controlar a portaria, recompensar quem aparece e transformar o público de uma noite em uma audiência que é realmente sua.",
+      ctaPrimary: "Quero levar minha festa", ctaSecondary: "Ver como funciona",
+      note: "Comissão de promoter automática · Pix na hora · Cashback que traz a galera de volta",
+    },
+    strip: ["Taxas menores", "Pix confirmado na hora", "Proteção contra fraude", "Repasse confiável"],
+    wedge: {
+      kicker: "Por que trocam de plataforma",
+      title: "Feito pra como a noite vende de verdade.",
+      sub: "Não é ferramenta genérica de eventos. É construída em cima das três coisas que fazem uma festa lotar no Brasil — promoter, WhatsApp e boca a boca.",
+      cards: [
+        { icon: Users, t: "Promoter que vende", d: "Cada promoter e RP ganha um link próprio. Cada venda é atribuída automaticamente e a comissão é calculada sozinha. Eles veem quanto venderam e quanto vão receber, em tempo real. É onde as outras plataformas são mais fracas." },
+        { icon: Zap, t: "Pix na hora", d: "Checkout com Pix instantâneo, cartão e parcelamento pra ingresso de festival. Confirmação automática na hora do pagamento e o ingresso chega no WhatsApp de quem comprou. Sem fila, sem fricção, mais conversão." },
+        { icon: Gift, t: "Cashback que volta", d: "Cada ingresso gera crédito pra próxima festa. A galera volta — e você sabe exatamente quem são. Duplique o evento com um toque e chame de volta todo mundo que foi e todo mundo que tem crédito guardado." },
+      ],
+    },
+    own: {
+      kicker: "Retenção",
+      title1: "Uma audiência que é sua.", title2: "De verdade.",
+      p1: "Nas plataformas de sempre, o cliente é da plataforma — você aluga acesso ao seu próprio público. Na FestChain, o público, os dados e o relacionamento são seus.",
+      p2: "Depois da festa, o cashback, o histórico e o contato ficam com você. Um toque duplica o evento e avisa todo mundo que foi — mais quem ainda tem crédito pra gastar.",
+      quote: "É o loop de retenção que uma plataforma genérica de ingressos não consegue fechar.",
+      rows: [
+        { i: "M", n: "Mari S.", s: "Foi na última · R$18 de crédito", b: "Voltou" },
+        { i: "P", n: "Pedro L.", s: "Foi 3x · promoter da casa", b: "Voltou" },
+        { i: "J", n: "Jé + 4 amigos", s: "Grupo · comprou junto", b: "Voltou" },
+        { i: "R", n: "Rafa D.", s: "R$30 de crédito parado", b: "Chamar" },
+      ],
+    },
+    how: {
+      kicker: "Para organizadores",
+      title: "Da criação à próxima lotação.",
+      steps: [
+        { icon: CalendarPlus, t: "Crie", d: "Monte o evento em minutos — lotes, line-up, horários e preços numa página só. Salve como modelo e duplique festas semanais em segundos." },
+        { icon: Ticket, t: "Venda", d: "Ative seus promoters com links e comissão automática. Um toque compartilha no WhatsApp e no Instagram. É assim que a noite vende." },
+        { icon: DoorOpen, t: "Portaria", d: "Check-in por QR à prova de duplicidade, vários operadores, contador ao vivo de quem já entrou. Lista e cortesia com nome na porta." },
+        { icon: Repeat, t: "Traga de volta", d: "Veja receita, vendas por lote e por promoter em tempo real. Cashback e follow trazem a galera pra próxima. O ciclo recomeça." },
+      ],
+    },
+    crowd: {
+      kicker: "Para a galera",
+      title: "A noite, do começo ao fim, no celular.",
+      cta: "Encontrar eventos",
+      items: [
+        { icon: Search, t: "Descubra", d: "O que rola hoje, no fim de semana e pra onde os amigos vão." },
+        { icon: Zap, t: "Compre em segundos", d: "Pix na hora ou cartão parcelado. Ingresso no WhatsApp na hora." },
+        { icon: Ticket, t: "Entre rápido", d: "QR na carteira, funciona offline, sem fila na porta." },
+        { icon: Gift, t: "Ganhe cashback", d: "Crédito que volta e paga parte do próximo rolê." },
+      ],
+    },
+    trust: {
+      title: "Seguro por design.",
+      body: "Cada ingresso carrega um QR único com validação segura no servidor — nada de ingresso falso, duplicado ou dor de cabeça na porta. Por trás, ticketing seguro, proteção contra fraude e repasses confiáveis, sem ninguém precisar pensar na tecnologia por baixo.",
+    },
+    contact: {
+      kicker: "Comece agora",
+      title: "Quer levar sua próxima festa pra FestChain?",
+      sub: "Fale com a gente no WhatsApp ou deixe seus dados. Sem burocracia — só uma conversa sobre a sua noite.",
+      whatsapp: "Falar no WhatsApp",
+      roleLabel: "Eu sou…",
+      roles: ["Organizador", "Promoter", "DJ", "Marca", "Investidor"],
+      nameL: "Nome", emailL: "E-mail", msgL: "Sobre sua festa",
+      namePh: "Seu nome", emailPh: "voce@email.com", msgPh: "Nome da festa, cidade, data, como você vende hoje…",
+      send: "Enviar", sending: "Enviando…",
+      sentTitle: "Recebemos!", sentSub: "Vamos te chamar pra ajudar a colocar sua próxima festa no ar. Se quiser adiantar, fala com a gente no WhatsApp.",
+      errTitle: "Erro", errSub: "Não conseguimos enviar. Tente de novo.",
+    },
+    footer: { tagline: "O sistema operacional da vida noturna. Feito no Brasil, começando por São Paulo.", rights: "Ticketing seguro · Proteção contra fraude · Repasse confiável" },
+    waMsg: "Oi! Quero levar minha festa pra FestChain.",
+  },
+  en: {
+    nav: { organizers: "For organizers", how: "How it works", crowd: "For the crowd", openApp: "Open app", login: "Log in", cta: "Bring your party" },
+    hero: {
+      badge: "Built for Brazil's nightlife",
+      title1: "The operating system", title2: "for nightlife.",
+      sub: "FestChain helps clubs, festivals, collectives and promoters sell more tickets, run the door, reward the people who show up, and turn a one-night crowd into an audience they actually own.",
+      ctaPrimary: "Bring your party", ctaSecondary: "See how it works",
+      note: "Automatic promoter commissions · Instant Pix checkout · Cashback that brings the crowd back",
+    },
+    strip: ["Lower fees", "Pix confirmed instantly", "Fraud protection", "Reliable payouts"],
+    wedge: {
+      kicker: "Why they switch",
+      title: "Built for how nightlife actually sells.",
+      sub: "Not generic events tooling. Built on the three things that fill a party in Brazil — promoters, WhatsApp and word of mouth.",
+      cards: [
+        { icon: Users, t: "Promoters that sell", d: "Every promoter and RP gets their own link. Every sale is attributed automatically and commission is calculated for them. They see what they sold and what they'll earn, live. It's exactly where the other platforms are weakest." },
+        { icon: Zap, t: "Instant Pix", d: "Checkout with instant Pix, card and installments for festival-tier prices. Auto-confirmed the moment payment lands, and the ticket arrives on the buyer's WhatsApp. No queue, no friction, more conversion." },
+        { icon: Gift, t: "Cashback that returns", d: "Every ticket earns credit toward the next party. The crowd comes back — and you know exactly who they are. Duplicate the event in one tap and invite back everyone who came and everyone holding credit." },
+      ],
+    },
+    own: {
+      kicker: "Retention",
+      title1: "An audience that is", title2: "actually yours.",
+      p1: "On the usual platforms, the customer belongs to the platform — you're renting access to your own crowd. On FestChain, the audience, the data and the relationship are yours.",
+      p2: "After the party, the cashback, the history and the contact stay with you. One tap duplicates the event and notifies everyone who came — plus everyone still holding credit to spend.",
+      quote: "It's the retention loop a generic ticketing platform structurally can't close.",
+      rows: [
+        { i: "M", n: "Mari S.", s: "Last event · R$18 credit", b: "Returned" },
+        { i: "P", n: "Pedro L.", s: "3 events · house promoter", b: "Returned" },
+        { i: "J", n: "Jé + 4 friends", s: "Group · bought together", b: "Returned" },
+        { i: "R", n: "Rafa D.", s: "R$30 credit unused", b: "Invite" },
+      ],
+    },
+    how: {
+      kicker: "For organizers",
+      title: "From creation to the next sellout.",
+      steps: [
+        { icon: CalendarPlus, t: "Create", d: "Build the event in minutes — phases, line-up, set times and prices on one page. Save as a template and duplicate weekly parties in seconds." },
+        { icon: Ticket, t: "Sell", d: "Activate your promoters with links and automatic commission. One tap shares to WhatsApp and Instagram. That's how the night sells." },
+        { icon: DoorOpen, t: "Run the door", d: "Duplicate-proof QR check-in, multiple scanners, a live counter of who's inside. Guest list and comps with name-at-the-door." },
+        { icon: Repeat, t: "Bring them back", d: "See revenue, sales by phase and by promoter in real time. Cashback and follows pull the crowd to the next one. The cycle restarts." },
+      ],
+    },
+    crowd: {
+      kicker: "For the crowd",
+      title: "The whole night, start to finish, on your phone.",
+      cta: "Find events",
+      items: [
+        { icon: Search, t: "Discover", d: "What's on tonight, this weekend, and where your friends are going." },
+        { icon: Zap, t: "Buy in seconds", d: "Instant Pix or card in installments. Ticket on WhatsApp right away." },
+        { icon: Ticket, t: "Get in fast", d: "QR in your wallet, works offline, no queue at the door." },
+        { icon: Gift, t: "Earn cashback", d: "Credit that comes back and covers part of the next night out." },
+      ],
+    },
+    trust: {
+      title: "Secure by design.",
+      body: "Every ticket carries a unique QR with secure server-side validation — no fakes, no doubles, no hassle at the door. Behind the scenes, secure ticketing, fraud protection and reliable payouts, without anyone needing to think about the technology underneath.",
+    },
+    contact: {
+      kicker: "Get started",
+      title: "Want to bring your next party to FestChain?",
+      sub: "Message us on WhatsApp or leave your details. No red tape — just a conversation about your night.",
+      whatsapp: "Message on WhatsApp",
+      roleLabel: "I am a…",
+      roles: ["Organizer", "Promoter", "DJ", "Brand", "Investor"],
+      nameL: "Name", emailL: "Email", msgL: "About your party",
+      namePh: "Your name", emailPh: "you@email.com", msgPh: "Party name, city, date, how you sell today…",
+      send: "Send", sending: "Sending…",
+      sentTitle: "Got it!", sentSub: "We'll reach out to help you get your next party live. Want to move faster? Message us on WhatsApp.",
+      errTitle: "Error", errSub: "Could not submit. Please try again.",
+    },
+    footer: { tagline: "The operating system for nightlife. Built in Brazil, starting with São Paulo.", rights: "Secure ticketing · Fraud protection · Reliable payouts" },
+    waMsg: "Hi! I want to run my event on FestChain.",
+  },
+};
 
 export default function Landing() {
-  const { lang, t } = useLanguage();
+  const { lang } = useLanguage();
   const { currentUser } = useAuth();
   const authed = !!currentUser;
   const { toast } = useToast();
+  const c = COPY[lang] || COPY["pt-BR"];
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", message: "", role: "Organizer" });
+  const [form, setForm] = useState({ name: "", email: "", message: "", role: c.contact.roles[0] });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
   const findEventsTo = authed ? "/events" : "/register";
-  const createEventTo = authed ? "/dashboard" : "/register";
+  const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(c.waMsg)}`;
 
   const handleContact = async (e) => {
     e.preventDefault();
@@ -36,35 +195,27 @@ export default function Landing() {
     try {
       await base44.entities.PilotApplication.create({
         name: form.name, email: form.email, role: form.role || "",
-        message: form.message, status: "new", source: "landing_form"
+        message: form.message, status: "new", source: "landing_form",
       });
       base44.integrations.Core.SendEmail({
-        to: "hello@festchain.app",
+        to: CONTACT_EMAIL,
         subject: `Pilot application — ${form.name}${form.role ? ` (${form.role})` : ""}`,
         body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
       }).catch(() => {});
       setSent(true);
-      toast({ title: "Thanks!", description: "Start building your event right now — we'll also reach out to help with your first pilot." });
+      toast({ title: c.contact.sentTitle, description: c.contact.sentSub });
     } catch (err) {
-      toast({ title: "Error", description: "Could not submit. Please try again.", variant: "destructive" });
+      toast({ title: c.contact.errTitle, description: c.contact.errSub, variant: "destructive" });
     } finally {
       setSending(false);
     }
   };
 
-  const steps = [
-    { title: "Discover or create a party", desc: "Find live events near you, or launch your own in minutes." },
-    { title: "Get a secure QR ticket", desc: "Reserve your spot. Each ticket has a unique QR code for entry." },
-    { title: "Earn FestCoin rewards", desc: "Show up, get rewarded. FestCoin lands in your balance after check-in." },
-    { title: "Redeem perks inside", desc: "Use FestCoin for drinks, VIP access, and perks at the event." },
-  ];
-
   const NavLinks = ({ onClick }) => (
     <>
-      <a href="#how" onClick={onClick} className="hover:text-white transition-colors">How it works</a>
-      <a href="#audiences" onClick={onClick} className="hover:text-white transition-colors">For You</a>
-      <Link to="/legal" onClick={onClick} className="hover:text-white transition-colors">Trust &amp; Safety</Link>
-      <a href="#contact" onClick={onClick} className="hover:text-white transition-colors">Create Event</a>
+      <a href="#promoters" onClick={onClick} className="hover:text-white transition-colors">{c.nav.organizers}</a>
+      <a href="#how" onClick={onClick} className="hover:text-white transition-colors">{c.nav.how}</a>
+      <a href="#crowd" onClick={onClick} className="hover:text-white transition-colors">{c.nav.crowd}</a>
     </>
   );
 
@@ -79,19 +230,19 @@ export default function Landing() {
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             {authed ? (
-              <Link to="/events">
-                <Button className="hidden sm:flex bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold">
-                  Find Events <ChevronRight className="w-4 h-4 ml-1" />
+              <Link to="/app" className="hidden sm:block">
+                <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold">
+                  {c.nav.openApp} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             ) : (
-              <Link to="/register" className="hidden sm:block">
+              <a href={waHref} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
                 <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold">
-                  Join the Pilot
+                  {c.nav.cta}
                 </Button>
-              </Link>
+              </a>
             )}
-            <button className="md:hidden p-2 text-[#888] hover:text-white" onClick={() => setMenuOpen(m => !m)}>
+            <button className="md:hidden p-2 text-[#888] hover:text-white" onClick={() => setMenuOpen((m) => !m)} aria-label="Menu">
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -99,9 +250,9 @@ export default function Landing() {
         {menuOpen && (
           <div className="md:hidden border-t border-[#1f1f1f] px-5 py-4 flex flex-col gap-3 text-sm text-[#888]">
             <NavLinks onClick={() => setMenuOpen(false)} />
-            <Link to={authed ? "/events" : "/register"} onClick={() => setMenuOpen(false)} className="text-primary font-semibold">
-              {authed ? "Find Events" : "Join the Pilot"}
-            </Link>
+            <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)} className="text-primary font-semibold">
+              {c.nav.cta}
+            </a>
           </div>
         )}
       </nav>
@@ -113,56 +264,57 @@ export default function Landing() {
         <div className="max-w-3xl mx-auto text-center relative">
           <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-4 py-2 rounded-full mb-8 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            Private Pilot · Now Onboarding
+            {c.hero.badge}
           </div>
           <h1 className="font-heading font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.02] tracking-tight mb-6">
-            The new way<br />to <span className="text-primary">party.</span>
+            {c.hero.title1}<br /><span className="text-primary">{c.hero.title2}</span>
           </h1>
-          <p className="text-[#aaa] text-base sm:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Discover events, enter with secure tickets, earn FestCoin rewards, and unlock perks inside the party.
-          </p>
-
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-10">
-            <Link to={findEventsTo}>
+          <p className="text-[#aaa] text-base sm:text-lg leading-relaxed mb-10 max-w-2xl mx-auto">{c.hero.sub}</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-8">
+            <a href={waHref} target="_blank" rel="noopener noreferrer">
               <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white h-12 px-8 rounded-xl font-bold text-base">
-                <Ticket className="w-5 h-5 mr-2" strokeWidth={2} /> Find Events
+                <MessageCircle className="w-5 h-5 mr-2" strokeWidth={2} /> {c.hero.ctaPrimary}
               </Button>
-            </Link>
-            <Link to={createEventTo}>
+            </a>
+            <a href="#promoters">
               <Button variant="outline" className="w-full sm:w-auto h-12 px-7 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                <LayoutDashboard className="w-5 h-5 mr-2" strokeWidth={2} /> Create Event
+                {c.hero.ctaSecondary}
               </Button>
-            </Link>
+            </a>
           </div>
-
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-[#666]">
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Secure QR tickets</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Real rewards</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-primary" /> Fast check-in</span>
-          </div>
+          <p className="text-sm text-[#666]">{c.hero.note}</p>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section id="how" className="py-16 px-5">
+      {/* ── TRUST STRIP ── */}
+      <div className="border-t border-b border-[#1f1f1f] bg-[#111]">
+        <div className="max-w-6xl mx-auto px-5 py-5 flex flex-wrap justify-center gap-x-10 gap-y-2.5">
+          {c.strip.map((item, i) => (
+            <span key={i} className="flex items-center gap-2 text-[#aaa] text-sm font-medium">
+              <Check className="w-4 h-4 text-primary" strokeWidth={2.5} /> {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── WEDGE ── */}
+      <section id="promoters" className="py-20 px-5">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">How it works</p>
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">Your night, in four steps.</h2>
+          <div className="max-w-2xl mb-12">
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.wedge.kicker}</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white mb-4 leading-tight">{c.wedge.title}</h2>
+            <p className="text-[#aaa] text-base leading-relaxed">{c.wedge.sub}</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {steps.map((step, i) => {
-              const Icon = STEP_ICONS[i];
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {c.wedge.cards.map((card, i) => {
+              const Icon = card.icon;
               return (
-                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 hover:border-primary/30 transition-all relative">
-                  <div className="absolute top-5 right-5 w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <span className="text-xs font-bold text-primary">{i + 1}</span>
+                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-7 hover:border-primary/30 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
+                    <Icon className="w-6 h-6 text-primary" strokeWidth={1.5} />
                   </div>
-                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                  </div>
-                  <h3 className="font-heading font-bold text-white text-base mb-1.5">{step.title}</h3>
-                  <p className="text-[#888] text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="font-heading font-bold text-white text-xl mb-2.5">{card.t}</h3>
+                  <p className="text-[#888] text-sm leading-relaxed">{card.d}</p>
                 </div>
               );
             })}
@@ -170,184 +322,179 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── FESTCOIN STRIP ── */}
-      <section className="py-10 px-5">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mx-auto mb-4">
-            <Coins className="w-5 h-5 text-primary" strokeWidth={1.5} />
+      {/* ── OWN YOUR AUDIENCE ── */}
+      <section className="py-20 px-5 bg-[#111] border-t border-b border-[#1f1f1f]">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.own.kicker}</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-5xl text-white mb-5 leading-[1.05]">
+              {c.own.title1}<br />{c.own.title2}
+            </h2>
+            <p className="text-[#aaa] text-base leading-relaxed mb-4">{c.own.p1}</p>
+            <p className="text-[#aaa] text-base leading-relaxed mb-6">{c.own.p2}</p>
+            <p className="text-[#777] text-sm border-l-2 border-primary pl-4">{c.own.quote}</p>
           </div>
-          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
-            {t("festcoin.landingFtc")}
-          </p>
-          {authed && (
-            <Link to="/festcoin" className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all mt-3">
-              Open FestCoin <ChevronRight className="w-4 h-4" />
-            </Link>
-          )}
+          <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6">
+            {c.own.rows.map((r, i) => (
+              <div key={i} className={"flex items-center gap-3.5 py-3.5 " + (i < c.own.rows.length - 1 ? "border-b border-[#1f1f1f]" : "")}>
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{r.i}</div>
+                <div className="min-w-0">
+                  <div className="text-white font-semibold text-sm">{r.n}</div>
+                  <div className="text-[#666] text-xs">{r.s}</div>
+                </div>
+                <span className={"ml-auto text-xs font-semibold px-2.5 py-1 rounded-full border " + (r.b === c.own.rows[3].b && i === 3 ? "text-primary bg-primary/10 border-primary/25" : "text-green-400 bg-green-400/10 border-green-400/25")}>{r.b}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── BEYOND THE TICKET ── */}
-      <BeyondTheTicket />
-
-      {/* ── AUDIENCES ── */}
-      <section id="audiences" className="py-16 px-5 bg-[#111]">
+      {/* ── HOW IT WORKS ── */}
+      <section id="how" className="py-20 px-5">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">Built for the night</p>
-            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">One app. Two sides of the party.</h2>
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.how.kicker}</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">{c.how.title}</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-8 hover:border-primary/30 transition-all flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
-                <Users className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-heading font-bold text-white text-2xl mb-2">For Partygoers</h3>
-              <p className="text-[#888] text-sm leading-relaxed mb-6 flex-1">
-                Find parties, get secure QR tickets, skip the line at the door, and earn FestCoin rewards every time you show up.
-              </p>
-              <Link to={findEventsTo} className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
-                Find Events <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-            <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-8 hover:border-primary/30 transition-all flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
-                <Building2 className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-heading font-bold text-white text-2xl mb-2">For Organizers</h3>
-              <p className="text-[#888] text-sm leading-relaxed mb-6 flex-1">
-                Create your party, sell tickets, scan guests at the door, and reward your crowd with FestCoin — all from one dashboard.
-              </p>
-              <Link to={createEventTo} className="inline-flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
-                Create Event <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {c.how.steps.map((step, i) => {
+              const Icon = step.icon;
+              return (
+                <div key={i} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 hover:border-primary/30 transition-all relative">
+                  <div className="absolute top-5 right-5 text-xs font-bold text-primary font-heading">0{i + 1}</div>
+                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="font-heading font-bold text-white text-base mb-1.5">{step.t}</h3>
+                  <p className="text-[#888] text-sm leading-relaxed">{step.d}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── TRUST STRIP ── */}
-      <section className="py-14 px-5">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
-            <ShieldCheck className="w-6 h-6 text-primary" strokeWidth={1.5} />
+      {/* ── FOR THE CROWD ── */}
+      <section id="crowd" className="py-20 px-5 bg-[#111] border-t border-[#1f1f1f]">
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-10">
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.crowd.kicker}</p>
+            <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">{c.crowd.title}</h2>
           </div>
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">Secure by design.</h2>
-          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed max-w-xl mx-auto mb-2">
-            Every ticket carries a unique QR code with secure ticket validation powered by blockchain technology — so no fakes, no doubles, no hassle at the door.
-          </p>
-          <Link to="/legal" className="inline-block mt-3 text-primary text-sm hover:underline font-medium">
-            Read our Trust &amp; Safety promise →
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+            {c.crowd.items.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i}>
+                  <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <h4 className="font-heading font-bold text-white text-base mb-1.5">{item.t}</h4>
+                  <p className="text-[#888] text-sm leading-relaxed">{item.d}</p>
+                </div>
+              );
+            })}
+          </div>
+          <Link to={findEventsTo}>
+            <Button className="bg-primary hover:bg-primary/90 text-white h-11 px-6 rounded-xl font-semibold text-sm">
+              <Search className="w-4 h-4 mr-2" /> {c.crowd.cta}
+            </Button>
           </Link>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="py-16 px-5 bg-[#111]">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/12 to-[#0d0d0d] border border-primary/25 p-8 sm:p-12 text-center">
-            <div className="absolute top-0 right-0 w-72 h-72 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-[10px] font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-widest">
-                <Star className="w-3 h-3" /> Join the Pilot
-              </div>
-              <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white mb-3">Your ticket. Your rewards. Your night.</h2>
-              <p className="text-[#888] text-sm sm:text-base leading-relaxed mb-8 max-w-2xl mx-auto">
-                FestChain is running a private pilot. Be among the first to party with secure tickets and real rewards.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <Link to={findEventsTo}>
-                  <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-base">
-                    Find Events <ArrowRight className="w-5 h-5 ml-1" />
-                  </Button>
-                </Link>
-                <a href="#contact">
-                  <Button variant="outline" className="h-12 px-6 rounded-xl font-semibold text-sm border-[#333] text-white hover:bg-[#1a1a1a]">
-                    I want to organize
-                  </Button>
-                </a>
-              </div>
-              {!authed && (
-                <p className="text-sm text-[#666] mt-6">
-                  Already have an account?{" "}
-                  <Link to="/login" className="text-primary hover:underline font-medium">Log in</Link>
-                </p>
-              )}
-            </div>
+      {/* ── TRUST ── */}
+      <section className="py-16 px-5">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-5">
+            <ShieldCheck className="w-6 h-6 text-primary" strokeWidth={1.5} />
           </div>
+          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white mb-3">{c.trust.title}</h2>
+          <p className="text-[#aaa] text-sm sm:text-base leading-relaxed">{c.trust.body}</p>
         </div>
       </section>
 
-      {/* ── CONTACT ── */}
-      <section id="contact" className="py-16 px-5">
+      {/* ── CONTACT / CTA ── */}
+      <section id="contact" className="py-16 px-5 bg-[#111] border-t border-[#1f1f1f]">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">Get in touch</p>
-            <h2 className="font-heading font-bold text-3xl text-white mb-2">Want to run a pilot event?</h2>
-            <p className="text-[#888] text-sm">Sign up and create your event today — no approval needed. Tell us about it below and our team will personally reach out to help with your first pilot.</p>
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.contact.kicker}</p>
+            <h2 className="font-heading font-bold text-3xl text-white mb-3">{c.contact.title}</h2>
+            <p className="text-[#888] text-sm mb-6">{c.contact.sub}</p>
+            <a href={waHref} target="_blank" rel="noopener noreferrer" className="inline-block">
+              <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 rounded-xl font-bold text-base">
+                <MessageCircle className="w-5 h-5 mr-2" /> {c.contact.whatsapp}
+              </Button>
+            </a>
           </div>
+
           {sent ? (
             <div className="bg-primary/10 border border-primary/30 rounded-2xl p-8 text-center">
               <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check className="w-7 h-7 text-primary" strokeWidth={2} />
               </div>
-              <h3 className="font-heading font-bold text-white text-lg mb-2">Thanks for reaching out!</h3>
-              <p className="text-[#888] text-sm">Start creating your event right now — we'll also reach out personally to help with your first pilot.</p>
+              <h3 className="font-heading font-bold text-white text-lg mb-2">{c.contact.sentTitle}</h3>
+              <p className="text-[#888] text-sm">{c.contact.sentSub}</p>
             </div>
           ) : (
-            <form onSubmit={handleContact} className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8 space-y-4">
+            <form onSubmit={handleContact} className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6 sm:p-8 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">Name</label>
-                  <input required value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                    className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder="Your name" />
+                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{c.contact.nameL}</label>
+                  <input required value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder={c.contact.namePh} />
                 </div>
                 <div>
-                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">Email</label>
-                  <input required type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                    className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder="you@email.com" />
+                  <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{c.contact.emailL}</label>
+                  <input required type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                    className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors" placeholder={c.contact.emailPh} />
                 </div>
               </div>
               <div>
-                <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">I am a…</label>
+                <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{c.contact.roleLabel}</label>
                 <div className="flex flex-wrap gap-2">
-                  {["Organizer", "DJ", "Brand", "Partygoer", "Investor"].map(r => (
-                    <button key={r} type="button" onClick={() => setForm(p => ({ ...p, role: r }))}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${form.role === r ? "bg-primary/20 border-primary text-primary" : "bg-[#0d0d0d] border-[#2a2a2a] text-[#666] hover:border-primary/50 hover:text-white"}`}>
+                  {c.contact.roles.map((r) => (
+                    <button key={r} type="button" onClick={() => setForm((p) => ({ ...p, role: r }))}
+                      className={"px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors " + (form.role === r ? "bg-primary/20 border-primary text-primary" : "bg-[#111] border-[#2a2a2a] text-[#666] hover:border-primary/50 hover:text-white")}>
                       {r}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">Message</label>
-                <textarea required value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} rows={3}
-                  className="w-full bg-[#0d0d0d] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors resize-none" placeholder="Tell us about your event or idea..." />
+                <label className="text-xs text-[#888] uppercase tracking-wide block mb-1.5">{c.contact.msgL}</label>
+                <textarea required value={form.message} onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))} rows={3}
+                  className="w-full bg-[#111] border border-[#2a2a2a] rounded-xl px-4 py-3 text-white text-sm placeholder-[#444] focus:outline-none focus:border-primary transition-colors resize-none" placeholder={c.contact.msgPh} />
               </div>
               <Button type="submit" disabled={sending || !form.name || !form.email} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl text-base">
-                {sending ? "Sending..." : "Send"} <Send className="w-4 h-4 ml-2" />
+                {sending ? c.contact.sending : c.contact.send} <Send className="w-4 h-4 ml-2" />
               </Button>
             </form>
           )}
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center text-sm text-[#888]">
-            <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> hello@festchain.app</span>
+            <a href={waHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-white transition-colors"><MessageCircle className="w-4 h-4" /> WhatsApp</a>
+            <span className="flex items-center gap-1.5"><Mail className="w-4 h-4" /> {CONTACT_EMAIL}</span>
             <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> São Paulo, BR</span>
           </div>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <LandingFAQ lang={lang} />
-
       {/* ── FOOTER ── */}
       <footer className="py-10 px-5 border-t border-[#1f1f1f] bg-[#0d0d0d]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5">
-          <Link to="/"><Logo size={24} /></Link>
-          <p className="text-[#555] text-xs text-center max-w-md">© {new Date().getFullYear()} FestChain. Secure tickets. Real rewards. Better nights.</p>
-          <div className="flex items-center gap-4 text-[#777] text-sm">
-            <Link to="/legal" className="hover:text-white transition-colors">Trust &amp; Safety</Link>
-            <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+          <div className="flex flex-col items-center sm:items-start gap-2">
+            <Link to="/"><Logo size={24} /></Link>
+            <p className="text-[#555] text-xs text-center sm:text-left max-w-xs">{c.footer.tagline}</p>
           </div>
+          <div className="flex items-center gap-4 text-[#777] text-sm">
+            <Link to="/legal" className="hover:text-white transition-colors">Legal</Link>
+            <a href={waHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">WhatsApp</a>
+            <a href="#contact" className="hover:text-white transition-colors">{c.contact.kicker}</a>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto mt-6 pt-5 border-t border-[#1f1f1f] flex flex-col sm:flex-row justify-between gap-2 text-[#555] text-xs">
+          <span>© {new Date().getFullYear()} FestChain</span>
+          <span>{c.footer.rights}</span>
         </div>
       </footer>
     </div>
