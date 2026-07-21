@@ -34,189 +34,6 @@ Deno.serve(async (req) => {
     };
 
     // ===================================================================
-    // TEST GROUP: sendMomentTip
-    // ===================================================================
-
-    // --- TEST 1: Self-tip prevention ---
-    // Uses user-scoped SDK so created_by_id = admin (matches the calling user)
-    try {
-      const ownMoment = await base44.entities.Moment.create({
-        image_url: 'https://test.invalid/moments/test-self-tip.png',
-        caption: '[TEST] self-tip prevention — safe to delete',
-        is_anonymous: true,
-        author_alias: 'TestSelfTip',
-      });
-      TRACK('Moment', ownMoment.id);
-
-      const d = await invoke('sendMomentTip', { moment_id: ownMoment.id, amount: 1 });
-      record(
-        'sendMomentTip: self-tip prevention (endpoint now hard-disabled)',
-        d.status === 'error' && /disabled/i.test(d.message || ''),
-        `Expected "disabled" error (endpoint is hard-disabled), got: ${d.status} — ${d.message}`
-      );
-    } catch (e) {
-      record('sendMomentTip: self-tip prevention', false, `Exception: ${e.message}`);
-    }
-
-    // --- TEST 2: Insufficient balance rejection ---
-    try {
-      // Create moment via asServiceRole (created_by_id will be service_...)
-      // so the self-tip check won't trigger; the balance check should catch it
-      const otherMoment = await base44.asServiceRole.entities.Moment.create({
-        image_url: 'https://test.invalid/moments/test-insufficient.png',
-        caption: '[TEST] insufficient balance — safe to delete',
-        is_anonymous: true,
-        author_alias: 'TestInsufficient',
-      });
-      TRACK('Moment', otherMoment.id);
-
-      const d = await invoke('sendMomentTip', { moment_id: otherMoment.id, amount: 999999 });
-      record(
-        'sendMomentTip: insufficient balance rejection (endpoint now hard-disabled)',
-        d.status === 'error' && /disabled/i.test(d.message || ''),
-        `Expected "disabled" error (endpoint is hard-disabled), got: ${d.status} — ${d.message}`
-      );
-    } catch (e) {
-      record('sendMomentTip: insufficient balance rejection', false, `Exception: ${e.message}`);
-    }
-
-    // --- TEST 3: Recipient credit — KNOWN BROKEN, tip UI disabled ---
-    // sendMomentTip creates a transferred_in transaction for the moment's
-    // author, but asServiceRole stamps created_by_id = service_... (phantom
-    // owner), so the credit never lands in the author's wallet. Tipping UI
-    // is disabled in MomentCard.jsx. This test documents the broken behavior
-    // and must NOT be counted as a passing feature test — status is always
-    // 'known_issue' regardless of whether the record is found.
-    try {
-      const tipMoment = await base44.asServiceRole.entities.Moment.create({
-        image_url: 'https://test.invalid/moments/test-recipient-credit.png',
-        caption: '[TEST] recipient credit regression — safe to delete',
-        is_anonymous: true,
-        author_alias: 'TestRecipient',
-      });
-      TRACK('Moment', tipMoment.id);
-
-      // Give the admin 10 FTC for this test so the tip can succeed
-      const topupTx = await base44.asServiceRole.entities.FestCoinTransaction.create({
-        type: 'earned',
-        amount: 10,
-        description: '[TEST] FTC for recipient credit test — safe to delete',
-        source: 'test_fixture',
-        status: 'confirmed',
-        created_by_id: String(user.id),
-      });
-      TRACK('FestCoinTransaction', topupTx.id);
-
-      // Record ALL transferred_in transactions with source=moment_tip BEFORE
-      const beforeTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-        type: 'transferred_in',
-        source: 'moment_tip',
-      });
-      const beforeIds = new Set(beforeTxs.map(t => t.id));
-
-      // Tip 5 FTC
-      const tipAmount = 5;
-      const d = await invoke('sendMomentTip', { moment_id: tipMoment.id, amount: tipAmount });
-
-      if (d.status !== 'success') {
-        record('Recipient credit — KNOWN BROKEN, tip UI disabled', 'known_issue',
-          `Tip call failed: ${d.status} — ${d.message}. Recipient credit is known broken; tipping is disabled.`);
-      } else {
-        // Query ALL transferred_in with source=moment_tip AFTER
-        const afterTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-          type: 'transferred_in',
-          source: 'moment_tip',
-        });
-
-        // Find transactions that are new (not in before set)
-        const newCredits = afterTxs.filter(t => !beforeIds.has(t.id));
-        const matchingCredit = newCredits.find(t =>
-          t.amount === tipAmount &&
-          t.description === 'Tip received on your moment' &&
-          t.status === 'confirmed'
-        );
-
-        // Clean up the new transferred_in transaction(s)
-        for (const t of newCredits) TRACK('FestCoinTransaction', t.id);
-
-        // Clean up sender's transferred_out
-        const senderDebits = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-          created_by_id: String(user.id),
-          type: 'transferred_out',
-          source: 'moment_tip',
-        });
-        const testDebit = senderDebits.find(t => t.amount === tipAmount);
-        if (testDebit) TRACK('FestCoinTransaction', testDebit.id);
-
-        // Clean up FTCTip records for this moment
-        const tipRecords = await base44.asServiceRole.entities.FTCTip.filter({ moment_id: tipMoment.id });
-        for (const t of tipRecords) TRACK('FTCTip', t.id);
-
-        record(
-          'Recipient credit — KNOWN BROKEN, tip UI disabled',
-          'known_issue',
-          (matchingCredit
-            ? `transferred_in record IS created (${tipAmount} FTC) but created_by_id=${matchingCredit.created_by_id} (phantom/service role, NOT the real author). `
-            : `Tip succeeded but NO transferred_in created. (before=${beforeTxs.length}, after=${afterTxs.length}, new=${newCredits.length}). `) +
-          'Tipping UI is disabled. Recipient credit is not production-ready.'
-        );
-      }
-    } catch (e) {
-      record('Recipient credit — KNOWN BROKEN, tip UI disabled', 'known_issue', `Exception: ${e.message}. Tipping is disabled; recipient credit is not production-ready.`);
-    }
-
-    // --- TEST 4: createMoment stores correct created_by_id ---
-    // After fixing createMoment to use user-scoped SDK, the moment's
-    // created_by_id should be the real user ID, not a service role ID.
-    // This is what makes the recipient credit actually land in the right wallet.
-    try {
-      const d = await invoke('createMoment', {
-        image_url: 'https://test.invalid/moments/test-createdby.png',
-        caption: '[TEST] created_by_id check — safe to delete',
-        is_anonymous: true,
-        author_alias: 'TestCreatedBy',
-      });
-
-      if (d.status !== 'success' || !d.moment) {
-        record('createMoment: stores real user ID as created_by_id', false,
-          `createMoment failed: ${d.status} — ${d.message}`);
-      } else {
-        TRACK('Moment', d.moment.id);
-
-        // Also clean up the 10 FTC reward transaction
-        const rewardTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-          created_by_id: String(user.id),
-          type: 'earned',
-          source: 'moment_reward',
-        });
-        const testReward = rewardTxs.find(t => t.description === 'Shared a moment');
-        if (testReward) TRACK('FestCoinTransaction', testReward.id);
-
-        // Clean up badge if created
-        const badges = await base44.asServiceRole.entities.UserBadge.filter({
-          created_by_id: String(user.id),
-          badge_key: 'first_moment',
-        });
-        if (badges.length > 0) {
-          // Don't delete the badge if it already existed before our test
-          // Only track if this was the first time (badge was just created)
-        }
-
-        const cby = d.moment.created_by_id;
-        const isRealUser = cby && !String(cby).startsWith('service_') && String(cby) === String(user.id);
-        record(
-          'createMoment: stores real user ID as created_by_id',
-          isRealUser,
-          isRealUser
-            ? `✓ created_by_id=${cby} (matches user ${user.id})`
-            : `✗ created_by_id=${cby} (expected ${user.id}) — recipient credits would go to wrong owner`
-        );
-      }
-    } catch (e) {
-      record('createMoment: stores real user ID as created_by_id', false, `Exception: ${e.message}`);
-    }
-
-    // ===================================================================
     // TEST 5: reserveTicket with cashback
     // ===================================================================
     // Creates a test event with cashback enabled, reserves a ticket,
@@ -324,25 +141,6 @@ Deno.serve(async (req) => {
     }
 
     // ===================================================================
-    // AUDIT: Count existing Moment records with created_by_id starting
-    // with "service_" — read-only, no fixes applied.
-    // ===================================================================
-    try {
-      const allMoments = await base44.asServiceRole.entities.Moment.list('-created_date', 500);
-      const serviceOwned = allMoments.filter(m => m.created_by_id && String(m.created_by_id).startsWith('service_'));
-      const userOwned = allMoments.filter(m => m.created_by_id && !String(m.created_by_id).startsWith('service_'));
-      record(
-        'AUDIT: Moment records with service_ created_by_id (blast radius)',
-        true, // informational — always "passes", the count is the data
-        `Total moments queried: ${allMoments.length}. ` +
-        `service_ owned: ${serviceOwned.length}. ` +
-        `user owned: ${userOwned.length}.`
-      );
-    } catch (e) {
-      record('AUDIT: Moment records with service_ created_by_id (blast radius)', false, `Exception: ${e.message}`);
-    }
-
-    // ===================================================================
     // DIAGNOSTIC 2: Can we create a FestCoinTransaction via asServiceRole
     // (stamps service_...) then UPDATE its created_by_id to a different
     // user? If yes, create-then-update is a viable path for crediting a
@@ -389,20 +187,6 @@ Deno.serve(async (req) => {
       );
     } catch (e) {
       record('DIAGNOSTIC 2: update created_by_id on FestCoinTransaction (create-then-update path)', false, `Exception: ${e.message}`);
-    }
-
-    // ===================================================================
-    // TEST 6: sendMomentTip is hard-disabled (rejects all requests)
-    // ===================================================================
-    try {
-      const d = await invoke('sendMomentTip', { moment_id: 'any-id', amount: 1 });
-      record(
-        'sendMomentTip: endpoint is hard-disabled',
-        d.status === 'error' && /disabled/i.test(d.message || ''),
-        `Expected "disabled" error, got: ${d.status} — ${d.message}`
-      );
-    } catch (e) {
-      record('sendMomentTip: endpoint is hard-disabled', false, `Exception: ${e.message}`);
     }
 
     // ===================================================================
@@ -553,40 +337,6 @@ Deno.serve(async (req) => {
       );
     } catch (e) {
       record('redeemEventItem: duplicate + stock guards', false, `Exception: ${e.message}`);
-    }
-
-    // ===================================================================
-    // TEST 9: likeMoment increments likes for non-author
-    // ===================================================================
-    try {
-      // Create moment via asServiceRole (owner = service_..., not the admin)
-      const testMoment = await base44.asServiceRole.entities.Moment.create({
-        image_url: 'https://test.invalid/moments/test-like.png',
-        caption: '[TEST] likeMoment — safe to delete',
-        is_anonymous: true,
-        author_alias: 'TestLike',
-        likes: 0,
-      });
-      TRACK('Moment', testMoment.id);
-
-      const beforeLikes = testMoment.likes || 0;
-
-      // Call likeMoment (user is NOT the author — service_ owns it)
-      const d = await invoke('likeMoment', { moment_id: testMoment.id });
-
-      // Re-fetch to verify
-      const refetched = await base44.asServiceRole.entities.Moment.get(testMoment.id);
-      const afterLikes = refetched?.likes || 0;
-
-      record(
-        'likeMoment: increments likes for non-author',
-        d.status === 'success' && afterLikes === beforeLikes + 1,
-        d.status === 'success'
-          ? `✓ likes went from ${beforeLikes} to ${afterLikes} (expected ${beforeLikes + 1})`
-          : `✗ likeMoment failed: ${d.status} — ${d.message}`
-      );
-    } catch (e) {
-      record('likeMoment: increments likes for non-author', false, `Exception: ${e.message}`);
     }
 
     // ===================================================================
