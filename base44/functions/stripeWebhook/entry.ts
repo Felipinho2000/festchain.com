@@ -1,10 +1,10 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import Stripe from 'npm:stripe@^14.0.0';
 
 // Stripe webhook handler for ticket purchases.
-// On checkout.session.completed: activates the pre-created pending ticket
-// and confirms reward/cashback transactions.
-// On checkout.session.expired: marks the pending ticket as expired.
+// On checkout.session.completed: activates all pre-created pending tickets
+// and confirms reward/cashback transactions (supports multi-ticket purchases).
+// On checkout.session.expired: marks all pending tickets as expired.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -25,20 +25,21 @@ Deno.serve(async (req) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
         const meta = session.metadata || {};
-        const ticketId = meta.ticket_id;
-        const rewardTxId = meta.reward_tx_id;
-        const cashbackTxId = meta.cashback_tx_id;
+        const ticketIds = (meta.ticket_ids || '').split(',').filter(Boolean);
+        const rewardTxIds = (meta.reward_tx_ids || '').split(',').filter(Boolean);
+        const cashbackTxIds = (meta.cashback_tx_ids || '').split(',').filter(Boolean);
         const eventId = meta.event_id;
+        const quantity = parseInt(meta.quantity) || ticketIds.length || 1;
 
-        if (!ticketId) {
-          console.error('stripeWebhook: no ticket_id in session metadata', session.id);
+        if (!ticketIds.length) {
+          console.error('stripeWebhook: no ticket_ids in session metadata', session.id);
           break;
         }
 
-        // Idempotency: only process if ticket is still pending
-        let ticket = null;
-        try { ticket = await base44.asServiceRole.entities.Ticket.get(ticketId); } catch (_) {}
-        if (!ticket || ticket.status !== 'pending') {
+        // Idempotency: check first ticket — if already active, skip
+        let firstTicket = null;
+        try { firstTicket = await base44.asServiceRole.entities.Ticket.get(ticketIds[0]); } catch (_) {}
+        if (!firstTicket || firstTicket.status !== 'pending') {
           break;
         }
 
@@ -54,46 +55,48 @@ Deno.serve(async (req) => {
           }
         } catch (_) {}
 
-        // Activate the ticket
-        try {
-          await base44.asServiceRole.entities.Ticket.update(ticketId, {
-            status: 'active',
-            payment_method: paymentMethod,
-            stripe_session_id: session.id,
-          });
-        } catch (e) {
-          console.error('stripeWebhook: failed to activate ticket:', e.message);
-        }
-
-        // Confirm reward transaction
-        if (rewardTxId) {
+        // Activate all tickets
+        for (const tid of ticketIds) {
           try {
-            await base44.asServiceRole.entities.FestCoinTransaction.update(rewardTxId, {
-              status: 'confirmed',
+            await base44.asServiceRole.entities.Ticket.update(tid, {
+              status: 'active',
+              payment_method: paymentMethod,
+              stripe_session_id: session.id,
             });
           } catch (e) {
-            console.error('stripeWebhook: failed to confirm reward:', e.message);
+            console.error('stripeWebhook: failed to activate ticket:', tid, e.message);
           }
         }
 
-        // Confirm cashback transaction
-        if (cashbackTxId) {
+        // Confirm all reward transactions
+        for (const rtxId of rewardTxIds) {
           try {
-            await base44.asServiceRole.entities.FestCoinTransaction.update(cashbackTxId, {
+            await base44.asServiceRole.entities.FestCoinTransaction.update(rtxId, {
               status: 'confirmed',
             });
           } catch (e) {
-            console.error('stripeWebhook: failed to confirm cashback:', e.message);
+            console.error('stripeWebhook: failed to confirm reward:', rtxId, e.message);
           }
         }
 
-        // Increment tickets_sold
+        // Confirm all cashback transactions
+        for (const ctxId of cashbackTxIds) {
+          try {
+            await base44.asServiceRole.entities.FestCoinTransaction.update(ctxId, {
+              status: 'confirmed',
+            });
+          } catch (e) {
+            console.error('stripeWebhook: failed to confirm cashback:', ctxId, e.message);
+          }
+        }
+
+        // Increment tickets_sold by quantity
         if (eventId) {
           try {
             const ev = await base44.asServiceRole.entities.Event.get(eventId);
             if (ev) {
               await base44.asServiceRole.entities.Event.update(eventId, {
-                tickets_sold: (ev.tickets_sold || 0) + 1,
+                tickets_sold: (ev.tickets_sold || 0) + quantity,
               });
             }
           } catch (e) {
@@ -106,25 +109,25 @@ Deno.serve(async (req) => {
       case 'checkout.session.expired': {
         const session = event.data.object;
         const meta = session.metadata || {};
-        const ticketId = meta.ticket_id;
-        const rewardTxId = meta.reward_tx_id;
-        const cashbackTxId = meta.cashback_tx_id;
+        const ticketIds = (meta.ticket_ids || '').split(',').filter(Boolean);
+        const rewardTxIds = (meta.reward_tx_ids || '').split(',').filter(Boolean);
+        const cashbackTxIds = (meta.cashback_tx_ids || '').split(',').filter(Boolean);
 
-        if (ticketId) {
+        for (const tid of ticketIds) {
           try {
-            const ticket = await base44.asServiceRole.entities.Ticket.get(ticketId);
+            const ticket = await base44.asServiceRole.entities.Ticket.get(tid);
             if (ticket && ticket.status === 'pending') {
-              await base44.asServiceRole.entities.Ticket.update(ticketId, { status: 'expired' });
+              await base44.asServiceRole.entities.Ticket.update(tid, { status: 'expired' });
             }
           } catch (e) {
-            console.error('stripeWebhook: failed to expire ticket:', e.message);
+            console.error('stripeWebhook: failed to expire ticket:', tid, e.message);
           }
         }
-        if (rewardTxId) {
-          try { await base44.asServiceRole.entities.FestCoinTransaction.update(rewardTxId, { status: 'cancelled' }); } catch (_) {}
+        for (const rtxId of rewardTxIds) {
+          try { await base44.asServiceRole.entities.FestCoinTransaction.update(rtxId, { status: 'cancelled' }); } catch (_) {}
         }
-        if (cashbackTxId) {
-          try { await base44.asServiceRole.entities.FestCoinTransaction.update(cashbackTxId, { status: 'cancelled' }); } catch (_) {}
+        for (const ctxId of cashbackTxIds) {
+          try { await base44.asServiceRole.entities.FestCoinTransaction.update(ctxId, { status: 'cancelled' }); } catch (_) {}
         }
         break;
       }

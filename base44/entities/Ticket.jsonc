@@ -30,6 +30,15 @@
       ],
       "default": "general"
     },
+    "ticket_tier": {
+      "type": "string",
+      "enum": [
+        "inteira",
+        "meia_estudante",
+        "meia_idoso"
+      ],
+      "default": "inteira"
+    },
     "ticket_phase": {
       "type": "string"
     },
@@ -81,6 +90,27 @@
       "default": 0
     },
     "stripe_session_id": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "buyer_cpf": {
+      "type": "string"
+    },
+    "buyer_document_type": {
+      "type": "string",
+      "enum": [
+        "cpf",
+        "rg",
+        "cnh"
+      ],
+      "default": "cpf"
+    },
+    "buyer_phone": {
+      "type": "string"
+    },
+    "buyer_email": {
       "type": "string"
     }
   },

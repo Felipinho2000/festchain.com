@@ -5,10 +5,10 @@ import { useAuth } from "@/lib/AuthContext";
 import { Calendar, MapPin, Users, Music, ArrowLeft, Ticket, ShoppingBag, Share2, Sparkles, Clock, Instagram, Lock, Zap } from "lucide-react";
 import EventShareButtons from "@/components/events/EventShareButtons";
 import EventMenuPanel from "@/components/events/EventMenuPanel";
+import CheckoutDialog from "@/components/events/CheckoutDialog";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
 
@@ -42,7 +42,6 @@ export default function EventDetail() {
   const [notFound, setNotFound] = useState(false);
   const [deniedMessage, setDeniedMessage] = useState(null);
   const [buyOpen, setBuyOpen] = useState(false);
-  const [purchasing, setPurchasing] = useState(false);
   const [userBalance, setUserBalance] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -86,27 +85,6 @@ export default function EventDetail() {
       toast({ title: "Payment cancelled", description: "Your ticket was not purchased." });
     }
   }, [toast]);
-
-  const handlePurchase = async () => {
-    if (window.self !== window.top) {
-      toast({ title: "Open in a new tab", description: "Checkout works only from a published app, not in the preview.", variant: "destructive" });
-      return;
-    }
-    setPurchasing(true);
-    try {
-      const res = await base44.functions.invoke("createCheckoutSession", { event_id: event.id, ticket_type: "general" });
-      const data = res.data || res;
-      if (data.status === "success" && data.checkout_url) {
-        window.location.href = data.checkout_url;
-      } else {
-        toast({ title: "Checkout failed", description: data.message || "Try again", variant: "destructive" });
-      }
-    } catch (e) {
-      toast({ title: "Checkout failed", description: e.message, variant: "destructive" });
-    } finally {
-      setPurchasing(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -306,6 +284,11 @@ export default function EventDetail() {
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
                 <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC reward when you attend
               </div>
+              {spotsLeft > 0 && spotsLeft <= Math.ceil(event.total_capacity * 0.2) && (
+                <div className="inline-flex items-center gap-1.5 bg-red-500/15 text-red-400 text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-2">
+                  🔥 Últimos {spotsLeft} ingressos!
+                </div>
+              )}
               {hasPhases && (
                 <p className="text-[10px] text-[#666] mt-2">Price reflects the current ticket phase and updates automatically as phases open and sell out.</p>
               )}
@@ -326,26 +309,7 @@ export default function EventDetail() {
         </div>
       </div>
 
-      {/* Confirm Ticket Dialog */}
-      <Dialog open={buyOpen} onOpenChange={setBuyOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle className="font-heading">Confirm your ticket</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div className="bg-secondary/50 rounded-xl p-3 text-xs text-warmgray">
-              {phase && <p className="text-foreground font-medium mb-1">{phase.name} phase</p>}
-              <p>You'll be redirected to Stripe to complete your payment with <strong className="text-foreground">Pix or credit card</strong>. Your QR ticket will appear in your wallet once payment is confirmed.</p>
-            </div>
-            <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={handlePurchase} disabled={purchasing}>
-              {purchasing ? (
-                <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecting...</span>
-              ) : (
-                displayPrice !== null ? `Pay R$ ${displayPrice.toFixed(2)}` : "Pay"
-              )}
-            </Button>
-            <p className="text-[10px] text-[#555] text-center">By getting a ticket you accept the <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CheckoutDialog event={event} phase={phase} displayPrice={displayPrice} open={buyOpen} onOpenChange={setBuyOpen} />
     </div>
   );
 }
