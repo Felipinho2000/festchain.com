@@ -35,7 +35,7 @@ const COPY = {
     wedge: {
       kicker: "Por que trocam de plataforma",
       title: "Feito pra como a noite vende de verdade.",
-      sub: "Não é ferramenta genérica de eventos. É construída em cima das três coisas que fazem uma festa lotar no Brasil — promoter, WhatsApp e boca a boca.",
+      sub: "Não é ferramenta genérica de eventos. É construída em cima das três coisas que fazem uma festa lotar no Brasil — promoter, WhatsApp e Instagram.",
       cards: [
         { icon: Users, t: "Promoter que vende", d: "Cada promoter e RP ganha um link próprio. Cada venda é atribuída automaticamente e a comissão é calculada sozinha. Eles veem quanto venderam e quanto vão receber, em tempo real. É onde as outras plataformas são mais fracas." },
         { icon: Zap, t: "Pix na hora", d: "Checkout com Pix instantâneo, cartão e parcelamento pra ingresso de festival. Confirmação automática na hora do pagamento e o ingresso chega no WhatsApp de quem comprou. Sem fila, sem fricção, mais conversão." },
@@ -121,7 +121,7 @@ const COPY = {
     wedge: {
       kicker: "Why they switch",
       title: "Built for how nightlife actually sells.",
-      sub: "Not generic events tooling. Built on the three things that fill a party in Brazil — promoters, WhatsApp and word of mouth.",
+      sub: "Not generic events tooling. Built on the three things that fill a party in Brazil — promoters, WhatsApp and Instagram.",
       cards: [
         { icon: Users, t: "Promoters that sell", d: "Every promoter and RP gets their own link. Every sale is attributed automatically and commission is calculated for them. They see what they sold and what they'll earn, live. It's exactly where the other platforms are weakest." },
         { icon: Zap, t: "Instant Pix", d: "Checkout with instant Pix, card and installments for festival-tier prices. Auto-confirmed the moment payment lands, and the ticket arrives on the buyer's WhatsApp. No queue, no friction, more conversion." },
