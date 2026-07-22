@@ -6,21 +6,32 @@ export default function Logo({ size = 32, withWordmark = true, className = "" })
       <svg
         width={size}
         height={size}
-        viewBox="0 0 32 32"
+        viewBox="0 0 36 36"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-label="FestChain"
       >
-        <rect width="32" height="32" rx="9" fill="#0d0d0d"/>
-        <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" fill="none" stroke="#FF6500" strokeWidth="1"/>
-        <path d="M11.5 7.5V24.5" stroke="#FF6500" strokeWidth="3" strokeLinecap="round"/>
-        <path d="M11.5 8.5H21" stroke="#FF6500" strokeWidth="3" strokeLinecap="round"/>
-        <path d="M11.5 16H19" stroke="#FF6500" strokeWidth="3" strokeLinecap="round"/>
-        <circle cx="22" cy="22" r="2.8" fill="#FF6500"/>
-        <circle cx="22" cy="22" r="1.05" fill="#0d0d0d"/>
+        {/* Ticket badge with side notches */}
+        <path
+          d="M9 7H27a2 2 0 0 1 2 2V13a2 2 0 0 0 0 4V27a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V17a2 2 0 0 0 0-4V9a2 2 0 0 1 2-2z"
+          fill="#FF6500"
+        />
+        {/* Music note: two note heads + connecting beam */}
+        <circle cx="14" cy="23" r="2.6" fill="white" />
+        <path
+          d="M16.6 23V12l7-1.4v6.2"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="23.6" cy="17" r="2.1" fill="white" />
       </svg>
       {withWordmark && (
-        <span className="font-heading font-bold tracking-tight text-white leading-none">FestChain</span>
+        <span className="font-heading font-extrabold tracking-tight leading-none text-[19px]">
+          <span className="text-white">Fest</span>
+          <span className="text-[#FF6500]">Chain</span>
+        </span>
       )}
     </span>
   );

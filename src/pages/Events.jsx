@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import EventCard from "@/components/events/EventCard";
 
 const genres = [
-  { value: "all", label: "All Genres" },
+  { value: "all", label: "Todos os estilos" },
   { value: "techno", label: "Techno" },
   { value: "house", label: "House" },
   { value: "trance", label: "Trance" },
@@ -43,8 +43,8 @@ export default function Events() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading font-bold text-3xl text-white mb-1">Find your next party</h1>
-        <p className="text-[#888] text-sm">Secure QR tickets. Real rewards. Better nights.</p>
+        <h1 className="font-heading font-extrabold text-3xl text-white mb-1 uppercase">Encontre sua próxima festa</h1>
+        <p className="text-[#888] text-sm">Ingressos com QR seguro. Recompensas reais. Noites melhores.</p>
       </div>
 
       {/* Filters */}
@@ -52,7 +52,7 @@ export default function Events() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" strokeWidth={1.5} />
           <Input
-            placeholder="Search events or venues..."
+            placeholder="Buscar eventos ou casas..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-9 h-11 rounded-xl bg-card border-border text-white placeholder:text-[#555]"
@@ -91,12 +91,12 @@ export default function Events() {
         <div className="bg-card border border-border rounded-xl p-12 text-center">
           <Calendar className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
           {search || genre !== "all" ? (
-            <p className="text-[#666] text-sm">No events match your filters. Try adjusting your search.</p>
+            <p className="text-[#666] text-sm">Nenhum evento encontrado. Tente ajustar sua busca.</p>
           ) : (
             <>
-              <p className="text-white text-base font-semibold mb-1">No parties live yet.</p>
-              <p className="text-[#666] text-sm mb-4">Create the first FestChain event.</p>
-              <a href="/#contact" className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">Create an event →</a>
+              <p className="text-white text-base font-semibold mb-1">Nenhuma festa no ar ainda.</p>
+              <p className="text-[#666] text-sm mb-4">Crie o primeiro evento FestChain.</p>
+              <a href="/#contact" className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">Criar evento →</a>
             </>
           )}
         </div>

@@ -130,7 +130,7 @@ export default function EventDetail() {
   return (
     <div className="space-y-6">
       <Link to="/events" className="inline-flex items-center gap-2 text-warmgray hover:text-foreground text-sm transition-colors">
-        <ArrowLeft className="w-4 h-4" strokeWidth={1.5} /> Back to Events
+      <ArrowLeft className="w-4 h-4" strokeWidth={1.5} /> Voltar para Eventos
       </Link>
 
       {/* Hero image */}
@@ -156,10 +156,10 @@ export default function EventDetail() {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               {event.genre && <Badge variant="secondary" className="text-xs">{genreLabels[event.genre]}</Badge>}
               <Badge className={`text-xs border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>
-                {event.visibility === "private" ? "Private Event" : "Public Event"}
+                {event.visibility === "private" ? "Evento Privado" : "Evento Público"}
               </Badge>
             </div>
-            <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-2">{event.title}</h1>
+            <h1 className="font-heading font-extrabold text-3xl lg:text-4xl text-foreground mb-2 uppercase leading-tight">{event.title}</h1>
             {event.organizer_name && <p className="text-warmgray text-sm">by {event.organizer_name}</p>}
           </div>
 
@@ -203,7 +203,7 @@ export default function EventDetail() {
 
           {event.description && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-2">About</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-2">Sobre</h3>
               <p className="text-warmgray text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
             </div>
           )}
@@ -211,7 +211,7 @@ export default function EventDetail() {
           {/* Schedule timeline */}
           {schedule.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-primary" strokeWidth={1.5} /> Schedule</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-primary" strokeWidth={1.5} /> Programação</h3>
               <div className="space-y-3">
                 {schedule.map((s, i) => (
                   <div key={i} className="flex gap-3">
@@ -229,7 +229,7 @@ export default function EventDetail() {
           {/* Lineup */}
           {lineup.length > 0 && (
             <div className="bg-card border border-border rounded-xl p-5">
-              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Lineup</h3>
+              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Line-up</h3>
               <div className="space-y-3">
                 {lineup.map((dj, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -298,11 +298,11 @@ export default function EventDetail() {
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.5} />
               {spotsLeft <= 0 ? "Sold Out" : (hasPhases && !phase) ? "Tickets Coming Soon" : "Get Ticket"}
             </Button>
-            <p className="text-[10px] text-[#666] text-center leading-relaxed">FestCoin rewards are part of the pilot experience and can be used for event perks where available.</p>
-            <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Pilot terms</Link>
+            <p className="text-[10px] text-[#666] text-center leading-relaxed">As recompensas FestChain fazem parte da experiência piloto e podem ser usadas em perks dos eventos.</p>
+            <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Termos do piloto</Link>
 
             <div className="border-t border-border pt-4">
-              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-primary" /> Share Event</p>
+              <p className="text-xs font-semibold text-white mb-3 flex items-center gap-1.5"><Share2 className="w-3.5 h-3.5 text-primary" /> Compartilhar</p>
               <EventShareButtons eventName={event.title} eventUrl={`${window.location.origin}/events/${event.id}`} visibility={event.visibility} eventDate={event.date} />
             </div>
           </div>

@@ -51,11 +51,11 @@ module.exports = {
   				'5': 'hsl(var(--chart-5))'
   			},
   			orange: {
-  					DEFAULT: '#ff6600',
+  					DEFAULT: '#FF6500',
   					light: '#ff8533',
   					dark: '#cc5200'
   				},
-  				bone: '#141414',
+  				bone: '#0d0d0d',
   				warmgray: '#888888',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',

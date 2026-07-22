@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   Users, Zap, Gift, ShieldCheck, Check, ChevronRight, Menu, X, ArrowRight,
   Mail, MapPin, Send, MessageCircle, Ticket, TrendingUp, CalendarPlus,
-  DoorOpen, Repeat, Search, Wallet as WalletIcon,
+  DoorOpen, Repeat, Search, Wallet as WalletIcon, Wine, Music,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import Logo from "@/components/shared/Logo";
-import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 /* ─────────────────────────────────────────────────────────────
    CONFIG — swap these two before going live:
@@ -61,10 +59,11 @@ const COPY = {
       kicker: "Para organizadores",
       title: "Da criação à próxima lotação.",
       steps: [
-        { icon: CalendarPlus, t: "Crie", d: "Monte o evento em minutos — lotes, line-up, horários e preços numa página só. Salve como modelo e duplique festas semanais em segundos." },
-        { icon: Ticket, t: "Venda", d: "Ative seus promoters com links e comissão automática. Um toque compartilha no WhatsApp e no Instagram. É assim que a noite vende." },
+        { icon: CalendarPlus, t: "Criar", d: "Monte o evento em minutos — lotes, line-up, horários e preços numa página só. Salve como modelo e duplique festas semanais em segundos." },
+        { icon: Ticket, t: "Vender", d: "Ative seus promoters com links e comissão automática. Um toque compartilha no WhatsApp e no Instagram. É assim que a noite vende." },
+        { icon: Wine, t: "Bar & consumação", d: "Venda bebidas, combos e open bar pelo app. O público gasta o cashback no bar, a casa fatura mais e sabe o gasto médio por pessoa." },
         { icon: DoorOpen, t: "Portaria", d: "Check-in por QR à prova de duplicidade, vários operadores, contador ao vivo de quem já entrou. Lista e cortesia com nome na porta." },
-        { icon: Repeat, t: "Traga de volta", d: "Veja receita, vendas por lote e por promoter em tempo real. Cashback e follow trazem a galera pra próxima. O ciclo recomeça." },
+        { icon: Repeat, t: "Trazer de volta", d: "Receita, vendas por lote e por promoter em tempo real. Cashback e follows puxam a galera pra próxima. O ciclo recomeça." },
       ],
     },
     crowd: {
@@ -96,6 +95,17 @@ const COPY = {
       errTitle: "Erro", errSub: "Não conseguimos enviar. Tente de novo.",
     },
     footer: { tagline: "O sistema operacional da vida noturna. Feito no Brasil, começando por São Paulo.", rights: "Ticketing seguro · Proteção contra fraude · Repasse confiável" },
+    ecosystem: {
+      kicker: "O ecossistema",
+      title: "Uma noite. Todo mundo ganha.",
+      sub: "A FestChain não é só ticketing. É a infra da noite inteira — onde cada lado sai ganhando.",
+      cards: [
+        { icon: Users, t: "Organizadores", d: "Vendem mais, rodam a noite inteira (ingresso, bar, porta), recebem certo e ficam donos do próprio público e dos dados." },
+        { icon: Ticket, t: "Público", d: "Compram em segundos no Pix, entram sem fila, ganham cashback que volta pra próxima e têm a noite inteira no celular." },
+        { icon: Music, t: "DJs & artistas", d: "Constroem uma base de fãs que é deles, com reputação por presença real — quem lotou a pista, não quem inflou o Instagram." },
+        { icon: TrendingUp, t: "Marcas & patrocinadores", d: "Financiam o cashback e transformam patrocínio em campanha medível, alcançando o público real do evento e pagando por resultado." },
+      ],
+    },
     waMsg: "Oi! Quero levar minha festa pra FestChain.",
   },
   en: {
@@ -175,11 +185,10 @@ const COPY = {
 };
 
 export default function Landing() {
-  const { lang } = useLanguage();
   const { currentUser } = useAuth();
   const authed = !!currentUser;
   const { toast } = useToast();
-  const c = COPY[lang] || COPY["pt-BR"];
+  const c = COPY["pt-BR"];
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", message: "", role: c.contact.roles[0] });
@@ -228,7 +237,6 @@ export default function Landing() {
           <Link to="/"><Logo size={28} /></Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-[#888]"><NavLinks /></div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
             {authed ? (
               <Link to="/app" className="hidden sm:block">
                 <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold">
@@ -322,29 +330,27 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── OWN YOUR AUDIENCE ── */}
+      {/* ── ECOSYSTEM: EVERYONE WINS ── */}
       <section className="py-20 px-5 bg-[#111] border-t border-b border-[#1f1f1f]">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.own.kicker}</p>
-            <h2 className="font-heading font-bold text-3xl sm:text-5xl text-white mb-5 leading-[1.05]">
-              {c.own.title1}<br />{c.own.title2}
-            </h2>
-            <p className="text-[#aaa] text-base leading-relaxed mb-4">{c.own.p1}</p>
-            <p className="text-[#aaa] text-base leading-relaxed mb-6">{c.own.p2}</p>
-            <p className="text-[#777] text-sm border-l-2 border-primary pl-4">{c.own.quote}</p>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.ecosystem.kicker}</p>
+            <h2 className="font-heading font-extrabold text-3xl sm:text-5xl text-white uppercase leading-[1.05] mb-4">{c.ecosystem.title}</h2>
+            <p className="text-[#aaa] text-base leading-relaxed max-w-2xl mx-auto">{c.ecosystem.sub}</p>
           </div>
-          <div className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6">
-            {c.own.rows.map((r, i) => (
-              <div key={i} className={"flex items-center gap-3.5 py-3.5 " + (i < c.own.rows.length - 1 ? "border-b border-[#1f1f1f]" : "")}>
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{r.i}</div>
-                <div className="min-w-0">
-                  <div className="text-white font-semibold text-sm">{r.n}</div>
-                  <div className="text-[#666] text-xs">{r.s}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {c.ecosystem.cards.map((card, i) => {
+              const Icon = card.icon;
+              return (
+                <div key={i} className="bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl p-6 hover:border-primary/30 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5">
+                    <Icon className="w-6 h-6 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="font-heading font-bold text-white text-lg mb-2">{card.t}</h3>
+                  <p className="text-[#888] text-sm leading-relaxed">{card.d}</p>
                 </div>
-                <span className={"ml-auto text-xs font-semibold px-2.5 py-1 rounded-full border " + (r.b === c.own.rows[3].b && i === 3 ? "text-primary bg-primary/10 border-primary/25" : "text-green-400 bg-green-400/10 border-green-400/25")}>{r.b}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -356,7 +362,7 @@ export default function Landing() {
             <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.how.kicker}</p>
             <h2 className="font-heading font-bold text-3xl sm:text-4xl text-white">{c.how.title}</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {c.how.steps.map((step, i) => {
               const Icon = step.icon;
               return (
@@ -487,7 +493,7 @@ export default function Landing() {
             <p className="text-[#555] text-xs text-center sm:text-left max-w-xs">{c.footer.tagline}</p>
           </div>
           <div className="flex items-center gap-4 text-[#777] text-sm">
-            <Link to="/legal" className="hover:text-white transition-colors">Legal</Link>
+            <Link to="/legal" className="hover:text-white transition-colors">Confiança &amp; Segurança</Link>
             <a href={waHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">WhatsApp</a>
             <a href="#contact" className="hover:text-white transition-colors">{c.contact.kicker}</a>
           </div>

@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { Award, Ticket, Camera, Users, Bell, Check, X, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import moment from "moment";
 
@@ -102,14 +101,6 @@ export default function Profile() {
 
       <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
         <div>
-          <p className="text-white text-sm font-medium">{t("profile.language")}</p>
-          <p className="text-[#666] text-xs">{t("profile.languageHint")}</p>
-        </div>
-        <LanguageSwitcher />
-      </div>
-
-      <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
-        <div>
           <p className="text-white text-sm font-medium">{t("profile.legalCardTitle")}</p>
           <p className="text-[#666] text-xs">{t("profile.legalCardDesc")}</p>
         </div>
@@ -122,10 +113,10 @@ export default function Profile() {
             Social
           </TabsTrigger>
           <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
-            Badges
+            Conquistas
           </TabsTrigger>
           <TabsTrigger value="history" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
-            Events
+            Eventos
           </TabsTrigger>
         </TabsList>
 
@@ -163,8 +154,8 @@ export default function Profile() {
           {connections.length === 0 && friendRequests.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-10 text-center">
               <Users className="w-8 h-8 text-[#444] mx-auto mb-2" />
-              <p className="text-[#666] text-sm">No connections yet.</p>
-              <p className="text-[#555] text-xs mt-1">Send friend requests from Moments to connect anonymously.</p>
+              <p className="text-[#666] text-sm">Sem conexões ainda.</p>
+              <p className="text-[#555] text-xs mt-1">Conecte-se com quem vai nas mesmas festas.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -226,9 +217,9 @@ export default function Profile() {
           ) : tickets.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-10 text-center">
               <Ticket className="w-8 h-8 text-[#444] mx-auto mb-2" />
-              <p className="text-[#666] text-sm">No events yet.</p>
+              <p className="text-[#666] text-sm">Sem eventos ainda.</p>
               <Link to="/events" className="inline-flex items-center gap-1 mt-3 text-primary text-sm font-medium">
-                Find events <ArrowRight className="w-3.5 h-3.5" />
+                Encontrar eventos <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           ) : (

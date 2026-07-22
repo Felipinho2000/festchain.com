@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { Calendar, MapPin, Zap, Music, Share2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Calendar, MapPin, Music, Share2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
 
@@ -9,106 +8,92 @@ const genreLabels = {
   techno: "Techno", house: "House", trance: "Trance",
   drum_and_bass: "Drum & Bass", hip_hop: "Hip Hop",
   reggaeton: "Reggaeton", funk: "Funk", pop: "Pop",
-  rock: "Rock", sertanejo: "Sertanejo", other: "Other"
+  rock: "Rock", sertanejo: "Sertanejo", other: "Outro"
 };
+
+const monthLabels = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
 
 export default function EventCard({ event }) {
   const { toast } = useToast();
   const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
-  const soldPct = Math.min(100, Math.round(((event.tickets_sold || 0) / event.total_capacity) * 100));
-  const sellingFast = soldPct >= 70 && spotsLeft > 0;
+  const soldOut = spotsLeft <= 0;
+  const sellingFast = !soldOut && spotsLeft <= Math.ceil(event.total_capacity * 0.2);
+  const price = event.ticket_price || 0;
+  const date = moment(event.date);
 
   const handleShare = (e) => {
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/events/${event.id}`;
     if (navigator.share) {
-      navigator.share({ title: event.title, text: `Join me at ${event.title} on FestChain 🎟️`, url }).catch(() => {});
+      navigator.share({ title: event.title, text: `Bora pra ${event.title} 🎟️`, url }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => {
-        toast({ title: "Event link copied!", description: "Share it on WhatsApp or Instagram." });
+        toast({ title: "Link copiado!", description: "Compartilha no WhatsApp ou Instagram." });
       }).catch(() => {});
     }
   };
 
   return (
     <Link to={`/events/${event.id}`} className="group block">
-      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_20px_-4px_rgba(255,85,0,0.2)]">
-        {/* Image */}
-        <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-[0_0_24px_-4px_rgba(255,101,0,0.25)]">
+        {/* Flyer image */}
+        <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
           {event.image_url ? (
-            <img
-              src={event.image_url}
-              alt={event.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+            <img src={event.image_url} alt={event.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-[#1f1f1f]">
-              <Music className="w-10 h-10 text-primary/30" strokeWidth={1.5} />
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-[#1a1a1a]">
+              <Music className="w-12 h-12 text-primary/30" strokeWidth={1.5} />
             </div>
           )}
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
-          {/* Top-left status badges */}
+          {/* Urgency badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+            {soldOut ? (
+              <span className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">Esgotado</span>
+            ) : sellingFast ? (
+              <span className="bg-primary text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide animate-pulse">Esgotando</span>
+            ) : null}
             {event.status === "live" && (
-              <div className="flex items-center gap-1.5 bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                LIVE
-              </div>
+              <span className="flex items-center gap-1.5 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> AO VIVO
+              </span>
             )}
-            {sellingFast && event.status !== "live" && (
-              <div className="bg-amber-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">Selling Fast</div>
+            {event.visibility === "private" && (
+              <span className="bg-black/70 backdrop-blur-sm text-amber-300 text-xs font-semibold px-2.5 py-1 rounded-full">Privado</span>
             )}
-            <div className={`text-xs font-semibold px-2.5 py-1 rounded-full ${event.visibility === "private" ? "bg-amber-900/80 text-amber-300" : "bg-black/70 text-white backdrop-blur-sm"}`}>
-              {event.visibility === "private" ? "Private" : "Public"}
-            </div>
           </div>
 
-          {/* Top-right: genre + share */}
-          <div className="absolute top-3 right-3 flex items-center gap-1.5">
-            {event.genre && (
-              <Badge className="bg-black/70 backdrop-blur-sm text-white text-xs border-0">
-                {genreLabels[event.genre] || event.genre}
-              </Badge>
-            )}
-            <button
-              onClick={handleShare}
-              className="w-7 h-7 rounded-full bg-black/70 backdrop-blur-sm text-white flex items-center justify-center hover:bg-primary transition-colors"
-              aria-label="Share event"
-            >
-              <Share2 className="w-3.5 h-3.5" strokeWidth={1.5} />
-            </button>
+          {/* Share button */}
+          <button onClick={handleShare} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm text-white flex items-center justify-center hover:bg-primary transition-colors" aria-label="Compartilhar">
+            <Share2 className="w-4 h-4" strokeWidth={1.5} />
+          </button>
+
+          {/* Date badge on image */}
+          <div className="absolute bottom-3 left-3 bg-primary text-white rounded-lg px-2.5 py-1.5 text-center leading-none">
+            <div className="text-[10px] font-bold uppercase">{monthLabels[date.month()]}</div>
+            <div className="text-lg font-extrabold">{date.format("D")}</div>
+          </div>
+
+          {/* Title overlay on image */}
+          <div className="absolute bottom-3 right-3 left-16">
+            <h3 className="font-heading font-extrabold text-white text-base uppercase leading-tight line-clamp-2 drop-shadow-lg">{event.title}</h3>
           </div>
         </div>
 
         {/* Content */}
         <div className="p-4">
-          <h3 className="font-heading font-semibold text-base text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-            {event.title}
-          </h3>
-
           <div className="flex flex-col gap-1.5 mb-3">
-            <div className="flex items-center gap-2 text-[#888] text-sm">
-              <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
-              <span>{moment(event.date).format("MMM D, YYYY · h:mm A")}</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#888] text-sm">
+            <div className="flex items-center gap-2 text-[#888] text-xs">
               <MapPin className="w-3.5 h-3.5" strokeWidth={1.5} />
               <span className="truncate">{event.location_name}</span>
             </div>
-          </div>
-
-          {/* Capacity bar */}
-          <div className="mb-3">
-            <div className="flex justify-between text-[10px] text-[#666] mb-1">
-              <span>{event.tickets_sold || 0} sold</span>
-              <span>{spotsLeft > 0 ? `${spotsLeft} left` : "Sold out"}</span>
-            </div>
-            <div className="h-1 bg-[#252525] rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${sellingFast ? "bg-amber-500" : "bg-primary"}`}
-                style={{ width: `${soldPct}%` }}
-              />
+            <div className="flex items-center gap-2 text-[#888] text-xs">
+              <Calendar className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <span>{date.format("HH:mm")}h</span>
+              {event.genre && <span className="text-[#555]">· {genreLabels[event.genre] || event.genre}</span>}
             </div>
           </div>
 
@@ -116,16 +101,15 @@ export default function EventCard({ event }) {
           <div className="flex items-end justify-between pt-3 border-t border-border">
             <div>
               <span className="text-[10px] text-[#555] block mb-0.5">
-                {event.ticket_price === 0 ? "Free / RSVP" : "Ticket"}
+                {price === 0 ? "Grátis / RSVP" : "A partir de"}
               </span>
-              <span className="font-heading font-bold text-white text-sm">
-                {event.ticket_price === 0 ? "Free" : `R$ ${event.ticket_price?.toFixed(2)}`}
+              <span className="font-heading font-extrabold text-white text-lg">
+                {price === 0 ? "Grátis" : `R$ ${price.toFixed(2)}`}
               </span>
             </div>
-            <div className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-lg">
-              <Zap className="w-3 h-3" strokeWidth={2} />
-              +{event.festcoin_reward || 50} FTC
-            </div>
+            {spotsLeft > 0 && (
+              <span className="text-[10px] text-[#666]">{spotsLeft} restantes</span>
+            )}
           </div>
         </div>
       </div>

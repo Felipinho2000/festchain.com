@@ -28,6 +28,7 @@ import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
 import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
+import Social from '@/pages/Social';
 import TrustSafety from '@/pages/TrustSafety';
 import TicketDetail from '@/pages/TicketDetail';
 import EventEditor from '@/pages/EventEditor';
@@ -69,7 +70,6 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/legal" element={<Legal />} />
       <Route path="/trust-safety" element={<TrustSafety />} />
-      <Route path="/whitepaper" element={<Navigate to="/trust-safety" replace />} />
 
       {/* Protected app routes */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
@@ -88,6 +88,7 @@ const AuthenticatedApp = () => {
           <Route path="/dashboard/events/new" element={<EventEditor />} />
           <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
           <Route path="/scan" element={<Scan />} />
+          <Route path="/social" element={<Social />} />
           <Route path="/pilot-setup" element={<PilotSetup />} />
         </Route>
       </Route>

@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Plus, Calendar, TrendingUp,
-  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck
+  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -54,10 +54,10 @@ export default function Dashboard() {
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
           <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
-        <h2 className="font-heading font-bold text-2xl text-white mb-2">Organizers only</h2>
-        <p className="text-[#888] text-sm mb-2">This area is for approved organizers and admins.</p>
-        <p className="text-[#555] text-xs mb-6">Organizer approval is granted manually by the admin team during the private pilot.</p>
-        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Back to Home</Link>
+        <h2 className="font-heading font-bold text-2xl text-white mb-2">Apenas organizadores</h2>
+        <p className="text-[#888] text-sm mb-2">Esta área é para organizadores e administradores aprovados.</p>
+        <p className="text-[#555] text-xs mb-6">A aprovação é concedida manualmente pela equipe durante o piloto privado.</p>
+        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Voltar ao início</Link>
       </div>
     );
   }
@@ -89,9 +89,9 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-warmgray text-sm mb-1">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, {currentUser?.full_name || "Organizer"}</p>
-          <h1 className="font-heading font-bold text-3xl text-foreground flex items-center gap-2">
-            Command Center <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
+          <p className="text-warmgray text-sm mb-1">{new Date().getHours() < 12 ? "Bom dia" : new Date().getHours() < 18 ? "Boa tarde" : "Boa noite"}, {currentUser?.full_name || "Organizador"}</p>
+          <h1 className="font-heading font-extrabold text-3xl text-foreground flex items-center gap-2 uppercase">
+            Painel <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
           </h1>
           {currentUser?.role === "admin" && (
             <Link to="/pilot-setup" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
@@ -101,7 +101,7 @@ export default function Dashboard() {
         </div>
         <Link to="/dashboard/events/new">
           <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">
-            <Plus className="w-4 h-4 mr-2" strokeWidth={1.5} /> Create Event
+            <Plus className="w-4 h-4 mr-2" strokeWidth={1.5} /> Criar Evento
           </Button>
         </Link>
       </div>
@@ -109,10 +109,10 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Est. Ticket Value", value: `R$ ${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-400 bg-emerald-900/20" },
-          { label: "Tickets Issued", value: totalTicketsSold, icon: Ticket, color: "text-primary bg-primary/10" },
-          { label: "Active Events", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-primary bg-primary/10" },
-          { label: "Checked In", value: checkedIn, icon: UserCheck, color: "text-emerald-400 bg-emerald-900/20" }
+          { label: "Receita Est.", value: `R$ ${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: "text-emerald-400 bg-emerald-900/20" },
+          { label: "Ingressos", value: totalTicketsSold, icon: Ticket, color: "text-primary bg-primary/10" },
+          { label: "Eventos Ativos", value: events.filter(e => e.status === "published" || e.status === "live").length, icon: Calendar, color: "text-primary bg-primary/10" },
+          { label: "Check-ins", value: checkedIn, icon: UserCheck, color: "text-emerald-400 bg-emerald-900/20" }
         ].map((kpi, i) => (
           <div key={i} className="bg-card border border-border rounded-xl p-4">
             <div className={`w-9 h-9 rounded-lg ${kpi.color} flex items-center justify-center mb-3`}>
@@ -127,7 +127,7 @@ export default function Dashboard() {
       {/* Sales Velocity Chart — shown once there is real activity */}
       {totalTicketsSold > 0 || realTickets.length > 0 ? (
         <div className="bg-card border border-border rounded-xl p-5">
-          <h3 className="font-heading font-semibold text-white mb-4">Sales Velocity (7 days)</h3>
+          <h3 className="font-heading font-semibold text-white mb-4">Vendas (7 dias)</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
@@ -146,31 +146,31 @@ export default function Dashboard() {
             <TrendingUp className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </div>
           <div>
-            <p className="font-heading font-semibold text-white text-sm">No sales yet</p>
-            <p className="text-[#888] text-xs">Once guests reserve tickets, your sales velocity and check-in stats will appear here.</p>
+            <p className="font-heading font-semibold text-white text-sm">Sem vendas ainda</p>
+            <p className="text-[#888] text-xs">Quando os convidados reservarem ingressos, suas vendas e check-ins aparecem aqui.</p>
           </div>
         </div>
       )}
 
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList className="bg-transparent p-0 gap-4 border-b border-border rounded-none h-auto">
-          <TabsTrigger value="events" className={tabClass}>Events</TabsTrigger>
-          <TabsTrigger value="inventory" className={tabClass}>Inventory</TabsTrigger>
-          <TabsTrigger value="redemptions" className={tabClass}>Redemptions</TabsTrigger>
+          <TabsTrigger value="events" className={tabClass}>Eventos</TabsTrigger>
+          <TabsTrigger value="inventory" className={tabClass}>Estoque</TabsTrigger>
+          <TabsTrigger value="redemptions" className={tabClass}>Resgates</TabsTrigger>
           <TabsTrigger value="festcoin" className={tabClass}>FestCoin</TabsTrigger>
         </TabsList>
 
         <TabsContent value="events">
           <div>
-            <h3 className="font-heading font-semibold text-lg text-white mb-4">Your Events</h3>
+            <h3 className="font-heading font-semibold text-lg text-white mb-4">Seus Eventos</h3>
             {loading ? (
               <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="bg-card border border-border rounded-xl h-20 animate-pulse" />)}</div>
             ) : events.length === 0 ? (
               <div className="bg-card border border-border rounded-xl p-12 text-center">
                 <Calendar className="w-10 h-10 text-warmgray/40 mx-auto mb-4" strokeWidth={1.5} />
-                <p className="text-white text-sm font-medium mb-1">No events yet</p>
-                <p className="text-[#666] text-sm mb-4">Create your first event and start testing QR tickets, check-in, and FestCoin rewards.</p>
-                <Link to="/dashboard/events/new"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl"><Plus className="w-4 h-4 mr-2" />Create Event</Button></Link>
+                <p className="text-white text-sm font-medium mb-1">Sem eventos ainda</p>
+                <p className="text-[#666] text-sm mb-4">Crie seu primeiro evento e comece a testar ingressos QR, check-in e recompensas FestCoin.</p>
+                <Link to="/dashboard/events/new"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl"><Plus className="w-4 h-4 mr-2" />Criar Evento</Button></Link>
               </div>
             ) : (
               <div className="space-y-3">
@@ -195,8 +195,9 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        <Link to={`/dashboard/events/${event.id}/edit`} className="p-2 text-warmgray hover:text-primary rounded-lg hover:bg-secondary transition-colors" title="Edit event"><Pencil className="w-4 h-4" strokeWidth={1.5} /></Link>
-                        <button onClick={() => handleDelete(event.id)} className="p-2 text-warmgray hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors" title="Delete event"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+                        <Link to="/scan" className="p-2 text-warmgray hover:text-primary rounded-lg hover:bg-secondary transition-colors" title="Check-in / Scanner"><ScanLine className="w-4 h-4" strokeWidth={1.5} /></Link>
+                        <Link to={`/dashboard/events/${event.id}/edit`} className="p-2 text-warmgray hover:text-primary rounded-lg hover:bg-secondary transition-colors" title="Editar evento"><Pencil className="w-4 h-4" strokeWidth={1.5} /></Link>
+                        <button onClick={() => handleDelete(event.id)} className="p-2 text-warmgray hover:text-red-500 rounded-lg hover:bg-red-900/20 transition-colors" title="Excluir evento"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
                       </div>
                     </div>
                   );

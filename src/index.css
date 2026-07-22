@@ -6,24 +6,24 @@
 
 @layer base {
   :root {
-    --background: 0 0% 8%;
+    --background: 0 0% 5%;
     --foreground: 0 0% 95%;
-    --card: 0 0% 11%;
+    --card: 0 0% 9%;
     --card-foreground: 0 0% 95%;
-    --popover: 0 0% 11%;
+    --popover: 0 0% 9%;
     --popover-foreground: 0 0% 95%;
     --primary: 24 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 15%;
+    --secondary: 0 0% 13%;
     --secondary-foreground: 0 0% 80%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 50%;
     --accent: 24 80% 48%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 24 100% 50%;
     --chart-1: 24 100% 50%;
     --chart-2: 24 80% 58%;
@@ -35,7 +35,7 @@
     --font-body: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sidebar-background: 0 0% 10%;
+    --sidebar-background: 0 0% 4%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 24 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;

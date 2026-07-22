@@ -5,23 +5,11 @@ const LanguageContext = createContext(null);
 const STORAGE_KEY = "fc_lang";
 
 function detectInitial() {
-  if (typeof navigator === "undefined") return "en";
-  try {
-    const l = (navigator.language || "").toLowerCase();
-    return l.startsWith("pt") ? "pt-BR" : "en";
-  } catch {
-    return "en";
-  }
+  return "pt-BR";
 }
 
 export function LanguageProvider({ children }) {
-  const [lang, setLangState] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === "en" || saved === "pt-BR") return saved;
-    } catch {}
-    return detectInitial();
-  });
+  const [lang, setLangState] = useState("pt-BR");
 
   useEffect(() => {
     try {
