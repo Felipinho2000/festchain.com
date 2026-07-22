@@ -42,10 +42,10 @@ export default function EventMenuPanel({ eventId, userBalance, onRedeemed }) {
         setRedemptions(rdps);
         onRedeemed && onRedeemed(data.balance_after);
       } else {
-        toast({ title: "Error", description: data.message || data.error, variant: "destructive" });
+        toast({ title: "Erro", description: data.message || data.error, variant: "destructive" });
       }
     } catch (e) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
     } finally {
       setRedeeming(null);
     }

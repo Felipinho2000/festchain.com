@@ -57,7 +57,7 @@ export default function RedemptionManager({ events }) {
     return (
       <div className="bg-card border border-border rounded-xl p-12 text-center">
         <Gift className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-        <p className="text-[#666] text-sm">Create an event first to manage redemptions.</p>
+        <p className="text-[#666] text-sm">Crie um evento primeiro para gerenciar os resgates.</p>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function RedemptionManager({ events }) {
         </button>
         <button onClick={exportCSV} disabled={redemptions.length === 0}
           className="flex items-center gap-1.5 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 px-3 py-2 rounded-lg disabled:opacity-40 transition-colors">
-          <Download className="w-3.5 h-3.5" /> Export CSV
+          <Download className="w-3.5 h-3.5" /> Exportar CSV
         </button>
       </div>
 
@@ -93,17 +93,17 @@ export default function RedemptionManager({ events }) {
       ) : redemptions.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-10 text-center">
           <Gift className="w-8 h-8 text-[#444] mx-auto mb-2" strokeWidth={1.5} />
-          <p className="text-[#666] text-sm">No redemptions yet for this event. Redemptions appear here when partygoers redeem items with FTC.</p>
+          <p className="text-[#666] text-sm">Nenhum resgate para este evento. Os resgates aparecem aqui quando o público troca créditos por produtos.</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-border text-[10px] uppercase tracking-wider text-[#666] font-semibold">
-            <div className="col-span-3">Item</div>
-            <div className="col-span-3">Code</div>
+            <div className="col-span-3">Produto</div>
+            <div className="col-span-3">Código</div>
             <div className="col-span-2">Status</div>
             <div className="col-span-1 text-right">FTC</div>
-            <div className="col-span-2">Date</div>
-            <div className="col-span-1 text-right">Actions</div>
+            <div className="col-span-2">Data</div>
+            <div className="col-span-1 text-right">Ações</div>
           </div>
           <div className="divide-y divide-[#1f1f1f] max-h-[60vh] overflow-y-auto">
             {redemptions.map(r => (
@@ -120,16 +120,16 @@ export default function RedemptionManager({ events }) {
                   </span>
                 </div>
                 <div className="col-span-1 text-right text-primary font-semibold">{r.ftc_cost || 0}</div>
-                <div className="col-span-2 text-[#888]">{r.created_date ? moment(r.created_date).format("MMM D, h:mm A") : "—"}</div>
+                <div className="col-span-2 text-[#888]">{r.created_date ? moment(r.created_date).format("D MMM, HH:mm") : "—"}</div>
                 <div className="col-span-1 flex items-center justify-end gap-1">
                   {r.status === "redeemed" && (
-                    <button onClick={() => markClaimed(r.id)} title="Mark as claimed"
+                    <button onClick={() => markClaimed(r.id)} title="Marcar como coletado"
                       className="p-1.5 text-emerald-400 hover:bg-emerald-900/20 rounded-lg transition-colors">
                       <Check className="w-3.5 h-3.5" />
                     </button>
                   )}
                   {!["cancelled", "claimed"].includes(r.status) && (
-                    <button onClick={() => cancelRedemption(r.id)} title="Cancel redemption"
+                    <button onClick={() => cancelRedemption(r.id)} title="Cancelar resgate"
                       className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
                       <Ban className="w-3.5 h-3.5" />
                     </button>

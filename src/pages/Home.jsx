@@ -9,24 +9,24 @@ import { Button } from "@/components/ui/button";
 import EventCard from "@/components/events/EventCard";
 
 const pillars = [
-  { icon: QrCode, label: "Secure QR tickets", desc: "Unique, unguessable ticket codes — no forged screenshots." },
-  { icon: Zap, label: "Offline-ready", desc: "Your QR stays on your device and scans at the door without signal." },
-  { icon: ShieldCheck, label: "No double entry", desc: "Check-in is verified server-side; each ticket scans exactly once." },
-  { icon: Sparkles, label: "FestCoin loyalty", desc: "Earn pilot loyalty credits by attending — in-app, no cash value." },
+  { icon: QrCode, label: "Ingressos QR seguros", desc: "Códigos únicos e invioláveis — nada de print falso." },
+  { icon: Zap, label: "Funciona offline", desc: "Seu QR fica no celular e é lido na portaria mesmo sem internet." },
+  { icon: ShieldCheck, label: "Sem entrada dupla", desc: "O check-in é validado no servidor; cada ingresso é lido só uma vez." },
+  { icon: Sparkles, label: "Recompensas", desc: "Ganhe créditos por participar — benefícios dentro do app." },
 ];
 
 const flow = [
-  { step: "1", icon: Ticket, title: "Get your ticket", desc: "A secure QR ticket is issued instantly into your wallet." },
-  { step: "2", icon: QrCode, title: "Show QR at the door", desc: "Open your wallet and present the QR — works offline, no app needed." },
-  { step: "3", icon: ShieldCheck, title: "Verified entry", desc: "Staff scans it; double entry is blocked automatically." },
-  { step: "4", icon: Sparkles, title: "Earn pilot credits", desc: "Get FestCoin loyalty credits for attending. No cash value." },
+  { step: "1", icon: Ticket, title: "Compre seu ingresso", desc: "O ingresso QR é emitido na hora direto na sua carteira." },
+  { step: "2", icon: QrCode, title: "Mostre o QR na porta", desc: "Abra a carteira e apresente o QR — funciona offline." },
+  { step: "3", icon: ShieldCheck, title: "Entrada liberada", desc: "O porteiro escaneia e a entrada dupla é bloqueada." },
+  { step: "4", icon: Sparkles, title: "Ganhe recompensas", desc: "Acumule créditos por participar. Use em benefícios." },
 ];
 
 const forOrganizers = [
-  { icon: QrCode, label: "Issue & validate QR tickets" },
-  { icon: TrendingUp, label: "Live check-in & sales view" },
-  { icon: Users, label: "Know who's at the door" },
-  { icon: ShieldCheck, label: "No passbacks, no fraud" },
+  { icon: QrCode, label: "Emitir e validar ingressos QR" },
+  { icon: TrendingUp, label: "Vendas e check-in em tempo real" },
+  { icon: Users, label: "Saiba quem está na porta" },
+  { icon: ShieldCheck, label: "Sem repasse, sem fraude" },
 ];
 
 export default function Home() {
@@ -49,27 +49,27 @@ export default function Home() {
         <div className="relative max-w-2xl">
           <div className="inline-flex items-center gap-2 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5 uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-            Private Pilot · QR Ticketing
+            Piloto privado · Ingressos QR
           </div>
-          <h1 className="font-heading font-bold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4">
-            Secure QR tickets.<br />
-            <span className="text-primary">Verified entry.</span><br />
-            No queue. No passbacks.
+          <h1 className="font-heading font-extrabold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4 uppercase">
+            Compre ingressos.<br />
+            <span className="text-primary">Evite filas.</span><br />
+            Aproveite mais.
           </h1>
           <p className="text-[#888] text-lg leading-relaxed mb-8 max-w-xl">
-            FestChain issues unique, offline-ready QR tickets and rewards attendees with pilot loyalty credits — so check-in is fast, reliable, and fraud-proof.
+            Plataforma para descobrir eventos, guardar ingressos e comprar produtos antes mesmo de chegar ao local.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link to="/events">
               <Button className="bg-primary hover:bg-primary/90 text-white h-12 px-7 text-sm font-bold rounded-xl">
                 <Calendar className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                Browse Events
+                Explorar eventos
               </Button>
             </Link>
             <Link to="/wallet">
               <Button variant="outline" className="h-12 px-7 text-sm font-bold rounded-xl border-border text-white hover:bg-primary/10 hover:border-primary/40">
                 <Wallet className="w-4 h-4 mr-2" strokeWidth={1.5} />
-                Open Wallet
+                Abrir carteira
               </Button>
             </Link>
           </div>
@@ -91,7 +91,7 @@ export default function Home() {
 
       {/* ── HOW IT WORKS ── */}
       <section>
-        <h2 className="font-heading font-semibold text-xl text-white mb-5">How it works</h2>
+        <h2 className="font-heading font-semibold text-xl text-white mb-5 uppercase">Como funciona</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {flow.map((f, i) => (
             <div key={i} className="bg-card border border-border rounded-xl p-5 relative">
@@ -109,9 +109,9 @@ export default function Home() {
       {/* ── UPCOMING EVENTS ── */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-heading font-semibold text-xl text-white">Upcoming Events</h2>
+          <h2 className="font-heading font-semibold text-xl text-white uppercase">Próximos eventos</h2>
           <Link to="/events" className="text-primary text-sm font-medium hover:underline flex items-center gap-1">
-            View all <ArrowRight className="w-3.5 h-3.5" />
+            Ver todos <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
         {loading ? (
@@ -133,7 +133,7 @@ export default function Home() {
         ) : (
           <div className="bg-card border border-border rounded-xl p-12 text-center">
             <Calendar className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-            <p className="text-[#666] text-sm">No events yet. Create your first event from the Dashboard.</p>
+            <p className="text-[#666] text-sm">Nenhum evento por enquanto. Crie seu primeiro evento no painel.</p>
           </div>
         )}
       </section>
@@ -142,17 +142,17 @@ export default function Home() {
       <section className="bg-gradient-to-br from-[#1a1a1a] to-[#111] border border-border rounded-2xl p-7 lg:p-10">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="flex-1">
-            <p className="text-xs text-primary font-bold uppercase tracking-widest mb-3">For organizers</p>
-            <h2 className="font-heading font-bold text-2xl text-white mb-3 leading-tight">
-              Run check-in<br />at scale.
+            <p className="text-xs text-primary font-bold uppercase tracking-widest mb-3">Para organizadores</p>
+            <h2 className="font-heading font-extrabold text-2xl text-white mb-3 leading-tight uppercase">
+              Controle de acesso<br />em escala.
             </h2>
             <p className="text-[#666] text-sm leading-relaxed mb-5">
-              Create events, issue QR tickets, and scan guests at the door with double-entry protection and a live attendance view — built for the private pilot.
+              Crie eventos, emita ingressos QR e escaneie o público na porta com proteção contra entrada dupla e lista de participantes em tempo real.
             </p>
             <Link to="/dashboard">
               <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 rounded-xl text-sm">
                 <LayoutDashboard className="w-4 h-4 mr-1.5" />
-                Open Organizer Dashboard <ArrowRight className="w-4 h-4 ml-1" />
+                Abrir painel <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>

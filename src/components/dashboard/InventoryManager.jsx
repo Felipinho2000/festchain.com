@@ -13,8 +13,8 @@ import { useToast } from "@/components/ui/use-toast";
 
 const CATEGORIES = ["drinks", "bottle_service", "food", "merchandise", "vip_table", "other"];
 const CATEGORY_LABELS = {
-  drinks: "Drinks 🍺", bottle_service: "Bottle Service 🍾",
-  food: "Food 🍔", merchandise: "Merch 👕", vip_table: "VIP Table 👑", other: "Other ⚡"
+  drinks: "Bebidas 🍺", bottle_service: "Comanda 🍾",
+  food: "Comida 🍔", merchandise: "Merch 👕", vip_table: "Mesa VIP 👑", other: "Outro ⚡"
 };
 
 const defaultForm = {
@@ -67,10 +67,10 @@ export default function InventoryManager({ events }) {
     };
     if (editingId) {
       await base44.functions.invoke("updateMenuItem", { id: editingId, ...data });
-      toast({ title: "Product updated" });
+      toast({ title: "Produto atualizado" });
     } else {
       await base44.functions.invoke("createMenuItem", data);
-      toast({ title: "Product added to menu" });
+      toast({ title: "Produto adicionado ao menu" });
     }
     setSaving(false);
     setDialogOpen(false);
@@ -95,7 +95,7 @@ export default function InventoryManager({ events }) {
 
   const handleDelete = async (id) => {
     await base44.functions.invoke("deleteMenuItem", { id });
-    toast({ title: "Product removed" });
+    toast({ title: "Produto removido" });
     loadItems(selectedEventId);
   };
 
@@ -108,7 +108,7 @@ export default function InventoryManager({ events }) {
     return (
       <div className="bg-card border border-border rounded-xl p-12 text-center">
         <Package className="w-10 h-10 text-[#444] mx-auto mb-3" strokeWidth={1.5} />
-        <p className="text-[#666] text-sm">Create an event first to manage its inventory.</p>
+        <p className="text-[#666] text-sm">Crie um evento primeiro para gerenciar os produtos.</p>
       </div>
     );
   }
@@ -119,7 +119,7 @@ export default function InventoryManager({ events }) {
       <div className="flex items-center gap-3 flex-wrap">
         <Select value={selectedEventId} onValueChange={setSelectedEventId}>
           <SelectTrigger className="w-64 rounded-xl bg-card border-border">
-            <SelectValue placeholder="Select event" />
+            <SelectValue placeholder="Selecionar evento" />
           </SelectTrigger>
           <SelectContent>
             {events.map(e => <SelectItem key={e.id} value={e.id}>{e.title}</SelectItem>)}
@@ -127,7 +127,7 @@ export default function InventoryManager({ events }) {
         </Select>
         <Button onClick={() => { setForm(defaultForm); setEditingId(null); setDialogOpen(true); }}
           className="bg-primary hover:bg-primary/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">
-          <Plus className="w-4 h-4 mr-1.5" /> Add Product
+          <Plus className="w-4 h-4 mr-1.5" /> Adicionar produto
         </Button>
       </div>
 
@@ -137,7 +137,7 @@ export default function InventoryManager({ events }) {
       ) : items.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-10 text-center">
           <Package className="w-8 h-8 text-[#444] mx-auto mb-2" strokeWidth={1.5} />
-          <p className="text-[#666] text-sm">No products yet. Add drinks, food, or merch for attendees to pre-order.</p>
+          <p className="text-[#666] text-sm">Nenhum produto ainda. Adicione bebidas, comida ou merch para o público comprar antecipadamente.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -148,10 +148,10 @@ export default function InventoryManager({ events }) {
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-semibold text-white text-sm">{item.name}</p>
                   <Badge className={`text-[10px] border-0 ${item.is_available ? "bg-emerald-900/40 text-emerald-400" : "bg-[#222] text-[#888]"}`}>
-                    {item.is_available ? "Active" : "Hidden"}
+                    {item.is_available ? "Ativo" : "Oculto"}
                   </Badge>
                 </div>
-                <p className="text-xs text-[#666]">{CATEGORY_LABELS[item.category] || item.category} · R${item.price_brl?.toFixed(2)}{item.stock ? ` · ${item.stock} in stock` : ""}</p>
+                <p className="text-xs text-[#666]">{CATEGORY_LABELS[item.category] || item.category} · R${item.price_brl?.toFixed(2)}{item.stock ? ` · ${item.stock} em estoque` : ""}</p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => toggleAvailability(item)} className="p-2 text-[#888] hover:text-primary rounded-lg hover:bg-[#1f1f1f] transition-colors">
@@ -173,12 +173,12 @@ export default function InventoryManager({ events }) {
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setEditingId(null); setForm(defaultForm); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-heading">{editingId ? "Edit Product" : "Add Product"}</DialogTitle>
+            <DialogTitle className="font-heading">{editingId ? "Editar produto" : "Adicionar produto"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-4 gap-3">
               <div className="col-span-3">
-                <Label className="text-xs">Product Name</Label>
+                <Label className="text-xs">Nome do produto</Label>
                 <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="rounded-xl mt-1" placeholder="Heineken 600ml" />
               </div>
               <div>
@@ -187,12 +187,12 @@ export default function InventoryManager({ events }) {
               </div>
             </div>
             <div>
-              <Label className="text-xs">Description</Label>
-              <Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="rounded-xl mt-1 resize-none" rows={2} placeholder="Ice cold. Served at the main bar." />
+              <Label className="text-xs">Descrição</Label>
+              <Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className="rounded-xl mt-1 resize-none" rows={2} placeholder="Gelada. Servida no bar principal." />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Category</Label>
+                <Label className="text-xs">Categoria</Label>
                 <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v }))}>
                   <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -201,29 +201,29 @@ export default function InventoryManager({ events }) {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">Price (R$)</Label>
+                <Label className="text-xs">Preço (R$)</Label>
                 <Input type="number" value={form.price_brl} onChange={e => setForm(p => ({ ...p, price_brl: e.target.value }))} className="rounded-xl mt-1" placeholder="18.00" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Stock (optional)</Label>
-                <Input type="number" value={form.stock} onChange={e => setForm(p => ({ ...p, stock: e.target.value }))} className="rounded-xl mt-1" placeholder="Unlimited" />
+                <Label className="text-xs">Estoque (opcional)</Label>
+                <Input type="number" value={form.stock} onChange={e => setForm(p => ({ ...p, stock: e.target.value }))} className="rounded-xl mt-1" placeholder="Ilimitado" />
               </div>
               <div>
                 <Label className="text-xs">Status</Label>
                 <Select value={form.is_available ? "active" : "hidden"} onValueChange={v => setForm(p => ({ ...p, is_available: v === "active" }))}>
                   <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="hidden">Hidden</SelectItem>
+                    <SelectItem value="active">Ativo</SelectItem>
+                    <SelectItem value="hidden">Oculto</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <Button onClick={handleSave} disabled={saving || !form.name || !form.price_brl}
               className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl">
-              {saving ? "Saving..." : editingId ? "Update Product" : "Add to Menu"}
+              {saving ? "Salvando..." : editingId ? "Atualizar produto" : "Adicionar ao menu"}
             </Button>
           </div>
         </DialogContent>

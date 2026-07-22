@@ -110,7 +110,7 @@ export default function EventEditor() {
           ftc_pilot_mode: ev.ftc_pilot_mode !== false,
         });
       })
-      .catch(() => { toast({ title: "Event not found", variant: "destructive" }); navigate("/dashboard"); })
+      .catch(() => {       toast({ title: "Evento não encontrado", variant: "destructive" }); navigate("/dashboard"); })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -124,7 +124,7 @@ export default function EventEditor() {
       const res = await base44.integrations.Core.UploadFile({ file });
       set("image_url", res.file_url);
     } catch (err) {
-      toast({ title: "Upload failed", variant: "destructive" });
+      toast({ title: "Erro no upload", variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -146,7 +146,7 @@ export default function EventEditor() {
 
   const handleSave = async () => {
     if (!form.title || !form.date || !form.location_name || !form.total_capacity) {
-      toast({ title: "Please fill all required fields", variant: "destructive" });
+      toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -189,14 +189,14 @@ export default function EventEditor() {
     try {
       if (isEdit) {
         await base44.entities.Event.update(id, payload);
-        toast({ title: "Event updated" });
+        toast({ title: "Evento atualizado" });
       } else {
         await base44.entities.Event.create(payload);
-        toast({ title: "Event created!", description: "Your event is live." });
+        toast({ title: "Evento criado!", description: "Seu evento está no ar." });
       }
       navigate("/dashboard");
     } catch (e) {
-      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+      toast({ title: "Erro ao salvar", description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -226,7 +226,7 @@ export default function EventEditor() {
       <Section title={t("eventEditor.eventBasics")} icon={Calendar}>
         <Field label={t("eventEditor.eventName")}><Input value={form.title} onChange={e => set("title", e.target.value)} className="rounded-xl" placeholder="Summer Solstice" /></Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Genre">
+          <Field label="Estilo">
             <Select value={form.genre} onValueChange={v => set("genre", v)}>
               <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>{GENRES.map(g => <SelectItem key={g} value={g}>{genreLabel(g)}</SelectItem>)}</SelectContent>
@@ -236,31 +236,31 @@ export default function EventEditor() {
             <Select value={form.status} onValueChange={v => set("status", v)}>
               <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="live">Live</SelectItem>
-                <SelectItem value="ended">Ended</SelectItem>
+                <SelectItem value="draft">Rascunho</SelectItem>
+                <SelectItem value="published">Publicado</SelectItem>
+                <SelectItem value="live">Ao vivo</SelectItem>
+                <SelectItem value="ended">Encerrado</SelectItem>
               </SelectContent>
             </Select>
           </Field>
         </div>
-        <Field label="Short Description"><Textarea value={form.description} onChange={e => set("description", e.target.value)} className="rounded-xl resize-none" rows={3} placeholder="Describe the vibe..." /></Field>
+        <Field label="Descrição"><Textarea value={form.description} onChange={e => set("description", e.target.value)} className="rounded-xl resize-none" rows={3} placeholder="Descreva a vibe..." /></Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Start Date & Time *"><Input type="datetime-local" value={form.date} onChange={e => set("date", e.target.value)} className="rounded-xl" /></Field>
-          <Field label="End Date & Time"><Input type="datetime-local" value={form.end_date} onChange={e => set("end_date", e.target.value)} className="rounded-xl" /></Field>
+          <Field label="Início *"><Input type="datetime-local" value={form.date} onChange={e => set("date", e.target.value)} className="rounded-xl" /></Field>
+          <Field label="Fim"><Input type="datetime-local" value={form.end_date} onChange={e => set("end_date", e.target.value)} className="rounded-xl" /></Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Venue Name *"><Input value={form.location_name} onChange={e => set("location_name", e.target.value)} className="rounded-xl" placeholder="Club Nova" /></Field>
-          <Field label="Address"><Input value={form.location_address} onChange={e => set("location_address", e.target.value)} className="rounded-xl" placeholder="São Paulo, SP" /></Field>
+          <Field label="Casa *"><Input value={form.location_name} onChange={e => set("location_name", e.target.value)} className="rounded-xl" placeholder="Club Nova" /></Field>
+          <Field label="Endereço"><Input value={form.location_address} onChange={e => set("location_address", e.target.value)} className="rounded-xl" placeholder="São Paulo, SP" /></Field>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Capacity *"><Input type="number" value={form.total_capacity} onChange={e => set("total_capacity", e.target.value)} className="rounded-xl" placeholder="500" /></Field>
-          <Field label="Base Price (R$)"><Input type="number" value={form.ticket_price} onChange={e => set("ticket_price", e.target.value)} className="rounded-xl" placeholder="40" /></Field>
+          <Field label="Capacidade *"><Input type="number" value={form.total_capacity} onChange={e => set("total_capacity", e.target.value)} className="rounded-xl" placeholder="500" /></Field>
+          <Field label="Preço base (R$)"><Input type="number" value={form.ticket_price} onChange={e => set("ticket_price", e.target.value)} className="rounded-xl" placeholder="40" /></Field>
         </div>
-        <Field label="Event Banner / Image">
+        <Field label="Banner / imagem do evento">
           <div className="flex items-center gap-3">
             <label className="cursor-pointer flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-white hover:border-primary transition-colors">
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />} Upload Image
+              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />} Enviar imagem
               <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
             </label>
             {form.image_url && <img src={form.image_url} alt="" className="w-16 h-16 rounded-lg object-cover" />}
@@ -269,33 +269,33 @@ export default function EventEditor() {
         <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
           <div className="flex-1 mr-3">
             <Label className="text-xs">{form.visibility === "public" ? t("eventEditor.publicEvent") : t("eventEditor.privateEvent")}</Label>
-            <p className="text-[10px] text-[#666] mt-0.5">{form.visibility === "public" ? "Appears in discovery and can be shared publicly." : "Hidden from public listing — only people with the link or a ticket can access."}</p>
+            <p className="text-[10px] text-[#666] mt-0.5">{form.visibility === "public" ? "Aparece na busca e pode ser compartilhado publicamente." : "Oculto da listagem pública — só quem tem o link ou o ingresso consegue acessar."}</p>
           </div>
           <Switch checked={form.visibility === "public"} onCheckedChange={v => set("visibility", v ? "public" : "private")} />
         </div>
       </Section>
 
       {/* TICKET PHASES */}
-      <Section title={t("eventEditor.ticketPhases")} icon={TicketIcon} subtitle="Default phases are preloaded. Only the active phase within its sales window is buyable; phases auto-advance.">
+      <Section title={t("eventEditor.ticketPhases")} icon={TicketIcon} subtitle="Fases padrão já carregadas. Só a fase ativa dentro do período de vendas fica disponível; as fases avançam automaticamente.">
         <div className="space-y-3">
           {form.ticket_phases.map((ph, i) => (
             <div key={i} className="bg-[#0d0d0d] border border-[#222] rounded-xl p-3 space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <Input value={ph.name} onChange={e => updatePhase(i, "name", e.target.value)} className="rounded-lg h-8 text-sm font-medium" placeholder="Phase name" />
+                <Input value={ph.name} onChange={e => updatePhase(i, "name", e.target.value)} className="rounded-lg h-8 text-sm font-medium" placeholder="Nome da fase" />
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-[10px] text-[#666]">Active</span>
+                  <span className="text-[10px] text-[#666]">Ativa</span>
                   <Switch checked={!!ph.active} onCheckedChange={v => updatePhase(i, "active", v)} />
                   <button onClick={() => removePhase(i)} className="p-1 text-[#666] hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><label className="text-[10px] text-[#666]">Price (R$)</label><Input type="number" value={ph.price} onChange={e => updatePhase(i, "price", e.target.value)} className="rounded-lg h-8 text-sm" /></div>
-                <div><label className="text-[10px] text-[#666]">Qty</label><Input type="number" value={ph.quantity} onChange={e => updatePhase(i, "quantity", e.target.value)} className="rounded-lg h-8 text-sm" /></div>
-                <div><label className="text-[10px] text-[#666]">FTC Reward</label><Input type="number" value={ph.festcoin_reward} onChange={e => updatePhase(i, "festcoin_reward", e.target.value)} className="rounded-lg h-8 text-sm" /></div>
+                <div><label className="text-[10px] text-[#666]">Preço (R$)</label><Input type="number" value={ph.price} onChange={e => updatePhase(i, "price", e.target.value)} className="rounded-lg h-8 text-sm" /></div>
+                <div><label className="text-[10px] text-[#666]">Qtd</label><Input type="number" value={ph.quantity} onChange={e => updatePhase(i, "quantity", e.target.value)} className="rounded-lg h-8 text-sm" /></div>
+                <div><label className="text-[10px] text-[#666]">Recompensa FTC</label><Input type="number" value={ph.festcoin_reward} onChange={e => updatePhase(i, "festcoin_reward", e.target.value)} className="rounded-lg h-8 text-sm" /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><label className="text-[10px] text-[#666]">Sales Start</label><Input type="datetime-local" value={toLocal(ph.sales_start)} onChange={e => updatePhase(i, "sales_start", fromLocal(e.target.value))} className="rounded-lg h-8 text-sm" /></div>
-                <div><label className="text-[10px] text-[#666]">Sales End</label><Input type="datetime-local" value={toLocal(ph.sales_end)} onChange={e => updatePhase(i, "sales_end", fromLocal(e.target.value))} className="rounded-lg h-8 text-sm" /></div>
+                <div><label className="text-[10px] text-[#666]">Início das vendas</label><Input type="datetime-local" value={toLocal(ph.sales_start)} onChange={e => updatePhase(i, "sales_start", fromLocal(e.target.value))} className="rounded-lg h-8 text-sm" /></div>
+                <div><label className="text-[10px] text-[#666]">Fim das vendas</label><Input type="datetime-local" value={toLocal(ph.sales_end)} onChange={e => updatePhase(i, "sales_end", fromLocal(e.target.value))} className="rounded-lg h-8 text-sm" /></div>
               </div>
             </div>
           ))}
@@ -309,41 +309,41 @@ export default function EventEditor() {
           {form.lineup.map((dj, i) => (
             <div key={i} className="bg-[#0d0d0d] border border-[#222] rounded-xl p-3 space-y-2">
               <div className="flex items-center gap-2">
-                <Input value={dj.name} onChange={e => updateLineup(i, "name", e.target.value)} className="rounded-lg h-8 text-sm font-medium flex-1" placeholder="DJ / Artist name" />
+                <Input value={dj.name} onChange={e => updateLineup(i, "name", e.target.value)} className="rounded-lg h-8 text-sm font-medium flex-1" placeholder="Nome do DJ / artista" />
                 <button onClick={() => removeLineup(i)} className="p-1 text-[#666] hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input value={dj.set_time} onChange={e => updateLineup(i, "set_time", e.target.value)} className="rounded-lg h-8 text-sm" placeholder="Set time (e.g. 23:00)" />
-                <Input value={dj.social_link} onChange={e => updateLineup(i, "social_link", e.target.value)} className="rounded-lg h-8 text-sm" placeholder="Instagram / social link" />
+                <Input value={dj.set_time} onChange={e => updateLineup(i, "set_time", e.target.value)} className="rounded-lg h-8 text-sm" placeholder="Horário (ex: 23:00)" />
+                <Input value={dj.social_link} onChange={e => updateLineup(i, "social_link", e.target.value)} className="rounded-lg h-8 text-sm" placeholder="Instagram / rede social" />
               </div>
-              <Textarea value={dj.bio} onChange={e => updateLineup(i, "bio", e.target.value)} className="rounded-lg text-sm resize-none" rows={2} placeholder="Short bio (optional)" />
+              <Textarea value={dj.bio} onChange={e => updateLineup(i, "bio", e.target.value)} className="rounded-lg text-sm resize-none" rows={2} placeholder="Bio (opcional)" />
             </div>
           ))}
-          {form.lineup.length === 0 && <p className="text-xs text-[#666]">No DJs added yet.</p>}
+          {form.lineup.length === 0 && <p className="text-xs text-[#666]">Nenhum DJ adicionado.</p>}
         </div>
         <button onClick={addLineup} className="flex items-center gap-1.5 text-primary text-sm font-medium hover:underline mt-2"><Plus className="w-4 h-4" /> {t("eventEditor.addDj")}</button>
       </Section>
 
       {/* SCHEDULE */}
-      <Section title={t("eventEditor.schedule")} icon={Clock} subtitle="Doors open, DJ set, main act, closing — show the night's timeline.">
+      <Section title={t("eventEditor.schedule")} icon={Clock} subtitle="Abertura, set do DJ, atração principal, encerramento — mostre a timeline da noite.">
         <div className="space-y-2">
           {form.schedule.map((s, i) => (
             <div key={i} className="flex items-start gap-2 bg-[#0d0d0d] border border-[#222] rounded-xl p-3">
               <Input value={s.time} onChange={e => updateSchedule(i, "time", e.target.value)} className="rounded-lg h-8 text-sm w-24 flex-shrink-0" placeholder="22:00" />
               <div className="flex-1 space-y-1">
-                <Input value={s.title} onChange={e => updateSchedule(i, "title", e.target.value)} className="rounded-lg h-8 text-sm" placeholder="Doors Open" />
-                <Input value={s.description} onChange={e => updateSchedule(i, "description", e.target.value)} className="rounded-lg h-8 text-xs" placeholder="Optional detail" />
+                <Input value={s.title} onChange={e => updateSchedule(i, "title", e.target.value)} className="rounded-lg h-8 text-sm" placeholder="Abertura" />
+                <Input value={s.description} onChange={e => updateSchedule(i, "description", e.target.value)} className="rounded-lg h-8 text-xs" placeholder="Detalhe (opcional)" />
               </div>
               <button onClick={() => removeSchedule(i)} className="p-1 text-[#666] hover:text-red-400 mt-1"><Trash2 className="w-3.5 h-3.5" /></button>
             </div>
           ))}
-          {form.schedule.length === 0 && <p className="text-xs text-[#666]">No schedule items yet.</p>}
+          {form.schedule.length === 0 && <p className="text-xs text-[#666]">Nenhum item na programação.</p>}
         </div>
         <button onClick={addSchedule} className="flex items-center gap-1.5 text-primary text-sm font-medium hover:underline mt-2"><Plus className="w-4 h-4" /> {t("eventEditor.addScheduleItem")}</button>
       </Section>
 
       {/* FESTCOIN CONFIG */}
-      <Section title={t("festcoin.orgSectionTitle")} icon={Coins} subtitle="Configure how FestCoin works at this event.">
+      <Section title={t("festcoin.orgSectionTitle")} icon={Coins} subtitle="Configure como as recompensas funcionam neste evento.">
         <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
           <div className="flex-1 mr-3">
             <Label className="text-xs">{t("festcoin.orgFtcEnabled")}</Label>

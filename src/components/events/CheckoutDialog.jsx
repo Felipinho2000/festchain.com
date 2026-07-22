@@ -9,9 +9,9 @@ import { Ticket, Minus, Plus, ArrowRight, ArrowLeft, Zap, ShieldCheck } from "lu
 import { Link } from "react-router-dom";
 
 const TIERS = [
-  { key: "inteira", label: "Inteira", desc: "Full price" },
-  { key: "meia_estudante", label: "Meia-Estudante", desc: "50% off · student" },
-  { key: "meia_idoso", label: "Meia-Idoso", desc: "50% off · 60+" },
+  { key: "inteira", label: "Inteira", desc: "Preço cheio" },
+  { key: "meia_estudante", label: "Meia-estudante", desc: "50% off · estudante" },
+  { key: "meia_idoso", label: "Meia-idoso", desc: "50% off · +60 anos" },
 ];
 
 function formatCPF(value) {
@@ -51,7 +51,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
 
   const handleSubmit = async () => {
     if (window.self !== window.top) {
-      toast({ title: "Open in a new tab", description: "Checkout works only from a published app, not in the preview.", variant: "destructive" });
+      toast({ title: "Abra em nova aba", description: "O checkout só funciona no app publicado, não na prévia.", variant: "destructive" });
       return;
     }
     setSubmitting(true);
@@ -71,11 +71,11 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
       if (data.status === "success" && data.checkout_url) {
         window.location.href = data.checkout_url;
       } else {
-        toast({ title: "Checkout failed", description: data.message || "Try again", variant: "destructive" });
+        toast({ title: "Erro no checkout", description: data.message || "Tente novamente", variant: "destructive" });
         setSubmitting(false);
       }
     } catch (e) {
-      toast({ title: "Checkout failed", description: e.message, variant: "destructive" });
+      toast({ title: "Erro no checkout", description: e.message, variant: "destructive" });
       setSubmitting(false);
     }
   };
@@ -95,7 +95,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
         <DialogHeader>
           <DialogTitle className="font-heading flex items-center gap-2">
             <Ticket className="w-5 h-5 text-primary" />
-            {step === 1 ? "Choose your ticket" : "Your details"}
+            {step === 1 ? "Escolha seu ingresso" : "Seus dados"}
           </DialogTitle>
         </DialogHeader>
 
@@ -131,7 +131,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
 
             {/* Quantity */}
             <div className="flex items-center justify-between bg-card border border-border rounded-xl p-3">
-              <span className="text-sm text-white font-medium">Quantity</span>
+              <span className="text-sm text-white font-medium">Quantidade</span>
               <div className="flex items-center gap-3">
                 <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-white hover:bg-primary/20">
                   <Minus className="w-4 h-4" />
@@ -149,7 +149,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
                 <span className="text-sm text-[#888]">Total</span>
                 {reward > 0 && (
                   <p className="text-xs text-primary flex items-center gap-1 mt-0.5">
-                    <Zap className="w-3 h-3" /> +{reward} FTC reward
+                    <Zap className="w-3 h-3" /> +{reward} FTC de recompensa
                   </p>
                 )}
               </div>
@@ -157,7 +157,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
             </div>
 
             <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={() => setStep(2)}>
-              Continue <ArrowRight className="w-4 h-4 ml-2" />
+              Continuar <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         ) : (
@@ -169,14 +169,14 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
                 <span className="text-white font-semibold">R$ {total.toFixed(2)}</span>
               </div>
               <p className="text-[#555] pt-1 border-t border-border flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3 text-primary" /> Pix (instant) or card · ticket sent to your WhatsApp
+                <ShieldCheck className="w-3 h-3 text-primary" /> Pix (instantâneo) ou cartão · ingresso enviado no WhatsApp
               </p>
             </div>
 
             {/* Buyer info form */}
             <div className="space-y-3">
               <div>
-                <Label className="text-xs text-[#888] mb-1.5 block">Full name</Label>
+                <Label className="text-xs text-[#888] mb-1.5 block">Nome completo</Label>
                 <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   placeholder="Seu nome" className="bg-card border-border text-white placeholder:text-[#555] rounded-xl" />
               </div>
@@ -193,7 +193,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-[#888] mb-1.5 block">Email</Label>
+                <Label className="text-xs text-[#888] mb-1.5 block">E-mail</Label>
                 <Input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                   placeholder="voce@email.com" className="bg-card border-border text-white placeholder:text-[#555] rounded-xl" />
               </div>
@@ -207,17 +207,17 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
               <Button className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={handleSubmit} disabled={submitting || !canSubmit}>
                 {submitting ? (
                   <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecting...
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecionando...
                   </span>
                 ) : (
-                  <>Pay R$ {total.toFixed(2)}</>
+                  <>Pagar R$ {total.toFixed(2)}</>
                 )}
               </Button>
             </div>
 
             <p className="text-[10px] text-[#555] text-center">
-              By getting a ticket you accept the{" "}
-              <Link to="/legal" className="text-primary hover:underline">pilot terms</Link>.
+              Ao comprar um ingresso você aceita os{" "}
+              <Link to="/legal" className="text-primary hover:underline">termos do piloto</Link>.
             </p>
           </div>
         )}

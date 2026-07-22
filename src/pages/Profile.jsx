@@ -10,15 +10,15 @@ import moment from "moment";
 
 // All possible badges definition
 const BADGE_DEFS = [
-  { key: "first_ticket", emoji: "🎟️", name: "First Timer", desc: "Bought your first ticket" },
-  { key: "five_events", emoji: "🔥", name: "Party Starter", desc: "Attended 5 events" },
-  { key: "ten_events", emoji: "💎", name: "Festival Veteran", desc: "Attended 10 events" },
-  { key: "twenty_events", emoji: "👑", name: "Party Royalty", desc: "Attended 20 events" },
-  { key: "first_moment", emoji: "📸", name: "Moment Maker", desc: "Shared your first moment" },
-  { key: "night_owl", emoji: "🦉", name: "Night Owl", desc: "Attended a late-night event" },
-  { key: "genre_techno", emoji: "🤖", name: "Techno Head", desc: "Attended a techno event" },
-  { key: "genre_house", emoji: "🏠", name: "House Lover", desc: "Attended a house event" },
-  { key: "festcoin_holder", emoji: "🪙", name: "FTC Holder", desc: "Hold 1000+ FTC" },
+  { key: "first_ticket", emoji: "🎟️", name: "Primeiro ingresso", desc: "Comprou seu primeiro ingresso" },
+  { key: "five_events", emoji: "🔥", name: "Pegando fogo", desc: "Participou de 5 eventos" },
+  { key: "ten_events", emoji: "💎", name: "Veterano", desc: "Participou de 10 eventos" },
+  { key: "twenty_events", emoji: "👑", name: "Lenda", desc: "Participou de 20 eventos" },
+  { key: "first_moment", emoji: "📸", name: "Fotógrafo", desc: "Compartilhou seu primeiro momento" },
+  { key: "night_owl", emoji: "🦉", name: "Coruja", desc: "Foi num evento que durou até de madrugada" },
+  { key: "genre_techno", emoji: "🤖", name: "Techno", desc: "Foi num evento de techno" },
+  { key: "genre_house", emoji: "🏠", name: "House", desc: "Foi num evento de house" },
+  { key: "festcoin_holder", emoji: "🪙", name: "Acumulador", desc: "Acumulou mais de 1000 FTC" },
 ];
 
 export default function Profile() {
@@ -75,17 +75,17 @@ export default function Profile() {
             <span className="font-heading font-bold text-2xl text-primary">{initials}</span>
           </div>
           <div className="flex-1">
-            <h1 className="font-heading font-bold text-xl text-white">{currentUser?.full_name || "Partygoer"}</h1>
+            <h1 className="font-heading font-bold text-xl text-white">{currentUser?.full_name || "Participante"}</h1>
             <p className="text-[#666] text-sm">{currentUser?.email}</p>
             <div className="flex items-center gap-4 mt-2">
               <span className="flex items-center gap-1 text-xs text-[#888]">
-                <Ticket className="w-3 h-3" /> <span className="text-white font-semibold">{tickets.length}</span> events
+                <Ticket className="w-3 h-3" /> <span className="text-white font-semibold">{tickets.length}</span> eventos
               </span>
               <span className="flex items-center gap-1 text-xs text-[#888]">
-                <Users className="w-3 h-3" /> <span className="text-white font-semibold">{connections.length}</span> connections
+                <Users className="w-3 h-3" /> <span className="text-white font-semibold">{connections.length}</span> conexões
               </span>
               <span className="flex items-center gap-1 text-xs text-[#888]">
-                <Camera className="w-3 h-3" /> <span className="text-white font-semibold">{moments.length}</span> moments
+                <Camera className="w-3 h-3" /> <span className="text-white font-semibold">{moments.length}</span> momentos
               </span>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function Profile() {
             <div className="flex items-center gap-1 bg-primary/20 border border-primary/30 rounded-xl px-3 py-1.5">
               <Award className="w-4 h-4 text-primary" />
               <span className="text-primary font-bold text-sm">{earnedKeys.size}</span>
-              <span className="text-[#888] text-xs">badges</span>
+              <span className="text-[#888] text-xs">conquistas</span>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function Profile() {
             <div className="bg-card border border-primary/30 rounded-xl p-4 space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Bell className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-white text-sm">{friendRequests.length} Connection Request{friendRequests.length > 1 ? "s" : ""}</span>
+                <span className="font-semibold text-white text-sm">{friendRequests.length} solicitação{friendRequests.length > 1 ? "ões" : ""} de conexão</span>
               </div>
               {friendRequests.map(req => (
                 <div key={req.id} className="flex items-center justify-between bg-[#1a1a1a] rounded-xl p-3">
@@ -135,7 +135,7 @@ export default function Profile() {
                       <span className="text-primary font-bold text-xs">?</span>
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">{req.from_alias || "Anonymous Raver"}</p>
+                      <p className="text-white text-sm font-medium">{req.from_alias || "Participante anônimo"}</p>
                       {req.message && <p className="text-[#666] text-xs">"{req.message}"</p>}
                     </div>
                   </div>
@@ -161,7 +161,7 @@ export default function Profile() {
             <div className="space-y-2">
               {connections.map(c => {
                 const isMe = c.from_user_id === currentUser.id;
-                const alias = isMe ? (c.to_alias || "Anonymous Raver") : (c.from_alias || "Anonymous Raver");
+                const alias = isMe ? (c.to_alias || "Participante anônimo") : (c.from_alias || "Participante anônimo");
                 return (
                   <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -169,10 +169,10 @@ export default function Profile() {
                     </div>
                     <div>
                       <p className="text-white text-sm font-medium">{alias}</p>
-                      <p className="text-[#555] text-xs">Connected {moment(c.updated_date).fromNow()}</p>
+                      <p className="text-[#555] text-xs">Conectado {moment(c.updated_date).fromNow()}</p>
                     </div>
                     <div className="ml-auto">
-                      <Badge className="bg-emerald-900/40 text-emerald-400 border-0 text-[10px]">Connected</Badge>
+                      <Badge className="bg-emerald-900/40 text-emerald-400 border-0 text-[10px]">Conectado</Badge>
                     </div>
                   </div>
                 );
@@ -197,7 +197,7 @@ export default function Profile() {
                   <p className={`font-semibold text-sm mb-0.5 ${earned ? "text-white" : "text-[#555]"}`}>{def.name}</p>
                   <p className="text-[10px] text-[#666] leading-relaxed">{def.desc}</p>
                   {earned && earnedRecord?.event_title && (
-                    <p className="text-[10px] text-primary mt-1.5">at {earnedRecord.event_title}</p>
+                    <p className="text-[10px] text-primary mt-1.5">em {earnedRecord.event_title}</p>
                   )}
                   {earned && (
                     <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
@@ -230,10 +230,10 @@ export default function Profile() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium truncate">{t.event_title}</p>
-                  <p className="text-[#666] text-xs">{t.event_date ? moment(t.event_date).format("MMM D, YYYY") : "—"} · {t.event_location || ""}</p>
+                  <p className="text-[#666] text-xs">{t.event_date ? moment(t.event_date).format("D MMM, YYYY") : "—"} · {t.event_location || ""}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-[#555] uppercase">{t.ticket_type || "General"}</p>
+                  <p className="text-[10px] text-[#555] uppercase">{t.ticket_type === "vip" ? "VIP" : t.ticket_type === "backstage" ? "Backstage" : "Pista"}</p>
                 </div>
               </div>
             ))

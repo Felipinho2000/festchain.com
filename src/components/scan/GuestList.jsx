@@ -20,12 +20,12 @@ export default function GuestList({ eventId, eventTitle }) {
   const checkedIn = tickets.filter(t => t.checked_in).length;
 
   const exportCSV = () => {
-    const headers = ["Ticket ID", "QR Code", "Status", "Checked In", "Checked In At"];
+    const headers = ["ID do ingresso", "QR Code", "Status", "Check-in", "Check-in em"];
     const rows = tickets.map(t => [
       t.id,
       t.qr_code || "",
       t.status || "",
-      t.checked_in ? "Yes" : "No",
+      t.checked_in ? "Sim" : "Não",
       t.checked_in_at ? moment(t.checked_in_at).format("YYYY-MM-DD HH:mm:ss") : ""
     ]);
     const csv = [headers, ...rows]
@@ -55,9 +55,9 @@ export default function GuestList({ eventId, eventTitle }) {
       <div className="flex items-center justify-between bg-card border border-border rounded-xl p-3">
         <div className="text-sm">
           <span className="text-white font-semibold">{tickets.length}</span>
-          <span className="text-[#888]"> tickets · </span>
+          <span className="text-[#888]"> ingressos · </span>
           <span className="text-emerald-400 font-semibold">{checkedIn}</span>
-          <span className="text-[#888]"> checked in</span>
+          <span className="text-[#888]"> com check-in</span>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={load} className="text-[#888] hover:text-white p-2 rounded-lg hover:bg-secondary transition-colors">
@@ -65,27 +65,27 @@ export default function GuestList({ eventId, eventTitle }) {
           </button>
           <button onClick={exportCSV} disabled={tickets.length === 0}
             className="flex items-center gap-1.5 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 px-3 py-2 rounded-lg disabled:opacity-40 transition-colors">
-            <Download className="w-3.5 h-3.5" /> Export CSV
+            <Download className="w-3.5 h-3.5" /> Exportar CSV
           </button>
         </div>
       </div>
 
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-400 flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-        <p>If camera or internet fails, use this guest list and manual code validation.</p>
+        <p>Se a câmera ou a internet falhar, use esta lista de participantes e a validação manual de código.</p>
       </div>
 
       {tickets.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-10 text-center">
           <TicketIcon className="w-8 h-8 text-[#444] mx-auto mb-2" strokeWidth={1.5} />
-          <p className="text-[#666] text-sm">No tickets issued for this event yet.</p>
+          <p className="text-[#666] text-sm">Nenhum ingresso emitido para este evento ainda.</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-border text-[10px] uppercase tracking-wider text-[#666] font-semibold">
-            <div className="col-span-5">Ticket ID / QR</div>
+            <div className="col-span-5">Ingresso / QR</div>
             <div className="col-span-3">Status</div>
-            <div className="col-span-4">Checked In</div>
+            <div className="col-span-4">Check-in</div>
           </div>
           <div className="divide-y divide-[#1f1f1f] max-h-[60vh] overflow-y-auto">
             {tickets.map(t => (
@@ -107,11 +107,11 @@ export default function GuestList({ eventId, eventTitle }) {
                 <div className="col-span-4">
                   {t.checked_in ? (
                     <span className="flex items-center gap-1 text-emerald-400">
-                      <Check className="w-3 h-3" /> {t.checked_in_at ? moment(t.checked_in_at).format("MMM D, h:mm A") : "Yes"}
+                      <Check className="w-3 h-3" /> {t.checked_in_at ? moment(t.checked_in_at).format("D MMM, HH:mm") : "Sim"}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1 text-[#555]">
-                      <X className="w-3 h-3" /> Not yet
+                      <X className="w-3 h-3" /> Não
                     </span>
                   )}
                 </div>

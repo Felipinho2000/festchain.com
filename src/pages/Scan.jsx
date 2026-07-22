@@ -48,17 +48,17 @@ export default function Scan() {
 
   const handleCameraError = (err) => {
     const name = err?.name || "";
-    let msg = "Camera error. Try the manual entry below.";
+    let msg = "Erro na câmera. Use a digitação manual abaixo.";
     if (!isHTTPS) {
-      msg = "Camera access requires HTTPS. Please open FestChain from the secure live URL.";
+      msg = "O acesso à câmera exige HTTPS. Abra o FestChain pelo link seguro publicado.";
     } else if (name === "NotAllowedError" || name === "PermissionDeniedError") {
-      msg = "Camera permission was denied. Please allow camera access in your browser settings.";
+      msg = "Permissão de câmera negada. Autorize o acesso à câmera nas configurações do navegador.";
     } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
-      msg = "No camera found on this device.";
+      msg = "Nenhuma câmera encontrada neste dispositivo.";
     } else if (name === "NotReadableError" || name === "TrackStartError") {
-      msg = "Camera is already in use by another app. Close other camera apps and try again.";
+      msg = "A câmera já está em uso por outro app. Feche outros apps de câmera e tente novamente.";
     } else if (name === "OverconstrainedError") {
-      msg = "Your browser does not support camera scanning. Please try another browser.";
+      msg = "Seu navegador não é compatível com a leitura por câmera. Tente outro navegador.";
     } else {
       // Not a DOMException (e.g. html5-qrcode threw a plain string because of a
       // malformed constraints object) — log it so the real cause is visible
@@ -76,7 +76,7 @@ export default function Scan() {
   const startCamera = async () => {
     if (!eventId) return;
     if (!isHTTPS) {
-      setCamError("Camera access requires HTTPS. Please open FestChain from the secure live URL.");
+      setCamError("O acesso à câmera exige HTTPS. Abra o FestChain pelo link seguro publicado.");
       setCameraState("error");
       return;
     }
@@ -144,9 +144,9 @@ export default function Scan() {
     setValidating(true);
     try {
       const res = await base44.functions.invoke("validateTicket", { qr_code: qr, event_id: eventId });
-      setResult(res.data || { status: "error", message: "No response" });
+      setResult(res.data || { status: "error", message: "Sem resposta" });
     } catch (e) {
-      setResult({ status: "error", message: "Could not validate ticket" });
+      setResult({ status: "error", message: "Não foi possível validar o ingresso" });
     } finally {
       setValidating(false);
     }
@@ -176,47 +176,47 @@ export default function Scan() {
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
           <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
-        <h2 className="font-heading font-bold text-2xl text-white mb-2">Organizers only</h2>
-        <p className="text-[#888] text-sm mb-2">The scanner is for approved organizers and door staff.</p>
-        <p className="text-[#555] text-xs mb-6">Organizer access is granted manually by the admin team during the private pilot.</p>
-        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Back to Home</Link>
+        <h2 className="font-heading font-bold text-2xl text-white mb-2">Apenas organizadores</h2>
+        <p className="text-[#888] text-sm mb-2">O scanner é para organizadores aprovados e equipe de portaria.</p>
+        <p className="text-[#555] text-xs mb-6">O acesso é liberado manualmente pela equipe durante o piloto privado.</p>
+        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Voltar ao início</Link>
       </div>
     );
   }
 
   const config = {
-    valid:        { icon: CheckCircle2, title: "Valid Ticket",       text: "text-emerald-400", border: "border-emerald-500/50", badge: "bg-emerald-500" },
-    used:         { icon: AlertTriangle, title: "Already Checked In", text: "text-amber-400",    border: "border-amber-500/50",    badge: "bg-amber-500" },
-    invalid:      { icon: XCircle, title: "Invalid Ticket",          text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
-    unauthorized: { icon: Ban, title: "Not Authorized",             text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
-    error:        { icon: XCircle, title: "Error",                   text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
+    valid:        { icon: CheckCircle2, title: "Ingresso válido",       text: "text-emerald-400", border: "border-emerald-500/50", badge: "bg-emerald-500" },
+    used:         { icon: AlertTriangle, title: "Check-in já realizado", text: "text-amber-400",    border: "border-amber-500/50",    badge: "bg-amber-500" },
+    invalid:      { icon: XCircle, title: "Ingresso inválido",          text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
+    unauthorized: { icon: Ban, title: "Sem autorização",             text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
+    error:        { icon: XCircle, title: "Erro",                   text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
   }[result?.status] || {};
 
   const selectedEvent = events.find(e => e.id === eventId);
 
   const statusLabel = {
-    idle: "Camera not started",
-    requesting: "Requesting camera permission…",
-    active: "Camera active — scanning",
-    error: "Camera error",
+    idle: "Câmera parada",
+    requesting: "Solicitando permissão de câmera…",
+    active: "Câmera ativa — escaneando",
+    error: "Erro na câmera",
   }[cameraState];
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-heading font-bold text-3xl text-white mb-1">Ticket Scanner</h1>
-        <p className="text-[#888] text-sm">Select an event to begin scanning.</p>
+        <h1 className="font-heading font-extrabold text-3xl text-white mb-1 uppercase">Check-in</h1>
+        <p className="text-[#888] text-sm">Selecione um evento para começar a escanear.</p>
       </div>
 
       {!eventId ? (
         <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <p className="text-sm text-white font-medium">Select the event you're scanning for</p>
+          <p className="text-sm text-white font-medium">Selecione o evento que você vai escanear</p>
           {loadingEvents ? (
-            <p className="text-[#888] text-sm">Loading your events…</p>
+            <p className="text-[#888] text-sm">Carregando seus eventos…</p>
           ) : events.length === 0 ? (
             <div className="text-[#888] text-sm">
-              <p className="mb-2">No events assigned to you.</p>
-              <Link to="/dashboard" className="text-primary hover:underline text-sm">Create an event</Link> or ask an admin to assign you as staff.
+              <p className="mb-2">Nenhum evento atribuído a você.</p>
+              <Link to="/dashboard" className="text-primary hover:underline text-sm">Criar evento</Link> ou peça a um admin para te adicionar como equipe.
             </div>
           ) : (
             <div className="space-y-2">
@@ -237,10 +237,10 @@ export default function Scan() {
         <div className="space-y-3">
           <div className="flex items-center justify-between bg-card border border-border rounded-xl p-3">
             <div>
-              <p className="text-[10px] text-[#666] uppercase tracking-wider">Scanning for</p>
+              <p className="text-[10px] text-[#666] uppercase tracking-wider">Escaneando</p>
               <p className="text-white text-sm font-medium">{selectedEvent?.title}</p>
             </div>
-            <button onClick={changeEvent} className="text-primary text-xs font-medium hover:underline">Change event</button>
+            <button onClick={changeEvent} className="text-primary text-xs font-medium hover:underline">Trocar evento</button>
           </div>
 
           {/* Scanner / Guest List toggle */}
@@ -251,7 +251,7 @@ export default function Scan() {
             </button>
             <button onClick={() => { stopCamera(); setView("guestlist"); }}
               className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${view === "guestlist" ? "bg-primary text-white" : "text-[#888] hover:text-white"}`}>
-              <TicketIcon className="w-4 h-4 inline mr-1.5" /> Guest List
+              <TicketIcon className="w-4 h-4 inline mr-1.5" /> Lista de participantes
             </button>
           </div>
 
@@ -261,7 +261,7 @@ export default function Scan() {
               {!isHTTPS && (
                 <div className="flex items-start gap-2 bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
                   <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <p>Camera access requires HTTPS. Please open FestChain from the secure live URL. You can still enter ticket codes manually below.</p>
+                  <p>O acesso à câmera exige HTTPS. Abra o FestChain pelo link seguro publicado. Você ainda pode digitar o código do ingresso manualmente abaixo.</p>
                 </div>
               )}
 
@@ -272,10 +272,10 @@ export default function Scan() {
                 {cameraState === "idle" && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-4">
                     <Camera className="w-12 h-12 text-[#555]" strokeWidth={1.5} />
-                    <p className="text-[#888] text-sm max-w-xs">Tap the button below to start the camera and scan tickets.</p>
+                    <p className="text-[#888] text-sm max-w-xs">Toque no botão abaixo para iniciar a câmera e escanear ingressos.</p>
                     <button onClick={startCamera}
                       className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors">
-                      <Camera className="w-4 h-4" /> Start Camera
+                      <Camera className="w-4 h-4" /> Iniciar câmera
                     </button>
                   </div>
                 )}
@@ -283,7 +283,7 @@ export default function Scan() {
                 {cameraState === "requesting" && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-3">
                     <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={1.5} />
-                    <p className="text-[#888] text-sm">Requesting camera permission…</p>
+                    <p className="text-[#888] text-sm">Solicitando permissão de câmera…</p>
                   </div>
                 )}
 
@@ -299,7 +299,7 @@ export default function Scan() {
                     <p className="text-red-400 text-sm max-w-xs">{camError}</p>
                     <button onClick={startCamera}
                       className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-4 py-2 text-xs transition-colors">
-                      <RotateCcw className="w-3.5 h-3.5" /> Retry Camera
+                      <RotateCcw className="w-3.5 h-3.5" /> Tentar novamente
                     </button>
                   </div>
                 )}
@@ -324,7 +324,7 @@ export default function Scan() {
                           <p className="text-[#888] text-xs">{result.message}</p>
                         </div>
                         <button onClick={resume} className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-2 rounded-lg flex-shrink-0">
-                          <RotateCcw className="w-3.5 h-3.5" /> Next
+                          <RotateCcw className="w-3.5 h-3.5" /> Próximo
                         </button>
                       </div>
 
@@ -338,12 +338,12 @@ export default function Scan() {
                             </>
                           )}
                           {result.status === "valid" && result.scanned_at && (
-                            <p className="text-emerald-400"><Clock className="w-3 h-3 inline mr-1.5" />Checked in {moment(result.scanned_at).format("MMM D, h:mm:ss A")}</p>
+                            <p className="text-emerald-400"><Clock className="w-3 h-3 inline mr-1.5" />Check-in {moment(result.scanned_at).format("D MMM, HH:mm:ss")}</p>
                           )}
                           {result.status === "used" && result.previous_scan && (
                             <>
-                              <p className="text-amber-400"><Clock className="w-3 h-3 inline mr-1.5" />Previously checked in {result.previous_scan.at ? moment(result.previous_scan.at).format("MMM D, h:mm A") : "—"}</p>
-                              {result.previous_scan.by_label && <p className="text-[#888]">By {result.previous_scan.by_label}</p>}
+                              <p className="text-amber-400"><Clock className="w-3 h-3 inline mr-1.5" />Check-in anterior {result.previous_scan.at ? moment(result.previous_scan.at).format("D MMM, HH:mm") : "—"}</p>
+                              {result.previous_scan.by_label && <p className="text-[#888]">Por {result.previous_scan.by_label}</p>}
                             </>
                           )}
                         </div>
@@ -356,16 +356,16 @@ export default function Scan() {
               {/* Status bar */}
               <div className="flex items-center justify-between bg-card border border-border rounded-xl px-4 py-2.5">
                 <span className={`text-xs font-medium ${cameraState === "active" ? "text-emerald-400" : cameraState === "error" ? "text-red-400" : "text-[#888]"}`}>
-                  {validating ? "Validating ticket…" : statusLabel}
+                  {validating ? "Validando ingresso…" : statusLabel}
                 </span>
                 {cameraState === "active" && (
-                  <button onClick={stopCamera} className="text-xs text-[#888] hover:text-red-400 font-medium">Stop Camera</button>
+                  <button onClick={stopCamera} className="text-xs text-[#888] hover:text-red-400 font-medium">Parar câmera</button>
                 )}
               </div>
 
               {/* Manual entry fallback */}
               <form onSubmit={submitManual} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                <label className="text-xs text-[#888] flex items-center gap-1.5"><Keyboard className="w-3.5 h-3.5" /> Camera not working? Enter the ticket code manually</label>
+                <label className="text-xs text-[#888] flex items-center gap-1.5"><Keyboard className="w-3.5 h-3.5" /> Câmera não funciona? Digite o código do ingresso manualmente</label>
                 <div className="flex gap-2">
                   <input
                     value={manual}
@@ -374,7 +374,7 @@ export default function Scan() {
                     className="flex-1 bg-[#111] border border-border rounded-lg px-3 py-2 text-sm text-white font-mono placeholder-[#444] focus:outline-none focus:border-primary"
                   />
                   <button type="submit" disabled={validating || !manual.trim()} className="px-4 rounded-lg bg-primary hover:bg-primary/90 text-white text-sm font-semibold disabled:opacity-50">
-                    {validating ? "…" : "Validate Ticket"}
+                    {validating ? "…" : "Validar ingresso"}
                   </button>
                 </div>
               </form>

@@ -64,7 +64,7 @@ export default function TransactionList({ transactions, loading }) {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm text-white truncate">{getLabel(tx)}</p>
                   <div className="flex items-center gap-2 text-xs text-[#666]">
-                    <span>{moment(tx.created_date).format("MMM D, YYYY · h:mm A")}</span>
+                    <span>{moment(tx.created_date).format("D MMM, YYYY · HH:mm")}</span>
                     {tx.event_title && <span className="truncate">· {tx.event_title}</span>}
                   </div>
                   {tx.status && tx.status !== "confirmed" && (

@@ -53,10 +53,10 @@ export default function TopupPanel({ selectedEvent, onSuccess }) {
         toast({ title: t("festcoin.topupSuccess") });
         if (onSuccess) onSuccess();
       } else {
-        toast({ title: data.message || "Top-up failed", variant: "destructive" });
+        toast({ title: data.message || "Erro ao adicionar saldo", variant: "destructive" });
       }
     } catch (e) {
-      const msg = e?.response?.data?.message || e.message || "Top-up failed";
+      const msg = e?.response?.data?.message || e.message || "Erro ao adicionar saldo";
       toast({ title: msg, variant: "destructive" });
     } finally {
       setLoading(false);

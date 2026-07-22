@@ -23,11 +23,20 @@ const ticketStatusColors = {
   listed: "bg-amber-900/30 text-amber-400"
 };
 
+const ticketStatusLabels = {
+  active: "Válido",
+  used: "Usado",
+  transferred: "Transferido",
+  expired: "Expirado",
+  refunded: "Reembolsado",
+  pending: "Pendente",
+};
+
 const txTypeConfig = {
-  earned:         { icon: ArrowDownLeft, color: "text-emerald-400", bg: "bg-emerald-900/30", label: "Earned" },
-  spent:          { icon: ArrowUpRight,  color: "text-red-400",     bg: "bg-red-900/20",    label: "Spent" },
-  transferred_in: { icon: ArrowDownLeft, color: "text-blue-400",    bg: "bg-blue-900/20",   label: "Received" },
-  transferred_out:{ icon: ArrowUpRight,  color: "text-orange-400",  bg: "bg-orange-900/20", label: "Sent" }
+  earned:         { icon: ArrowDownLeft, color: "text-emerald-400", bg: "bg-emerald-900/30", label: "Recompensa" },
+  spent:          { icon: ArrowUpRight,  color: "text-red-400",     bg: "bg-red-900/20",    label: "Gasto" },
+  transferred_in: { icon: ArrowDownLeft, color: "text-blue-400",    bg: "bg-blue-900/20",   label: "Recebido" },
+  transferred_out:{ icon: ArrowUpRight,  color: "text-orange-400",  bg: "bg-orange-900/20", label: "Enviado" }
 };
 
 function TicketCard({ ticket }) {
@@ -59,14 +68,14 @@ function TicketCard({ ticket }) {
             <div className="flex items-start justify-between gap-2 mb-1">
               <h3 className="font-heading font-semibold text-white text-sm line-clamp-1 group-hover:text-primary transition-colors">{ticket.event_title}</h3>
               <Badge className={`text-[10px] px-2 py-0.5 ${ticketStatusColors[ticket.status] || ""} border-0 flex-shrink-0`}>
-                {ticket.status}
+                {ticketStatusLabels[ticket.status] || ticket.status}
               </Badge>
             </div>
             <div className="flex flex-col gap-1 text-xs text-[#888]">
               {ticket.event_date && (
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3 h-3" strokeWidth={1.5} />
-                  {moment(ticket.event_date).format("MMM D, YYYY · h:mm A")}
+                  {moment(ticket.event_date).format("D MMM, YYYY · HH:mm")}
                 </span>
               )}
               {ticket.event_location && (
@@ -78,17 +87,17 @@ function TicketCard({ ticket }) {
             </div>
           </div>
           <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#222]">
-            <span className="text-xs text-[#666]">{ticket.payment_method === "test" ? "Pilot ticket" : `R$${ticket.price_paid?.toFixed(2)}`}</span>
+            <span className="text-xs text-[#666]">{ticket.payment_method === "test" ? "Ingresso piloto" : `R$ ${ticket.price_paid?.toFixed(2)}`}</span>
             <div className="flex items-center gap-3">
               <button
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowQR(!showQR); }}
                 className="text-[#888] text-xs font-medium hover:text-primary flex items-center gap-1 transition-colors"
               >
                 <QrCode className="w-3 h-3" strokeWidth={1.5} />
-                {showQR ? "Hide QR" : "Show QR"}
+                {showQR ? "Ocultar QR" : "Ver QR"}
               </button>
               <span className="text-primary text-xs font-semibold flex items-center gap-0.5 group-hover:gap-1.5 transition-all">
-                Open Ticket <ChevronRight className="w-3.5 h-3.5" />
+                Abrir ingresso <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -98,8 +107,8 @@ function TicketCard({ ticket }) {
                 <div className="bg-white p-2 rounded-lg"><Qr value={qrCode} size={160} /></div>
                 <span className="text-[10px] font-mono text-[#555] break-all max-w-[200px]">{qrCode || "—"}</span>
               </div>
-              <p className="text-[10px] text-primary font-medium mt-1.5">Show this QR at the entrance</p>
-              {cachedQR && <p className="text-[10px] text-emerald-500">✓ Works offline</p>}
+              <p className="text-[10px] text-primary font-medium mt-1.5">Mostre este QR na entrada</p>
+              {cachedQR && <p className="text-[10px] text-emerald-500">✓ Funciona offline</p>}
             </div>
           )}
         </div>
@@ -141,7 +150,6 @@ export default function WalletPage() {
     };
   }, [currentUser?.id]);
 
-  // Wallet balance counts only confirmed/valid transactions (excludes cancelled/failed).
   const validTx = transactions.filter(t => !["cancelled", "failed"].includes(t.status));
   const balance = validTx.reduce((s, t) => {
     if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
@@ -159,19 +167,19 @@ export default function WalletPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-heading font-bold text-3xl text-white mb-1">Tickets &amp; Rewards</h1>
-          <p className="text-[#888] text-sm">Your tickets, QR codes &amp; FestCoin rewards.</p>
+          <h1 className="font-heading font-extrabold text-3xl text-white mb-1 uppercase">Minha Carteira</h1>
+          <p className="text-[#888] text-sm">Seus ingressos, QR codes e recompensas.</p>
         </div>
         {currentUser?.role === "admin" && (
           <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
-            <Zap className="w-3.5 h-3.5" /> Add Pilot Credits
+            <Zap className="w-3.5 h-3.5" /> Adicionar saldo
           </button>
         )}
       </div>
 
       {/* Pilot disclaimer */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-[#bbb]">
-        <span className="text-primary font-semibold">Private pilot.</span> FestCoin is a pilot reward and utility credit used for event perks, loyalty, and future FestChain experiences. During the pilot it has no cash value, is not an investment, and cannot be sold or withdrawn. <Link to="/legal" className="text-primary hover:underline">Learn more</Link>.
+        <span className="text-primary font-semibold">Piloto privado.</span> As recompensas FestChain fazem parte da experiência piloto e podem ser usadas em benefícios dos eventos. Não têm valor em dinheiro, não são investimento e não podem ser sacadas. <Link to="/legal" className="text-primary hover:underline">Saiba mais</Link>.
       </div>
 
       {showTopup && (
@@ -186,23 +194,23 @@ export default function WalletPage() {
       <div className="bg-gradient-to-br from-[#1f1f1f] to-card border border-border rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
         <div className="relative">
-          <p className="text-xs text-[#666] uppercase tracking-wider mb-1">Pilot Credit Balance (FestCoin)</p>
+          <p className="text-xs text-[#666] uppercase tracking-wider mb-1">Saldo disponível</p>
           <div className="flex items-baseline gap-2 mb-1">
             <span className="font-heading font-bold text-5xl text-white tracking-tight">{balance.toLocaleString()}</span>
             <span className="text-[#888] text-sm">FTC</span>
           </div>
-          <p className="text-[10px] text-[#555] mb-4">Test credits · no cash value · not an investment</p>
+          <p className="text-[10px] text-[#555] mb-4">Créditos do piloto · sem valor em dinheiro</p>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-[#111] border border-[#222] rounded-xl p-3">
-              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-1">Active Tickets</p>
+              <p className="text-[10px] text-[#555] uppercase tracking-wider mb-1">Ingressos ativos</p>
               <p className="font-heading font-bold text-xl text-white">{activeTickets.length}</p>
             </div>
             <div className="bg-emerald-900/20 border border-emerald-800/30 rounded-xl p-3">
-              <p className="text-[10px] text-emerald-400/80 uppercase tracking-wider mb-1">Earned</p>
+              <p className="text-[10px] text-emerald-400/80 uppercase tracking-wider mb-1">Ganhos</p>
               <p className="font-heading font-bold text-xl text-emerald-400">{totalEarned.toLocaleString()}</p>
             </div>
             <div className="bg-red-900/20 border border-red-800/30 rounded-xl p-3">
-              <p className="text-[10px] text-red-400/80 uppercase tracking-wider mb-1">Spent</p>
+              <p className="text-[10px] text-red-400/80 uppercase tracking-wider mb-1">Gastos</p>
               <p className="font-heading font-bold text-xl text-red-400">{totalSpent.toLocaleString()}</p>
             </div>
           </div>
@@ -213,9 +221,9 @@ export default function WalletPage() {
       <Tabs defaultValue="tickets" className="space-y-4">
         <TabsList className="bg-transparent p-0 gap-4 border-b border-border rounded-none h-auto">
           {[
-            { value: "tickets", label: `Tickets (${tickets.length})` },
-            { value: "transactions", label: "Transactions" },
-            { value: "rewards", label: "Rewards" },
+            { value: "tickets", label: `Ingressos (${tickets.length})` },
+            { value: "transactions", label: "Extrato" },
+            { value: "rewards", label: "Benefícios" },
           ].map(tab => (
             <TabsTrigger key={tab.value} value={tab.value}
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white">
@@ -233,22 +241,22 @@ export default function WalletPage() {
               <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Ticket className="w-7 h-7 text-primary" strokeWidth={1.5} />
               </div>
-              <h3 className="font-heading font-semibold text-white text-base mb-2">No tickets yet</h3>
-              <p className="text-[#666] text-sm mb-1 max-w-xs mx-auto">Attend a FestChain pilot event to get your first ticket and earn FestCoin automatically.</p>
-              <p className="text-[#555] text-xs mb-5">Your tickets and loyalty credits will appear here after joining a pilot event.</p>
-              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Browse Pilot Events</Button></Link>
+              <h3 className="font-heading font-semibold text-white text-base mb-2">Sem ingressos ainda</h3>
+              <p className="text-[#666] text-sm mb-1 max-w-xs mx-auto">Participe de um evento FestChain para receber seu primeiro ingresso e ganhar recompensas automaticamente.</p>
+              <p className="text-[#555] text-xs mb-5">Seus ingressos e recompensas aparecem aqui após a compra.</p>
+              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Ver eventos</Button></Link>
             </div>
           ) : (
             <div className="space-y-4">
               {activeTickets.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-3">Upcoming ({activeTickets.length})</p>
+                  <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-3">Próximos ({activeTickets.length})</p>
                   <div className="space-y-3">{activeTickets.map(t => <TicketCard key={t.id} ticket={t} />)}</div>
                 </div>
               )}
               {pastTickets.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-3">Past ({pastTickets.length})</p>
+                  <p className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-3">Anteriores ({pastTickets.length})</p>
                   <div className="space-y-3">{pastTickets.map(t => <TicketCard key={t.id} ticket={t} />)}</div>
                 </div>
               )}
@@ -265,9 +273,9 @@ export default function WalletPage() {
               <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <WalletIcon className="w-7 h-7 text-primary" strokeWidth={1.5} />
               </div>
-              <h3 className="font-heading font-semibold text-white text-base mb-2">Your FestCoin will appear here</h3>
-              <p className="text-[#666] text-sm mb-5 max-w-xs mx-auto">Attend a FestChain pilot event to earn your first FestCoin. Credits are issued automatically when you get a ticket.</p>
-              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Browse Pilot Events</Button></Link>
+              <h3 className="font-heading font-semibold text-white text-base mb-2">Seu extrato aparece aqui</h3>
+              <p className="text-[#666] text-sm mb-5 max-w-xs mx-auto">Participe de um evento FestChain para ganhar suas primeiras recompensas. Os créditos são creditados automaticamente após a compra do ingresso.</p>
+              <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Ver eventos</Button></Link>
             </div>
           ) : (
             <div className="space-y-2">
@@ -302,29 +310,29 @@ export default function WalletPage() {
                 <Ticket className="w-5 h-5 text-primary" strokeWidth={1.5} />
               </div>
               <p className="font-bold text-white text-2xl">{tickets.length}</p>
-              <p className="text-xs text-[#666] mt-0.5">Tickets issued</p>
+              <p className="text-xs text-[#666] mt-0.5">Ingressos emitidos</p>
             </div>
             <div className="bg-card border border-border rounded-xl p-5 text-center">
               <div className="w-10 h-10 bg-emerald-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <ArrowDownLeft className="w-5 h-5 text-emerald-400" strokeWidth={1.5} />
               </div>
               <p className="font-bold text-white text-2xl">{totalEarned.toLocaleString()}</p>
-              <p className="text-xs text-[#666] mt-0.5">Pilot credits earned (FTC)</p>
+              <p className="text-xs text-[#666] mt-0.5">Recompensas recebidas</p>
             </div>
             <div className="bg-card border border-border rounded-xl p-5 text-center">
               <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Gift className="w-5 h-5 text-primary" strokeWidth={1.5} />
               </div>
-              <p className="font-bold text-white text-2xl">{tickets.length >= 10 ? "VIP" : tickets.length >= 5 ? "Regular" : "New"}</p>
-              <p className="text-xs text-[#666] mt-0.5">Member tier</p>
+              <p className="font-bold text-white text-2xl">{tickets.length >= 10 ? "VIP" : tickets.length >= 5 ? "Regular" : "Novo"}</p>
+              <p className="text-xs text-[#666] mt-0.5">Seu nível</p>
             </div>
           </div>
           <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-            <p className="text-sm font-semibold text-white">Tier Progress</p>
+            <p className="text-sm font-semibold text-white">Seu progresso</p>
             {[
-              { label: "Regular — 5 events", target: 5 },
-              { label: "VIP — 10 events", target: 10 },
-              { label: "Elite — 20 events", target: 20 },
+              { label: "Regular — 5 eventos", target: 5 },
+              { label: "VIP — 10 eventos", target: 10 },
+              { label: "Elite — 20 eventos", target: 20 },
             ].map((tier, i) => {
               const pct = Math.min(100, Math.round((tickets.length / tier.target) * 100));
               const done = tickets.length >= tier.target;
@@ -333,7 +341,7 @@ export default function WalletPage() {
                   <div className="flex justify-between text-xs mb-1.5">
                     <span className={done ? "text-emerald-400" : "text-[#888]"}>{tier.label}</span>
                     <span className={done ? "text-emerald-400 font-bold" : "text-[#555]"}>
-                      {done ? "✓ Unlocked" : `${tickets.length}/${tier.target}`}
+                      {done ? "✓ Desbloqueado" : `${tickets.length}/${tier.target}`}
                     </span>
                   </div>
                   <div className="h-2 bg-[#222] rounded-full overflow-hidden">
