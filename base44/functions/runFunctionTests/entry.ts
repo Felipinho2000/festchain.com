@@ -340,6 +340,55 @@ Deno.serve(async (req) => {
     }
 
     // ===================================================================
+    // TEST 9: sendMomentTip kill switch (Stage A)
+    // ===================================================================
+    try {
+      const d = await invoke('sendMomentTip', { moment_id: 'any-id', amount: 5 });
+      const isDisabled = d.status === 'error' && d.code === 'tipping_disabled';
+      record(
+        'sendMomentTip: hard-disabled (Stage A kill switch)',
+        isDisabled,
+        isDisabled
+          ? '✓ Function returns code:tipping_disabled before any balance/ownership logic runs.'
+          : `✗ Expected kill switch. Got: ${d.status} / ${d.code || d.message || d.error}`
+      );
+    } catch (e) {
+      record('sendMomentTip: hard-disabled (Stage A kill switch)', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // TEST 10: likeMoment toggles like/unlike and dedupes per user
+    // ===================================================================
+    try {
+      const testMoment = await base44.asServiceRole.entities.Moment.create({
+        image_url: 'https://test.example/[TEST]-like-moment.png',
+        caption: '[TEST] Like toggle test — safe to delete',
+        author_alias: 'Test',
+        is_anonymous: true,
+        likes: 0,
+        liked_by: [],
+      });
+      TRACK('Moment', testMoment.id);
+
+      // First call — should like
+      const d1 = await invoke('likeMoment', { moment_id: testMoment.id });
+      const firstLiked = d1.status === 'success' && d1.liked === true && d1.likes === 1;
+
+      // Second call from same user — should unlike
+      const d2 = await invoke('likeMoment', { moment_id: testMoment.id });
+      const secondUnliked = d2.status === 'success' && d2.liked === false && d2.likes === 0;
+
+      record(
+        'likeMoment: toggles like/unlike and dedupes per user',
+        firstLiked && secondUnliked,
+        `First (like): ${firstLiked ? '✓ liked=true, likes=1' : `✗ ${d1.status}: ${d1.message || d1.error}`}. ` +
+        `Second (unlike): ${secondUnliked ? '✓ liked=false, likes=0' : `✗ ${d2.status}: ${d2.message || d2.error}`}.`
+      );
+    } catch (e) {
+      record('likeMoment: toggles like/unlike and dedupes per user', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
     // DOCUMENTED GAPS — not fixed, called out explicitly
     // ===================================================================
     record(

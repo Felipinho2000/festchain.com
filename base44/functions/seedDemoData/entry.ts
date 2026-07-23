@@ -56,7 +56,9 @@ Deno.serve(async (req) => {
         description: '[DEMO] Pilot reward: ' + event.title,
         source: 'demo_data',
         status: 'confirmed',
-        is_pilot: true
+        is_pilot: true,
+        event_id: event.id,
+        event_title: event.title
       });
     }
 

@@ -494,3 +494,31 @@ For a pilot launch, at minimum these automated tests should be created:
 ---
 
 *This audit was compiled by reading all source files, entity schemas, backend function code, and querying the live database. It reflects the state of the app as of 2026-07-14.*
+
+---
+
+## Addendum — Stage A Bug-Fix Round (2026-07-23)
+
+The four "unsafe-in-production" issues flagged in §6 (Known Issues) have been addressed as follows:
+
+### Resolved
+
+| Issue | Resolution |
+|-------|-----------|
+| **#1 (Critical) — sendMomentTip does not credit the recipient** | Hard-disabled via a `TIPPING_ENABLED = false` kill switch at the top of the function. Returns `{status:'error', code:'tipping_disabled'}` (HTTP 403) before any balance/ownership logic runs — applies to every caller (UI, direct API, other functions). The dead-code debit/credit logic is left in place for a future round to verify and re-enable. |
+| **#2 (Critical) — seedDemoData creates orphan FestCoinTransactions** | Demo FTC rows now include `created_by_id` (via user-scoped create, not asServiceRole), `is_pilot: true`, `event_id`, and `event_title`. New seed runs no longer create unattributed ledger rows. Pre-existing orphaned rows (the ~21 from before the fix) are NOT retroactively cleaned — see Known Limitations below. |
+| **#3 (Critical) — redeemEventItem has no double-redemption prevention** | Server-side guard added: a second redemption of the same item by the same user/event now returns `{status:'error', message:'You have already redeemed this item'}` (HTTP 409). |
+| **#3b — redeemEventItem does not enforce stock=0** | Stock check added before any deduction: if `item.stock` is defined and `<= 0`, redemption is rejected with `{status:'error', message:'This item is out of stock'}` (HTTP 409). |
+
+### New infrastructure
+
+- **`likeMoment` function** — Idempotent like/unlike toggle using `asServiceRole` (any signed-in user can like, not just the moment's author) with per-user dedup via a new `liked_by` field on the Moment entity. This replaces the broken direct-`Moment.update()` flow from the client, which silently failed under the entity's own RLS for anyone but the author.
+- **`Moment.liked_by` field** — Array of user IDs, default `[]`. Additive and backward-compatible — existing moments simply have an empty array until first liked under the new code.
+- **`runFunctionTests`** — Four new/updated tests: sendMomentTip kill-switch assertion, likeMoment toggle/dedup, redeemEventItem duplicate guard, redeemEventItem stock=0 rejection.
+
+### Known limitations (not addressed in this round)
+
+1. **Pre-existing orphaned demo transactions** (~21 rows with `undefined` status / `service_...` owners) are not retroactively fixed — this round only stops new ones. A one-time data cleanup should be a deliberate, reviewed action.
+2. **`sendMomentTip`'s recipient-credit logic is unverified, not fixed.** Re-enabling tipping should be its own reviewed round, starting from the existing diagnostic tests in `runFunctionTests`.
+3. **Race condition in stock decrement** — the out-of-stock check and the actual decrement are still two separate, non-atomic operations. Full protection needs a real transactional decrement, which isn't available in Base44's function model.
+4. **Ticket asServiceRole stamping issue unverified** — whether `Ticket.create` via asServiceRole has the same phantom-owner stamping issue as Moment has not been tested.

@@ -25,6 +25,13 @@
       "type": "number",
       "default": 0
     },
+    "liked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
     "festcoin_tips": {
       "type": "number",
       "default": 0
