@@ -221,7 +221,7 @@ export default function PilotSetup() {
             {row("approvedOrganizer", Rocket, "Approved organizer exists")}
             {row("publishedEvent", Calendar, "Published / live event exists")}
             {row("capacity", Wrench, "Event capacity is set")}
-            {row("reserveTicket", Wrench, "Ticket issuing function deployed")}
+            {row("reserveTicket", Wrench, "Legacy reserveTicket correctly disabled (checkout-only)")}
             {row("validateTicket", Wrench, "Scanner validation function deployed")}
             {row("scannerScoped", Shield, "Scanner scoped to event owner")}
             {row("rewardOwnership", Coins, "FestCoin reward created for ticket buyer")}
