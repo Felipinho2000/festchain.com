@@ -336,6 +336,9 @@ Deno.serve(async (req) => {
       });
       TRACK('VenueMenuItem', menuItem.id);
 
+      // Create pending (satisfies entity RLS — direct client creates can
+      // only ever be born 'pending'), then confirm via asServiceRole, exactly
+      // like the real createCheckoutSession → stripeWebhook flow.
       const ticket = await base44.entities.Ticket.create({
         event_id: testEvent.id,
         organizer_id: String(user.id),
@@ -345,18 +348,20 @@ Deno.serve(async (req) => {
         price_paid: 50,
         payment_method: 'test',
         qr_code: `TEST-RDM-${Date.now()}`,
-        status: 'active',
+        status: 'pending',
       });
       TRACK('Ticket', ticket.id);
+      await base44.asServiceRole.entities.Ticket.update(ticket.id, { status: 'active' });
 
       const topup = await base44.entities.FestCoinTransaction.create({
         type: 'earned',
         amount: 100,
         description: '[TEST] FTC for redemption test — safe to delete',
         source: 'test_fixture',
-        status: 'confirmed',
+        status: 'pending',
       });
       TRACK('FestCoinTransaction', topup.id);
+      await base44.asServiceRole.entities.FestCoinTransaction.update(topup.id, { status: 'confirmed' });
 
       // First redemption — should succeed
       const d1 = await invoke('redeemEventItem', { event_id: testEvent.id, menu_item_id: menuItem.id });
