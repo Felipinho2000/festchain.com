@@ -69,7 +69,7 @@ export default function EventDetail() {
     if (!currentUser?.id) return;
     base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id })
       .then(txs => {
-        const valid = txs.filter(t => !["cancelled", "failed"].includes(t.status));
+        const valid = txs.filter(t => t.status === "confirmed");
         const bal = valid.reduce((s, t) => {
           if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
           if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
