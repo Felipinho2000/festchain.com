@@ -48,9 +48,9 @@ export default function FestCoin() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Calculate balance from confirmed, non-demo transactions
+  // Calculate balance from confirmed, non-demo transactions only.
   const validTx = transactions.filter(
-    tx => !["cancelled", "failed"].includes(tx.status) && tx.source !== "demo_data"
+    tx => tx.status === "confirmed" && tx.source !== "demo_data"
   );
   const balance = validTx.reduce((s, tx) => {
     if (["earned", "transferred_in", "pilot_topup"].includes(tx.type)) return s + (tx.amount || 0);
