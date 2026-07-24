@@ -37,7 +37,7 @@
         "cancelled",
         "failed"
       ],
-      "default": "confirmed"
+      "default": "pending"
     },
     "source": {
       "type": "string"
@@ -63,7 +63,14 @@
   ],
   "rls": {
     "create": {
-      "created_by_id": "{{user.id}}"
+      "$and": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.status": "pending"
+        }
+      ]
     },
     "read": {
       "$or": [
