@@ -48,9 +48,14 @@ export default function PilotSetup() {
     }
 
     try {
+      // reserveTicket is intentionally hard-disabled (money-path hardening
+      // round) — it used to issue free, unpaid tickets. Ticket purchase now
+      // goes exclusively through createCheckoutSession + Stripe. This check
+      // passes when the kill switch is confirmed active, not when tickets
+      // can be reserved.
       const r = await base44.functions.invoke("reserveTicket", { event_id: "__pilotsetup_ping__", payment_method: "test" });
       const d = r.data || r;
-      next.reserveTicket = { ok: d.status === "error" && /not found/i.test(d.message || ""), detail: "reserveTicket function deployed" };
+      next.reserveTicket = { ok: d.status === "error" && d.code === "ticket_reservation_disabled", detail: "reserveTicket correctly disabled — checkout is the only ticket-issuing path" };
     } catch (e) { next.reserveTicket = { ok: false, detail: "Could not reach reserveTicket" }; }
 
     try {
