@@ -48,6 +48,21 @@ Deno.serve(async (req) => {
       } catch (_) {}
     }
 
+    // Not yet paid/activated — a pending ticket (mid-checkout, before Stripe
+    // confirms payment) must never scan as a valid entry.
+    if (ticket.status === 'pending') {
+      return Response.json({
+        status: 'invalid',
+        message: 'This ticket has not been paid for yet. Ask the guest to complete checkout.',
+      });
+    }
+    if (['expired', 'refunded', 'transferred'].includes(ticket.status)) {
+      return Response.json({
+        status: 'invalid',
+        message: `This ticket is ${ticket.status} and cannot be used for entry.`,
+      });
+    }
+
     // Already used?
     if (ticket.status === 'used' || ticket.checked_in) {
       let scannedByUser = null;
