@@ -35,9 +35,11 @@ Deno.serve(async (req) => {
 
     const allowed = Math.min(amount, DAILY_LIMIT - todayTotal);
 
-    // Compute current balance
+    // Compute current balance — only 'confirmed' transactions count (see
+    // note in redeemEventItem / processCashback: a direct client create can
+    // only ever land as 'pending' now, per entity RLS).
     const allTx = await base44.entities.FestCoinTransaction.filter({ created_by_id: user.id }).catch(() => []);
-    const validTx = allTx.filter(t => !['cancelled', 'failed'].includes(t.status));
+    const validTx = allTx.filter(t => t.status === 'confirmed');
     const currentBalance = validTx.reduce((s, t) => {
       if (['earned', 'transferred_in', 'pilot_topup'].includes(t.type)) return s + (t.amount || 0);
       if (['spent', 'transferred_out'].includes(t.type)) return s - (t.amount || 0);
@@ -47,15 +49,17 @@ Deno.serve(async (req) => {
     const balanceAfter = currentBalance + allowed;
 
     // Create FestCoinTransaction — user-scoped so created_by_id stamps correctly
-    // (asServiceRole ignores the field and stamps service_...).
-    await base44.entities.FestCoinTransaction.create({
+    // (asServiceRole ignores the field and stamps service_...). Create pending
+    // (required by entity RLS), then confirm via asServiceRole.
+    const topupTx = await base44.entities.FestCoinTransaction.create({
       type: 'earned',
       amount: allowed,
       description: `Pilot FTC top-up · ${allowed} test credits added`,
       balance_after: balanceAfter,
-      status: 'confirmed',
+      status: 'pending',
       source: 'pilot_beta'
     });
+    await base44.asServiceRole.entities.FestCoinTransaction.update(topupTx.id, { status: 'confirmed' });
 
     await base44.asServiceRole.entities.PilotTopup.create({
       created_by_id: user.id,
