@@ -49,17 +49,19 @@ Deno.serve(async (req) => {
       });
       // User-scoped (not asServiceRole) so created_by_id stamps as the admin
       // who ran the seed — asServiceRole ignores created_by_id and stamps
-      // service_... (proven by runFunctionTests DIAGNOSTIC).
-      await base44.entities.FestCoinTransaction.create({
+      // service_... (proven by runFunctionTests DIAGNOSTIC). Create pending
+      // (required by entity RLS), then confirm via asServiceRole.
+      const demoTx = await base44.entities.FestCoinTransaction.create({
         type: 'earned',
         amount: 50,
         description: '[DEMO] Pilot reward: ' + event.title,
         source: 'demo_data',
-        status: 'confirmed',
+        status: 'pending',
         is_pilot: true,
         event_id: event.id,
         event_title: event.title
       });
+      await base44.asServiceRole.entities.FestCoinTransaction.update(demoTx.id, { status: 'confirmed' });
     }
 
     await base44.asServiceRole.entities.Event.updateMany({ id: event.id }, { $set: { tickets_sold: 3 } });
