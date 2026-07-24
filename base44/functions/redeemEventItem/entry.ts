@@ -45,9 +45,12 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'This item is out of stock' }, { status: 409 });
     }
 
-    // Compute FTC balance
+    // Compute FTC balance — only 'confirmed' transactions count. A direct
+    // client create can only ever land as 'pending' (enforced by entity RLS),
+    // so counting pending here would let a forged transaction spend as if it
+    // were real money.
     const allTx = await base44.entities.FestCoinTransaction.filter({ created_by_id: user.id }).catch(() => []);
-    const validTx = allTx.filter(t => !['cancelled', 'failed'].includes(t.status));
+    const validTx = allTx.filter(t => t.status === 'confirmed');
     const currentBalance = validTx.reduce((s, t) => {
       if (['earned', 'transferred_in', 'pilot_topup'].includes(t.type)) return s + (t.amount || 0);
       if (['spent', 'transferred_out'].includes(t.type)) return s - (t.amount || 0);
@@ -67,8 +70,9 @@ Deno.serve(async (req) => {
     const balanceAfter = currentBalance - cost;
     const redemptionCode = `RDM-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
 
-    // Deduct FTC
-    await base44.entities.FestCoinTransaction.create({
+    // Deduct FTC — create pending (user-scoped, correct created_by_id), then
+    // confirm via asServiceRole. Only reachable through this server function.
+    const spendTx = await base44.entities.FestCoinTransaction.create({
       created_by_id: user.id,
       type: 'spent',
       amount: cost,
@@ -76,8 +80,9 @@ Deno.serve(async (req) => {
       event_id,
       event_title: event.title,
       balance_after: balanceAfter,
-      status: 'confirmed'
+      status: 'pending'
     });
+    await base44.asServiceRole.entities.FestCoinTransaction.update(spendTx.id, { status: 'confirmed' });
 
     // Create redemption record with organizer_id so organizer can see it in their dashboard
     const redemption = await base44.entities.EventRedemption.create({
