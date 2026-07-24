@@ -150,7 +150,10 @@ export default function WalletPage() {
     };
   }, [currentUser?.id]);
 
-  const validTx = transactions.filter(t => !["cancelled", "failed"].includes(t.status));
+  // Only 'confirmed' transactions are spendable balance — 'pending' covers
+  // both mid-checkout holds and (since the money-path hardening round) any
+  // direct client-created record, which entity RLS now forces to 'pending'.
+  const validTx = transactions.filter(t => t.status === "confirmed");
   const balance = validTx.reduce((s, t) => {
     if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
     if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
