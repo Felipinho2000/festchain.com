@@ -34,11 +34,30 @@ Deno.serve(async (req) => {
     };
 
     // ===================================================================
-    // TEST 5: reserveTicket with cashback
+    // TEST 5a: reserveTicket is hard-disabled (money-path hardening round)
     // ===================================================================
-    // Creates a test event with cashback enabled, reserves a ticket,
-    // and verifies that a cashback transaction lands in the buyer's wallet
-    // with the correct amount.
+    // reserveTicket used to issue tickets with status:'active' and no Stripe
+    // call at all — free entry for any signed-in user. It's now dead;
+    // confirm it returns the disabled code for every caller.
+    try {
+      const d = await invoke('reserveTicket', { event_id: 'any-id', payment_method: 'test' });
+      const isDisabled = d.status === 'error' && d.code === 'ticket_reservation_disabled';
+      record(
+        'reserveTicket: hard-disabled (superseded by createCheckoutSession)',
+        isDisabled,
+        isDisabled
+          ? '✓ Function returns code:ticket_reservation_disabled before any ticket-issuing logic runs.'
+          : `✗ Expected kill switch. Got: ${d.status} / ${d.code || d.message || d.error}`
+      );
+    } catch (e) {
+      record('reserveTicket: hard-disabled (superseded by createCheckoutSession)', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // TEST 5b: processCashback only pays out against a real, owned,
+    // paid Ticket — and computes the amount from price_paid, never from
+    // a client-sent native_amount.
+    // ===================================================================
     try {
       const testEvent = await base44.asServiceRole.entities.Event.create({
         title: '[TEST] Cashback Event — safe to delete',
@@ -57,50 +76,101 @@ Deno.serve(async (req) => {
       });
       TRACK('Event', testEvent.id);
 
-      // Record cashback transactions BEFORE
-      const beforeCashback = await base44.asServiceRole.entities.FestCoinTransaction.filter({
+      // A real, paid ticket owned by the test admin (mirrors what
+      // createCheckoutSession + stripeWebhook produce once payment clears).
+      const paidTicket = await base44.asServiceRole.entities.Ticket.create({
+        event_id: testEvent.id,
+        organizer_id: String(user.id),
+        event_title: testEvent.title,
+        event_date: testEvent.date,
+        ticket_type: 'general',
+        price_paid: 100,
+        payment_method: 'pix',
+        qr_code: `TEST-CB-${Date.now()}`,
+        status: 'active',
         created_by_id: String(user.id),
-        source: 'cashback',
       });
-      const beforeIds = new Set(beforeCashback.map(t => t.id));
+      TRACK('Ticket', paidTicket.id);
 
-      // Reserve a ticket (triggers cashback via processCashback)
-      const d = await invoke('reserveTicket', { event_id: testEvent.id, payment_method: 'test' });
+      // Positive case: real ticket, real owner — cashback should be computed
+      // from the ticket's price_paid (100 * 10% / rate 1 = 10 FTC), not from
+      // any amount we pass in.
+      const d1 = await invoke('processCashback', {
+        event_id: testEvent.id,
+        purchase_reference: paidTicket.id,
+      });
+      if (d1.transaction && d1.transaction.id) TRACK('FestCoinTransaction', d1.transaction.id);
+      const correctAmount = d1.status === 'success' && d1.cashback_ftc === 10;
 
-      if (d.status !== 'success') {
-        record('reserveTicket: cashback lands in buyer wallet', false,
-          `Ticket reservation failed: ${d.status} — ${d.message}`);
-      } else {
-        TRACK('Ticket', d.ticket.id);
+      // Negative case: purchase_reference that isn't a real ticket at all —
+      // this is exactly the forgery this hardening closes (previously: any
+      // fresh random string + a self-reported native_amount = free FTC).
+      const d2 = await invoke('processCashback', {
+        event_id: testEvent.id,
+        purchase_reference: `forged-ref-${Date.now()}`,
+      });
+      const forgeryRejected = d2.status === 'error' && /not found/i.test(d2.message || '');
 
-        // Track all FTC transactions for this test event for cleanup
-        const eventTxs = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-          event_id: testEvent.id,
-        });
-        for (const t of eventTxs) TRACK('FestCoinTransaction', t.id);
-
-        // Check for cashback AFTER
-        const afterCashback = await base44.asServiceRole.entities.FestCoinTransaction.filter({
-          created_by_id: String(user.id),
-          source: 'cashback',
-        });
-        const newCashback = afterCashback.filter(t => !beforeIds.has(t.id));
-
-        const expectedCashback = 10; // price=100, percent=10%, rate=1 → 100*0.10/1 = 10 FTC
-        const matchingCashback = newCashback.find(t =>
-          t.amount === expectedCashback && t.status === 'confirmed'
-        );
-
-        record(
-          'reserveTicket: cashback lands in buyer wallet',
-          !!matchingCashback,
-          matchingCashback
-            ? `✓ Cashback found: ${matchingCashback.amount} FTC (expected ${expectedCashback}), created_by_id=${matchingCashback.created_by_id}`
-            : `✗ No matching cashback. Expected ${expectedCashback} FTC. Found ${newCashback.length} new cashback tx(s): ${newCashback.map(t => t.amount).join(', ') || 'none'}`
-        );
-      }
+      record(
+        'processCashback: pays from verified ticket.price_paid, rejects unowned/forged references',
+        correctAmount && forgeryRejected,
+        `Real ticket: ${correctAmount ? `✓ ${d1.cashback_ftc} FTC (expected 10)` : `✗ ${d1.status}: ${d1.message}`}. ` +
+        `Forged reference: ${forgeryRejected ? '✓ rejected (' + d2.message + ')' : `✗ NOT rejected — ${d2.status}: ${d2.message}`}.`
+      );
     } catch (e) {
-      record('reserveTicket: cashback lands in buyer wallet', false, `Exception: ${e.message}`);
+      record('processCashback: pays from verified ticket.price_paid, rejects unowned/forged references', false, `Exception: ${e.message}`);
+    }
+
+    // ===================================================================
+    // TEST 5c: entity RLS rejects a forged "born active/confirmed" Ticket
+    // or FestCoinTransaction created directly via the client SDK, bypassing
+    // every server function entirely. This is the core regression test for
+    // the money-path hardening round — if either of these ever starts
+    // succeeding again, free tickets / free FTC are back.
+    // ===================================================================
+    try {
+      let forgedTicketRejected = false;
+      let forgedTicketDetail = '';
+      try {
+        const forged = await base44.entities.Ticket.create({
+          event_id: 'rls-test-event',
+          event_title: '[TEST] RLS forgery attempt — should never persist',
+          price_paid: 0,
+          payment_method: 'test',
+          qr_code: `FORGED-${Date.now()}`,
+          status: 'active',
+        });
+        // If this didn't throw, the RLS hole is back open — clean up and fail loud.
+        TRACK('Ticket', forged.id);
+        forgedTicketDetail = `✗ Direct create with status:'active' SUCCEEDED (id=${forged.id}) — RLS is not enforcing data.status:'pending'.`;
+      } catch (e) {
+        forgedTicketRejected = true;
+        forgedTicketDetail = `✓ Rejected: ${e.message}`;
+      }
+
+      let forgedTxRejected = false;
+      let forgedTxDetail = '';
+      try {
+        const forged = await base44.entities.FestCoinTransaction.create({
+          type: 'earned',
+          amount: 999999,
+          description: '[TEST] RLS forgery attempt — should never persist',
+          status: 'confirmed',
+        });
+        TRACK('FestCoinTransaction', forged.id);
+        forgedTxDetail = `✗ Direct create with status:'confirmed' SUCCEEDED (id=${forged.id}) — RLS is not enforcing data.status:'pending'.`;
+      } catch (e) {
+        forgedTxRejected = true;
+        forgedTxDetail = `✓ Rejected: ${e.message}`;
+      }
+
+      record(
+        'RLS: Ticket and FestCoinTransaction reject a client-forged born-active/confirmed create',
+        forgedTicketRejected && forgedTxRejected,
+        `Ticket: ${forgedTicketDetail} | FestCoinTransaction: ${forgedTxDetail}`
+      );
+    } catch (e) {
+      record('RLS: Ticket and FestCoinTransaction reject a client-forged born-active/confirmed create', false, `Exception: ${e.message}`);
     }
 
     // ===================================================================
