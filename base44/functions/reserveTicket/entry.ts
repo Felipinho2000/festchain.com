@@ -1,9 +1,33 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// Secure, server-side ticket issuing for the private MVP pilot.
-// Respects ticket phases: only the active phase within its sales window is buyable.
+// reserveTicket — HARD-DISABLED (money-path security round).
+//
+// This function issued tickets with status:'active' directly, with no Stripe
+// call anywhere in it — payment_method was client-supplied and defaulted to
+// 'test'. Any signed-in user could invoke it directly (independent of what
+// the UI links to) and receive a free, fully-valid, scannable ticket for any
+// published event. It has been fully superseded by createCheckoutSession +
+// stripeWebhook, which pre-create tickets as 'pending' and only activate them
+// after a verified Stripe payment. Kept only so callers get a clear, typed
+// error instead of a raw 404/500.
+//
+// To re-enable (e.g. for a deliberate free/RSVP-ticket flow): set
+// RESERVATION_ENABLED = true AND add a server-side check that the event's
+// real price for the requested tier is exactly 0 — never trust the client on
+// this. Until then this is dead code below the switch.
+const RESERVATION_ENABLED = false;
+
 Deno.serve(async (req) => {
   try {
+    if (!RESERVATION_ENABLED) {
+      return Response.json({
+        status: 'error',
+        code: 'ticket_reservation_disabled',
+        message: 'Direct ticket reservation is disabled. Purchase through checkout (createCheckoutSession).',
+      }, { status: 403 });
+    }
+
+    // ── DEAD CODE BELOW — left in place for reference only ──
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ status: 'error', message: 'Sign in required' }, { status: 401 });
