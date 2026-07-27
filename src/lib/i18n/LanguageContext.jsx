@@ -5,11 +5,15 @@ const LanguageContext = createContext(null);
 const STORAGE_KEY = "fc_lang";
 
 function detectInitial() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "en" || stored === "pt-BR") return stored;
+  } catch {}
   return "pt-BR";
 }
 
 export function LanguageProvider({ children }) {
-  const [lang, setLangState] = useState("pt-BR");
+  const [lang, setLangState] = useState(() => detectInitial());
 
   useEffect(() => {
     try {
