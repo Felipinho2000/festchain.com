@@ -5,7 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Ticket, Minus, Plus, ArrowRight, ArrowLeft, Zap, ShieldCheck } from "lucide-react";
+import {
+  Ticket,
+  Minus,
+  Plus,
+  ArrowRight,
+  ArrowLeft,
+  Zap,
+  ShieldCheck
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const TIERS = [
@@ -91,10 +99,10 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-card border-border rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="font-heading flex items-center gap-2">
-            <Ticket className="w-5 h-5 text-primary" />
+          <DialogTitle className="font-heading flex items-center gap-2 text-foreground">
+            <Ticket className="w-5 h-5 text-primary" strokeWidth={1.75} />
             {step === 1 ? "Escolha seu ingresso" : "Seus dados"}
           </DialogTitle>
         </DialogHeader>
@@ -102,109 +110,103 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
         {step === 1 ? (
           <div className="space-y-4">
             {phase && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg px-3 py-2 text-xs flex items-center justify-between">
+              <div className="bg-primary/10 border border-primary/20 rounded-xl px-3 py-2 text-xs flex items-center justify-between">
                 <span className="text-primary font-semibold">{phase.name}</span>
-                {phase.price != null && <span className="text-white font-medium">R$ {phase.price.toFixed(2)}</span>}
+                {phase.price != null && <span className="text-foreground font-medium">R$ {phase.price.toFixed(2)}</span>}
               </div>
             )}
 
-            {/* Tier selection */}
             <div className="space-y-2">
               {TIERS.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTier(t.key)}
                   className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
-                    tier === t.key ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/30"
+                    tier === t.key ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-secondary hover:border-primary/30"
                   }`}
                 >
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-white">{t.label}</p>
-                    <p className="text-xs text-[#666]">{t.desc}</p>
+                    <p className="text-sm font-semibold text-foreground">{t.label}</p>
+                    <p className="text-xs text-muted-foreground">{t.desc}</p>
                   </div>
-                  <p className="text-sm font-bold text-white">
+                  <p className="text-sm font-bold text-foreground">
                     R$ {(t.key === "inteira" ? basePrice : Math.round(basePrice * 50) / 100).toFixed(2)}
                   </p>
                 </button>
               ))}
             </div>
 
-            {/* Quantity */}
-            <div className="flex items-center justify-between bg-card border border-border rounded-xl p-3">
-              <span className="text-sm text-white font-medium">Quantidade</span>
+            <div className="flex items-center justify-between bg-secondary border border-border rounded-xl p-3">
+              <span className="text-sm text-foreground font-medium">Quantidade</span>
               <div className="flex items-center gap-3">
-                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-white hover:bg-primary/20">
-                  <Minus className="w-4 h-4" />
+                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="w-8 h-8 rounded-lg bg-card flex items-center justify-center text-foreground hover:bg-primary/20 transition-colors">
+                  <Minus className="w-4 h-4" strokeWidth={1.75} />
                 </button>
-                <span className="text-white font-bold w-6 text-center">{quantity}</span>
-                <button onClick={() => setQuantity((q) => Math.min(5, q + 1))} className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-white hover:bg-primary/20">
-                  <Plus className="w-4 h-4" />
+                <span className="text-foreground font-bold w-6 text-center">{quantity}</span>
+                <button onClick={() => setQuantity((q) => Math.min(5, q + 1))} className="w-8 h-8 rounded-lg bg-card flex items-center justify-center text-foreground hover:bg-primary/20 transition-colors">
+                  <Plus className="w-4 h-4" strokeWidth={1.75} />
                 </button>
               </div>
             </div>
 
-            {/* Total + reward */}
             <div className="flex items-center justify-between border-t border-border pt-3">
               <div>
-                <span className="text-sm text-[#888]">Total</span>
+                <span className="text-sm text-muted-foreground">Total</span>
                 {reward > 0 && (
                   <p className="text-xs text-primary flex items-center gap-1 mt-0.5">
-                    <Zap className="w-3 h-3" /> +{reward} FTC de recompensa
+                    <Zap className="w-3 h-3" strokeWidth={2} /> +{reward} FTC de recompensa
                   </p>
                 )}
               </div>
-              <span className="text-xl font-bold text-white">R$ {total.toFixed(2)}</span>
+              <span className="font-heading font-bold text-xl text-foreground">R$ {total.toFixed(2)}</span>
             </div>
 
-            <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={() => setStep(2)}>
-              Continuar <ArrowRight className="w-4 h-4 ml-2" />
+            <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-glow" onClick={() => setStep(2)}>
+              Continuar <ArrowRight className="w-4 h-4 ml-2" strokeWidth={1.75} />
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Summary */}
-            <div className="bg-secondary/50 rounded-xl p-3 text-xs space-y-1">
+            <div className="bg-secondary rounded-xl p-3 text-xs space-y-1">
               <div className="flex justify-between">
-                <span className="text-[#888]">{TIERS.find((t) => t.key === tier).label} × {quantity}</span>
-                <span className="text-white font-semibold">R$ {total.toFixed(2)}</span>
+                <span className="text-muted-foreground">{TIERS.find((t) => t.key === tier).label} × {quantity}</span>
+                <span className="text-foreground font-semibold">R$ {total.toFixed(2)}</span>
               </div>
-              <p className="text-[#555] pt-1 border-t border-border flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3 text-primary" /> Pix (instantâneo) ou cartão · ingresso enviado no WhatsApp
+              <p className="text-muted-foreground pt-1 border-t border-border flex items-center gap-1.5">
+                <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={1.75} /> Pix (instantâneo) ou cartão · ingresso enviado no WhatsApp
               </p>
             </div>
 
-            {/* Buyer info form */}
             <div className="space-y-3">
               <div>
-                <Label className="text-xs text-[#888] mb-1.5 block">Nome completo</Label>
+                <Label className="text-xs text-muted-foreground mb-1.5 block">Nome completo</Label>
                 <Input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  placeholder="Seu nome" className="bg-card border-border text-white placeholder:text-[#555] rounded-xl" />
+                  placeholder="Seu nome" className="bg-card border-border text-foreground placeholder:text-muted-foreground/50 rounded-xl" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-[#888] mb-1.5 block">CPF</Label>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">CPF</Label>
                   <Input value={form.cpf} onChange={(e) => setForm((p) => ({ ...p, cpf: formatCPF(e.target.value) }))}
-                    placeholder="000.000.000-00" className="bg-card border-border text-white placeholder:text-[#555] rounded-xl" />
+                    placeholder="000.000.000-00" className="bg-card border-border text-foreground placeholder:text-muted-foreground/50 rounded-xl" />
                 </div>
                 <div>
-                  <Label className="text-xs text-[#888] mb-1.5 block">WhatsApp</Label>
+                  <Label className="text-xs text-muted-foreground mb-1.5 block">WhatsApp</Label>
                   <Input value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: formatPhone(e.target.value) }))}
-                    placeholder="(11) 99999-9999" className="bg-card border-border text-white placeholder:text-[#555] rounded-xl" />
+                    placeholder="(11) 99999-9999" className="bg-card border-border text-foreground placeholder:text-muted-foreground/50 rounded-xl" />
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-[#888] mb-1.5 block">E-mail</Label>
+                <Label className="text-xs text-muted-foreground mb-1.5 block">E-mail</Label>
                 <Input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                  placeholder="voce@email.com" className="bg-card border-border text-white placeholder:text-[#555] rounded-xl" />
+                  placeholder="voce@email.com" className="bg-card border-border text-foreground placeholder:text-muted-foreground/50 rounded-xl" />
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3">
               <Button variant="outline" className="h-11 rounded-xl px-4" onClick={() => setStep(1)} disabled={submitting}>
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
               </Button>
-              <Button className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl" onClick={handleSubmit} disabled={submitting || !canSubmit}>
+              <Button className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-glow" onClick={handleSubmit} disabled={submitting || !canSubmit}>
                 {submitting ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Redirecionando...
@@ -215,7 +217,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
               </Button>
             </div>
 
-            <p className="text-[10px] text-[#555] text-center">
+            <p className="text-[10px] text-muted-foreground text-center">
               Ao comprar um ingresso você aceita os{" "}
               <Link to="/legal" className="text-primary hover:underline">termos do piloto</Link>.
             </p>

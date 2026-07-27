@@ -14,11 +14,11 @@ import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
 
 const statusConfig = {
-  active:     { label: "Válido",       color: "bg-emerald-900/40 text-emerald-400", Icon: CheckCircle2 },
-  used:       { label: "Usado",        color: "bg-[#222] text-[#888]",              Icon: CheckCircle2 },
-  transferred:{ label: "Transferido", color: "bg-blue-900/30 text-blue-400",        Icon: TicketIcon },
-  expired:    { label: "Expirado",     color: "bg-red-900/30 text-red-400",          Icon: XCircle },
-  refunded:   { label: "Reembolsado",    color: "bg-orange-900/30 text-orange-400",    Icon: XCircle },
+  active:      { label: "Válido",        color: "bg-success/15 text-success",         Icon: CheckCircle2 },
+  used:        { label: "Usado",         color: "bg-secondary text-muted-foreground",  Icon: CheckCircle2 },
+  transferred: { label: "Transferido",   color: "bg-primary/15 text-primary",          Icon: TicketIcon },
+  expired:     { label: "Expirado",      color: "bg-destructive/15 text-destructive",  Icon: XCircle },
+  refunded:    { label: "Reembolsado",   color: "bg-warning/15 text-warning",         Icon: XCircle },
 };
 
 const ticketTypeLabels = { general: "Pista", vip: "VIP", backstage: "Backstage" };
@@ -54,60 +54,59 @@ export default function TicketDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className="h-5 w-24 bg-secondary rounded animate-pulse" />
-        <div className="h-56 bg-secondary rounded-2xl animate-pulse" />
-        <div className="h-8 bg-secondary rounded w-2/3 animate-pulse" />
-        <div className="h-40 bg-secondary rounded-2xl animate-pulse" />
+      <div className="max-w-2xl mx-auto px-4 space-y-4 py-8">
+        <div className="h-5 w-24 shimmer rounded" />
+        <div className="h-56 shimmer rounded-2xl" />
+        <div className="h-8 shimmer rounded w-2/3" />
+        <div className="h-40 shimmer rounded-2xl" />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="max-w-md mx-auto text-center py-16">
-        <div className="w-14 h-14 rounded-2xl bg-red-900/20 flex items-center justify-center mx-auto mb-4">
-          <XCircle className="w-7 h-7 text-red-400" strokeWidth={1.5} />
+      <div className="max-w-md mx-auto text-center py-24 px-4">
+        <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-5">
+          <XCircle className="w-8 h-8 text-destructive" strokeWidth={1.5} />
         </div>
-        <h1 className="font-heading font-bold text-xl text-white mb-2">Ingresso indisponível</h1>
-        <p className="text-[#888] text-sm mb-6">{error || "Não foi possível carregar este ingresso."}</p>
+        <h1 className="font-heading font-bold text-xl text-foreground mb-2">Ingresso indisponível</h1>
+        <p className="text-muted-foreground text-sm mb-6">{error || "Não foi possível carregar este ingresso."}</p>
         <Link to="/wallet"><Button variant="outline">Voltar para ingressos</Button></Link>
       </div>
     );
   }
 
   const { ticket, event, perks } = data;
-  const sc = statusConfig[ticket.status] || statusConfig.active;
   const isUsed = ticket.checked_in || ticket.status === "used";
   const effectiveStatus = isUsed && ticket.status === "active" ? "used" : ticket.status;
   const statusInfo = statusConfig[effectiveStatus] || statusConfig.active;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
-      <Link to="/wallet" className="inline-flex items-center gap-2 text-[#888] hover:text-white text-sm transition-colors">
+    <div className="max-w-2xl mx-auto px-4 lg:px-8 space-y-5 py-8">
+      <Link to="/wallet" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors">
         <ArrowLeft className="w-4 h-4" strokeWidth={1.5} /> Voltar para ingressos
       </Link>
 
       {/* ── TICKET PASS ── */}
-      <div className="relative bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] border border-primary/25 rounded-3xl overflow-hidden shadow-[0_0_40px_-8px_rgba(255,85,0,0.25)]">
+      <div className="relative bg-gradient-to-br from-secondary to-card border border-primary/25 rounded-3xl overflow-hidden shadow-glow">
         {/* Hero image */}
         <div className="relative aspect-[21/9] overflow-hidden">
           {(event?.image_url || ticket.event_image) ? (
             <img src={event?.image_url || ticket.event_image} alt={ticket.event_title} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-[#1a1a1a]">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary">
               <Music className="w-16 h-16 text-primary/20" strokeWidth={1.5} />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f0f] via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
 
           {/* Status + visibility badges */}
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge className={`text-xs border-0 ${statusInfo.color} flex items-center gap-1`}>
-              <statusInfo.Icon className="w-3 h-3" /> {statusInfo.label}
+              <statusInfo.Icon className="w-3 h-3" strokeWidth={1.75} /> {statusInfo.label}
             </Badge>
             {event && (
-              <Badge className={`text-xs border-0 ${event.visibility === "private" ? "bg-amber-900/80 text-amber-300" : "bg-black/70 text-white"}`}>
+              <Badge className={`text-xs border-0 ${event.visibility === "private" ? "bg-warning/15 text-warning" : "bg-black/70 text-white"}`}>
                 {event.visibility === "private" ? "Privado" : "Público"}
               </Badge>
             )}
@@ -117,66 +116,66 @@ export default function TicketDetail() {
         {/* Body */}
         <div className="p-6 space-y-5">
           <div>
-            <h1 className="font-heading font-bold text-2xl text-white mb-1">{ticket.event_title}</h1>
-            {event?.organizer_name && <p className="text-[#888] text-sm">by {event.organizer_name}</p>}
+            <h1 className="font-heading font-bold text-2xl text-foreground mb-1">{ticket.event_title}</h1>
+            {event?.organizer_name && <p className="text-muted-foreground text-sm">by {event.organizer_name}</p>}
             {!event && ticket.organizer_id && (
-              <p className="text-[#888] text-sm italic">Detalhes do evento indisponíveis, mas seu ingresso está salvo.</p>
+              <p className="text-muted-foreground text-sm italic">Detalhes do evento indisponíveis, mas seu ingresso está salvo.</p>
             )}
           </div>
 
           {/* Meta */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex items-start gap-3 bg-[#111] border border-[#1f1f1f] rounded-xl p-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="flex items-start gap-3 bg-secondary border border-border rounded-xl p-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <Calendar className="w-4 h-4 text-primary" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-xs text-[#666] mb-0.5">Data</p>
-                <p className="font-medium text-white text-sm">{ticket.event_date ? moment(ticket.event_date).format("ddd, D MMM, YYYY") : "—"}</p>
-                <p className="text-[#888] text-xs flex items-center gap-1"><Clock className="w-3 h-3" />{ticket.event_date ? moment(ticket.event_date).format("HH:mm") : ""}{event?.end_date ? ` – ${moment(event.end_date).format("HH:mm")}` : ""}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">Data</p>
+                <p className="font-medium text-foreground text-sm">{ticket.event_date ? moment(ticket.event_date).format("ddd, D MMM, YYYY") : "—"}</p>
+                <p className="text-muted-foreground text-xs flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={1.75} />{ticket.event_date ? moment(ticket.event_date).format("HH:mm") : ""}{event?.end_date ? ` – ${moment(event.end_date).format("HH:mm")}` : ""}</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 bg-[#111] border border-[#1f1f1f] rounded-xl p-3">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="flex items-start gap-3 bg-secondary border border-border rounded-xl p-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <MapPin className="w-4 h-4 text-primary" strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-xs text-[#666] mb-0.5">Local</p>
-                <p className="font-medium text-white text-sm">{ticket.event_location || event?.location_name || "—"}</p>
-                {event?.location_address && <p className="text-[#888] text-xs">{event.location_address}</p>}
+                <p className="text-xs text-muted-foreground mb-0.5">Local</p>
+                <p className="font-medium text-foreground text-sm">{ticket.event_location || event?.location_name || "—"}</p>
+                {event?.location_address && <p className="text-muted-foreground text-xs">{event.location_address}</p>}
               </div>
             </div>
           </div>
 
           {/* Ticket type + price */}
-          <div className="flex items-center justify-between bg-[#111] border border-[#1f1f1f] rounded-xl p-3">
+          <div className="flex items-center justify-between bg-secondary border border-border rounded-xl p-3">
             <div className="flex items-center gap-2 flex-wrap">
               <TicketIcon className="w-4 h-4 text-primary" strokeWidth={1.5} />
-              <span className="text-sm text-white font-medium">{ticketTypeLabels[ticket.ticket_type] || "Ingresso"}</span>
+              <span className="text-sm text-foreground font-medium">{ticketTypeLabels[ticket.ticket_type] || "Ingresso"}</span>
               {ticket.ticket_phase && <Badge className="text-[10px] border-0 bg-primary/15 text-primary">{ticket.ticket_phase}</Badge>}
             </div>
-            <span className="text-sm font-heading font-bold text-white">
+            <span className="text-sm font-heading font-bold text-foreground">
               {ticket.price_paid === 0 ? "Cortesia / RSVP" : `R$ ${ticket.price_paid?.toFixed(2)}`}
             </span>
           </div>
 
           {/* QR code */}
-          <div className="flex flex-col items-center bg-[#111] border border-primary/20 rounded-2xl p-6">
-            <p className="text-xs font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-1.5">
-              <QrCode className="w-4 h-4 text-primary" /> Seu QR de entrada
+          <div className="flex flex-col items-center bg-secondary border border-primary/20 rounded-2xl p-6">
+            <p className="text-xs font-semibold text-foreground tracking-wider mb-4 flex items-center gap-1.5">
+              <QrCode className="w-4 h-4 text-primary" strokeWidth={1.75} /> Seu QR de entrada
             </p>
             <div className={isUsed ? "opacity-40" : ""}>
               <Qr value={ticket.qr_code} size={200} />
             </div>
             {isUsed ? (
-              <p className="text-sm font-semibold text-[#888] mt-4 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" /> Check-in realizado — ingresso usado
+              <p className="text-sm font-semibold text-muted-foreground mt-4 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> Check-in realizado — ingresso usado
               </p>
             ) : (
               <p className="text-sm font-medium text-primary mt-4 text-center">Mostre este QR na entrada do evento.</p>
             )}
             {ticket.qr_code && (
-              <span className="text-[10px] font-mono text-[#444] mt-2 break-all max-w-[240px]">{ticket.qr_code}</span>
+              <span className="text-[10px] font-mono text-muted-foreground/50 mt-2 break-all max-w-[240px]">{ticket.qr_code}</span>
             )}
           </div>
 
@@ -186,20 +185,20 @@ export default function TicketDetail() {
               <Sparkles className="w-5 h-5 text-primary" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-white">{ticket.festcoin_earned || (event?.festcoin_reward || 0)} FTC de recompensa</p>
-              <p className="text-[#888] text-xs">Ganho quando você participa — creditado no seu saldo.</p>
+              <p className="text-sm font-semibold text-foreground">{ticket.festcoin_earned || (event?.festcoin_reward || 0)} FTC de recompensa</p>
+              <p className="text-muted-foreground text-xs">Ganho quando você participa — creditado no seu saldo.</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── EVENT DETAILS (works for private events via ticket ownership) ── */}
+      {/* ── EVENT DETAILS ── */}
       {event && (
         <>
           {event.description && (
-            <div className="bg-card border border-border rounded-2xl p-5">
-              <h3 className="font-heading font-semibold text-white text-base mb-2">Sobre a festa</h3>
-              <p className="text-[#888] text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
+              <h3 className="font-heading font-semibold text-foreground text-base mb-2">Sobre a festa</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
             </div>
           )}
 
@@ -207,22 +206,22 @@ export default function TicketDetail() {
             const lineup = (event.lineup && event.lineup.length) ? event.lineup : (event.dj_lineup || []).map(name => ({ name }));
             if (!lineup.length) return null;
             return (
-              <div className="bg-card border border-border rounded-2xl p-5">
-                <h3 className="font-heading font-semibold text-white text-base mb-3 flex items-center gap-2">
+              <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
+                <h3 className="font-heading font-semibold text-foreground text-base mb-3 flex items-center gap-2">
                   <Music className="w-4 h-4 text-primary" strokeWidth={1.5} /> Line-up
                 </h3>
                 <div className="space-y-3">
                   {lineup.map((dj, i) => (
                     <div key={i} className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Music className="w-4 h-4 text-primary" strokeWidth={1.5} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-medium text-white text-sm">{dj.name}</p>
-                          {dj.set_time && <span className="text-xs text-primary flex items-center gap-1"><Clock className="w-3 h-3" /> {dj.set_time}</span>}
+                          <p className="font-medium text-foreground text-sm">{dj.name}</p>
+                          {dj.set_time && <span className="text-xs text-primary flex items-center gap-1"><Clock className="w-3 h-3" strokeWidth={1.75} /> {dj.set_time}</span>}
                         </div>
-                        {dj.bio && <p className="text-xs text-[#888] mt-0.5">{dj.bio}</p>}
+                        {dj.bio && <p className="text-xs text-muted-foreground mt-0.5">{dj.bio}</p>}
                       </div>
                     </div>
                   ))}
@@ -232,19 +231,19 @@ export default function TicketDetail() {
           })()}
 
           {/* Available perks */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-heading font-semibold text-white text-base mb-3 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
+            <h3 className="font-heading font-semibold text-foreground text-base mb-3 flex items-center gap-2">
               <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.5} /> Produtos &amp; Benefícios
             </h3>
             {perks && perks.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {perks.map(p => (
-                  <div key={p.id} className="flex items-center justify-between bg-[#111] border border-[#1f1f1f] rounded-xl p-3">
+                  <div key={p.id} className="flex items-center justify-between bg-secondary border border-border rounded-xl p-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-lg">{p.emoji || "🎟️"}</span>
                       <div className="min-w-0">
-                        <p className="text-sm text-white font-medium truncate">{p.name}</p>
-                        {p.description && <p className="text-[10px] text-[#666] truncate">{p.description}</p>}
+                        <p className="text-sm text-foreground font-medium truncate">{p.name}</p>
+                        {p.description && <p className="text-[10px] text-muted-foreground truncate">{p.description}</p>}
                       </div>
                     </div>
                     <span className="text-xs font-bold text-primary flex-shrink-0 ml-2">{p.price_ftc} FTC</span>
@@ -252,21 +251,21 @@ export default function TicketDetail() {
                 ))}
               </div>
             ) : (
-              <p className="text-[#666] text-xs">Nenhum produto disponível para este evento ainda. Use seu saldo no local quando disponível.</p>
+              <p className="text-muted-foreground text-xs">Nenhum produto disponível para este evento ainda. Use seu saldo no local quando disponível.</p>
             )}
           </div>
 
           {/* Capacity */}
           {event.total_capacity && (
-            <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-              <Users className="w-4 h-4 text-[#666]" strokeWidth={1.5} />
-              <p className="text-xs text-[#888]">{event.tickets_sold || 0} / {event.total_capacity} ingressos emitidos</p>
+            <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-soft">
+              <Users className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+              <p className="text-xs text-muted-foreground">{event.tickets_sold || 0} / {event.total_capacity} ingressos emitidos</p>
             </div>
           )}
 
           {/* Share */}
-          <div className="bg-card border border-border rounded-2xl p-5">
-            <h3 className="font-heading font-semibold text-white text-base mb-3 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
+            <h3 className="font-heading font-semibold text-foreground text-base mb-3 flex items-center gap-2">
               <Share2 className="w-4 h-4 text-primary" strokeWidth={1.5} /> Compartilhar evento
             </h3>
             <EventShareButtons
@@ -280,8 +279,8 @@ export default function TicketDetail() {
       )}
 
       {/* Pilot disclaimer */}
-      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-[#bbb] flex items-start gap-2">
-        <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-muted-foreground flex items-start gap-2">
+        <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.75} />
         <p>As recompensas FestChain fazem parte da experiência piloto e podem ser usadas em benefícios dos eventos quando disponíveis. Os ingressos são validados com segurança na portaria.</p>
       </div>
     </div>

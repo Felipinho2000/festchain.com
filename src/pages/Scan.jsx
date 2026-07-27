@@ -60,9 +60,6 @@ export default function Scan() {
     } else if (name === "OverconstrainedError") {
       msg = "Seu navegador não é compatível com a leitura por câmera. Tente outro navegador.";
     } else {
-      // Not a DOMException (e.g. html5-qrcode threw a plain string because of a
-      // malformed constraints object) — log it so the real cause is visible
-      // instead of silently falling back to the generic message.
       console.error("Camera start failed:", err);
     }
     setCamError(msg);
@@ -80,7 +77,6 @@ export default function Scan() {
       setCameraState("error");
       return;
     }
-    // Clear any instance left over from a previous attempt or error
     if (html5Ref.current) {
       try { await html5Ref.current.clear(); } catch (_) {}
       html5Ref.current = null;
@@ -96,26 +92,9 @@ export default function Scan() {
     };
 
     const config = { fps: 10, qrbox: { width: 230, height: 230 } };
-
-    // IMPORTANT: navigator.mediaDevices.getUserMedia() and Html5Qrcode.start()
-    // expect DIFFERENT shapes for their constraints argument. Reusing one
-    // object for both (as before) makes html5-qrcode throw on every browser:
-    //   - getUserMedia() wants   { video: { facingMode: {...} } }
-    //   - Html5Qrcode.start() wants  { facingMode: "environment" }  or
-    //     { facingMode: { exact: "environment" } } — NEVER wrapped in
-    //     "video", and NEVER with an "ideal" key (html5-qrcode's internal
-    //     createVideoConstraints() only recognizes "exact"; anything else,
-    //     including an unexpected top-level "video" key, makes it `throw` a
-    //     plain string rather than a DOMException). That's why `err?.name`
-    //     was always empty and you only ever saw the generic fallback
-    //     message, on every device.
     const probeConstraint = { video: { facingMode: { ideal: "environment" } } };
-    const html5StartConstraint = { facingMode: "environment" }; // soft preference, won't hard-fail on desktops with no back camera
+    const html5StartConstraint = { facingMode: "environment" };
 
-    // Step 1: Ask the browser for camera permission via the standard Web API
-    // first. This triggers the OS/browser permission prompt reliably on both
-    // mobile and desktop, and surfaces denials before html5-qrcode touches the
-    // camera.
     let probe = null;
     try {
       probe = await navigator.mediaDevices.getUserMedia(probeConstraint);
@@ -123,13 +102,9 @@ export default function Scan() {
       handleCameraError(err);
       return;
     }
-    // Release the probe stream so html5-qrcode can acquire the camera cleanly.
     probe.getTracks().forEach((t) => t.stop());
-    // Brief settle (esp. iOS Safari) so the track fully releases before re-acquire.
     await new Promise((r) => setTimeout(r, 150));
 
-    // Step 2: Start html5-qrcode. Permission is already granted, so this won't
-    // re-prompt.
     const html5 = new Html5Qrcode("reader");
     html5Ref.current = html5;
     try {
@@ -172,24 +147,24 @@ export default function Scan() {
 
   if (!canScan) {
     return (
-      <div className="max-w-md mx-auto text-center py-20">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+      <div className="max-w-md mx-auto text-center py-24 px-4">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
           <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
-        <h2 className="font-heading font-bold text-2xl text-white mb-2">Apenas organizadores</h2>
-        <p className="text-[#888] text-sm mb-2">O scanner é para organizadores aprovados e equipe de portaria.</p>
-        <p className="text-[#555] text-xs mb-6">O acesso é liberado manualmente pela equipe durante o piloto privado.</p>
+        <h2 className="font-heading font-bold text-2xl text-foreground mb-2">Apenas organizadores</h2>
+        <p className="text-muted-foreground text-sm mb-2">O scanner é para organizadores aprovados e equipe de portaria.</p>
+        <p className="text-muted-foreground/60 text-xs mb-6">O acesso é liberado manualmente pela equipe durante o piloto privado.</p>
         <Link to="/" className="text-primary font-semibold text-sm hover:underline">Voltar ao início</Link>
       </div>
     );
   }
 
   const config = {
-    valid:        { icon: CheckCircle2, title: "Ingresso válido",       text: "text-emerald-400", border: "border-emerald-500/50", badge: "bg-emerald-500" },
-    used:         { icon: AlertTriangle, title: "Check-in já realizado", text: "text-amber-400",    border: "border-amber-500/50",    badge: "bg-amber-500" },
-    invalid:      { icon: XCircle, title: "Ingresso inválido",          text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
-    unauthorized: { icon: Ban, title: "Sem autorização",             text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
-    error:        { icon: XCircle, title: "Erro",                   text: "text-red-400",       border: "border-red-500/50",       badge: "bg-red-500" },
+    valid:        { icon: CheckCircle2, title: "Ingresso válido",       text: "text-success", border: "border-success/50", badge: "bg-success" },
+    used:         { icon: AlertTriangle, title: "Check-in já realizado", text: "text-warning",    border: "border-warning/50",    badge: "bg-warning" },
+    invalid:      { icon: XCircle, title: "Ingresso inválido",          text: "text-destructive", border: "border-destructive/50", badge: "bg-destructive" },
+    unauthorized: { icon: Ban, title: "Sem autorização",             text: "text-destructive", border: "border-destructive/50", badge: "bg-destructive" },
+    error:        { icon: XCircle, title: "Erro",                   text: "text-destructive", border: "border-destructive/50", badge: "bg-destructive" },
   }[result?.status] || {};
 
   const selectedEvent = events.find(e => e.id === eventId);
@@ -202,19 +177,19 @@ export default function Scan() {
   }[cameraState];
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-2xl mx-auto px-4 lg:px-8 py-8 space-y-4">
       <div>
-        <h1 className="font-heading font-extrabold text-3xl text-white mb-1 uppercase">Check-in</h1>
-        <p className="text-[#888] text-sm">Selecione um evento para começar a escanear.</p>
+        <h1 className="font-heading font-bold text-3xl text-foreground mb-1">Check-in</h1>
+        <p className="text-muted-foreground text-sm">Selecione um evento para começar a escanear.</p>
       </div>
 
       {!eventId ? (
-        <div className="bg-card border border-border rounded-xl p-5 space-y-3">
-          <p className="text-sm text-white font-medium">Selecione o evento que você vai escanear</p>
+        <div className="bg-card border border-border rounded-2xl p-5 space-y-3 shadow-soft">
+          <p className="text-sm text-foreground font-medium">Selecione o evento que você vai escanear</p>
           {loadingEvents ? (
-            <p className="text-[#888] text-sm">Carregando seus eventos…</p>
+            <p className="text-muted-foreground text-sm">Carregando seus eventos…</p>
           ) : events.length === 0 ? (
-            <div className="text-[#888] text-sm">
+            <div className="text-muted-foreground text-sm">
               <p className="mb-2">Nenhum evento atribuído a você.</p>
               <Link to="/dashboard" className="text-primary hover:underline text-sm">Criar evento</Link> ou peça a um admin para te adicionar como equipe.
             </div>
@@ -224,10 +199,10 @@ export default function Scan() {
                 <button
                   key={ev.id}
                   onClick={() => setEventId(ev.id)}
-                  className={`w-full text-left rounded-xl border p-3 transition-all ${eventId === ev.id ? "border-primary bg-primary/10" : "border-border bg-[#111] hover:border-[#444]"}`}
+                  className={`w-full text-left rounded-xl border p-3 transition-all ${eventId === ev.id ? "border-primary bg-primary/10" : "border-border bg-secondary hover:border-primary/30"}`}
                 >
-                  <p className="text-white text-sm font-medium">{ev.title}</p>
-                  <p className="text-[#666] text-xs">{ev.location_name}{ev.date ? ` · ${moment(ev.date).format("MMM D, h:mm A")}` : ""}</p>
+                  <p className="text-foreground text-sm font-medium">{ev.title}</p>
+                  <p className="text-muted-foreground text-xs">{ev.location_name}{ev.date ? ` · ${moment(ev.date).format("MMM D, h:mm A")}` : ""}</p>
                 </button>
               ))}
             </div>
@@ -235,10 +210,10 @@ export default function Scan() {
         </div>
       ) : (
         <div className="space-y-3">
-          <div className="flex items-center justify-between bg-card border border-border rounded-xl p-3">
+          <div className="flex items-center justify-between bg-card border border-border rounded-2xl p-3 shadow-soft">
             <div>
-              <p className="text-[10px] text-[#666] uppercase tracking-wider">Escaneando</p>
-              <p className="text-white text-sm font-medium">{selectedEvent?.title}</p>
+              <p className="text-[10px] text-muted-foreground tracking-wider">Escaneando</p>
+              <p className="text-foreground text-sm font-medium">{selectedEvent?.title}</p>
             </div>
             <button onClick={changeEvent} className="text-primary text-xs font-medium hover:underline">Trocar evento</button>
           </div>
@@ -246,36 +221,35 @@ export default function Scan() {
           {/* Scanner / Guest List toggle */}
           <div className="flex gap-1 bg-card border border-border rounded-xl p-1">
             <button onClick={() => setView("scanner")}
-              className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${view === "scanner" ? "bg-primary text-white" : "text-[#888] hover:text-white"}`}>
-              <Camera className="w-4 h-4 inline mr-1.5" /> Scanner
+              className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${view === "scanner" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"}`}>
+              <Camera className="w-4 h-4 inline mr-1.5" strokeWidth={1.75} /> Scanner
             </button>
             <button onClick={() => { stopCamera(); setView("guestlist"); }}
-              className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${view === "guestlist" ? "bg-primary text-white" : "text-[#888] hover:text-white"}`}>
-              <TicketIcon className="w-4 h-4 inline mr-1.5" /> Lista de participantes
+              className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${view === "guestlist" ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"}`}>
+              <TicketIcon className="w-4 h-4 inline mr-1.5" strokeWidth={1.75} /> Lista
             </button>
           </div>
 
           {view === "scanner" && (
             <>
-              {/* HTTPS warning */}
               {!isHTTPS && (
-                <div className="flex items-start gap-2 bg-red-900/20 border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
-                  <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/30 rounded-xl p-3 text-xs text-destructive">
+                  <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" strokeWidth={1.75} />
                   <p>O acesso à câmera exige HTTPS. Abra o FestChain pelo link seguro publicado. Você ainda pode digitar o código do ingresso manualmente abaixo.</p>
                 </div>
               )}
 
               {/* Camera area */}
-              <div className="relative bg-black rounded-2xl overflow-hidden aspect-square sm:aspect-video">
+              <div className="relative bg-black rounded-2xl overflow-hidden aspect-square sm:aspect-video shadow-card">
                 <div id="reader" className="w-full h-full" />
 
                 {cameraState === "idle" && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-4">
-                    <Camera className="w-12 h-12 text-[#555]" strokeWidth={1.5} />
-                    <p className="text-[#888] text-sm max-w-xs">Toque no botão abaixo para iniciar a câmera e escanear ingressos.</p>
+                    <Camera className="w-12 h-12 text-muted-foreground/40" strokeWidth={1.5} />
+                    <p className="text-muted-foreground text-sm max-w-xs">Toque no botão abaixo para iniciar a câmera e escanear ingressos.</p>
                     <button onClick={startCamera}
-                      className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors">
-                      <Camera className="w-4 h-4" /> Iniciar câmera
+                      className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors shadow-glow">
+                      <Camera className="w-4 h-4" strokeWidth={1.75} /> Iniciar câmera
                     </button>
                   </div>
                 )}
@@ -283,7 +257,7 @@ export default function Scan() {
                 {cameraState === "requesting" && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-3">
                     <Loader2 className="w-10 h-10 text-primary animate-spin" strokeWidth={1.5} />
-                    <p className="text-[#888] text-sm">Solicitando permissão de câmera…</p>
+                    <p className="text-muted-foreground text-sm">Solicitando permissão de câmera…</p>
                   </div>
                 )}
 
@@ -295,18 +269,18 @@ export default function Scan() {
 
                 {cameraState === "error" && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-4">
-                    <AlertTriangle className="w-10 h-10 text-red-400" strokeWidth={1.5} />
-                    <p className="text-red-400 text-sm max-w-xs">{camError}</p>
+                    <AlertTriangle className="w-10 h-10 text-destructive" strokeWidth={1.5} />
+                    <p className="text-destructive text-sm max-w-xs">{camError}</p>
                     <button onClick={startCamera}
                       className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl px-4 py-2 text-xs transition-colors">
-                      <RotateCcw className="w-3.5 h-3.5" /> Tentar novamente
+                      <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.75} /> Tentar novamente
                     </button>
                   </div>
                 )}
 
                 {cameraState === "active" && (
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-emerald-400 text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-success text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                    <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
                     {statusLabel}
                   </div>
                 )}
@@ -314,36 +288,36 @@ export default function Scan() {
                 {/* Result overlay */}
                 {result && config.icon && (
                   <div className="absolute inset-x-0 bottom-0 p-4">
-                    <div className={`rounded-xl p-4 bg-[#1a1a1a] border ${config.border}`}>
+                    <div className={`rounded-xl p-4 bg-card border ${config.border} shadow-raised`}>
                       <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${config.badge}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${config.badge}`}>
                           <config.icon className="w-6 h-6 text-white" strokeWidth={1.8} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`font-bold text-sm ${config.text}`}>{config.title}</p>
-                          <p className="text-[#888] text-xs">{result.message}</p>
+                          <p className="text-muted-foreground text-xs">{result.message}</p>
                         </div>
-                        <button onClick={resume} className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-2 rounded-lg flex-shrink-0">
-                          <RotateCcw className="w-3.5 h-3.5" /> Próximo
+                        <button onClick={resume} className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-2 rounded-lg flex-shrink-0 transition-colors">
+                          <RotateCcw className="w-3.5 h-3.5" strokeWidth={1.75} /> Próximo
                         </button>
                       </div>
 
                       {result.ticket && (
-                        <div className="mt-3 pt-3 border-t border-[#222] space-y-1.5 text-xs">
-                          <p className="text-white font-medium truncate"><TicketIcon className="w-3 h-3 inline mr-1.5" />{result.ticket.event_title}</p>
+                        <div className="mt-3 pt-3 border-t border-border space-y-1.5 text-xs">
+                          <p className="text-foreground font-medium truncate"><TicketIcon className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />{result.ticket.event_title}</p>
                           {result.attendee && (result.attendee.full_name || result.attendee.email) && (
                             <>
-                              {result.attendee.full_name && <p className="text-[#aaa]"><User className="w-3 h-3 inline mr-1.5" />{result.attendee.full_name}</p>}
-                              <p className="text-[#aaa] truncate"><Mail className="w-3 h-3 inline mr-1.5" />{result.attendee.email}</p>
+                              {result.attendee.full_name && <p className="text-muted-foreground"><User className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />{result.attendee.full_name}</p>}
+                              <p className="text-muted-foreground truncate"><Mail className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />{result.attendee.email}</p>
                             </>
                           )}
                           {result.status === "valid" && result.scanned_at && (
-                            <p className="text-emerald-400"><Clock className="w-3 h-3 inline mr-1.5" />Check-in {moment(result.scanned_at).format("D MMM, HH:mm:ss")}</p>
+                            <p className="text-success"><Clock className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />Check-in {moment(result.scanned_at).format("D MMM, HH:mm:ss")}</p>
                           )}
                           {result.status === "used" && result.previous_scan && (
                             <>
-                              <p className="text-amber-400"><Clock className="w-3 h-3 inline mr-1.5" />Check-in anterior {result.previous_scan.at ? moment(result.previous_scan.at).format("D MMM, HH:mm") : "—"}</p>
-                              {result.previous_scan.by_label && <p className="text-[#888]">Por {result.previous_scan.by_label}</p>}
+                              <p className="text-warning"><Clock className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />Check-in anterior {result.previous_scan.at ? moment(result.previous_scan.at).format("D MMM, HH:mm") : "—"}</p>
+                              {result.previous_scan.by_label && <p className="text-muted-foreground">Por {result.previous_scan.by_label}</p>}
                             </>
                           )}
                         </div>
@@ -354,27 +328,27 @@ export default function Scan() {
               </div>
 
               {/* Status bar */}
-              <div className="flex items-center justify-between bg-card border border-border rounded-xl px-4 py-2.5">
-                <span className={`text-xs font-medium ${cameraState === "active" ? "text-emerald-400" : cameraState === "error" ? "text-red-400" : "text-[#888]"}`}>
+              <div className="flex items-center justify-between bg-card border border-border rounded-xl px-4 py-2.5 shadow-soft">
+                <span className={`text-xs font-medium ${cameraState === "active" ? "text-success" : cameraState === "error" ? "text-destructive" : "text-muted-foreground"}`}>
                   {validating ? "Validando ingresso…" : statusLabel}
                 </span>
                 {cameraState === "active" && (
-                  <button onClick={stopCamera} className="text-xs text-[#888] hover:text-red-400 font-medium">Parar câmera</button>
+                  <button onClick={stopCamera} className="text-xs text-muted-foreground hover:text-destructive font-medium transition-colors">Parar câmera</button>
                 )}
               </div>
 
               {/* Manual entry fallback */}
-              <form onSubmit={submitManual} className="bg-card border border-border rounded-xl p-4 space-y-2">
-                <label className="text-xs text-[#888] flex items-center gap-1.5"><Keyboard className="w-3.5 h-3.5" /> Câmera não funciona? Digite o código do ingresso manualmente</label>
+              <form onSubmit={submitManual} className="bg-card border border-border rounded-xl p-4 space-y-2 shadow-soft">
+                <label className="text-xs text-muted-foreground flex items-center gap-1.5"><Keyboard className="w-3.5 h-3.5" strokeWidth={1.75} /> Câmera não funciona? Digite o código do ingresso manualmente</label>
                 <div className="flex gap-2">
                   <input
                     value={manual}
                     onChange={e => setManual(e.target.value)}
                     placeholder="FC-..."
-                    className="flex-1 bg-[#111] border border-border rounded-lg px-3 py-2 text-sm text-white font-mono placeholder-[#444] focus:outline-none focus:border-primary"
+                    className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary transition-colors"
                   />
-                  <button type="submit" disabled={validating || !manual.trim()} className="px-4 rounded-lg bg-primary hover:bg-primary/90 text-white text-sm font-semibold disabled:opacity-50">
-                    {validating ? "…" : "Validar ingresso"}
+                  <button type="submit" disabled={validating || !manual.trim()} className="px-4 rounded-lg bg-primary hover:bg-primary/90 text-white text-sm font-semibold disabled:opacity-50 transition-colors">
+                    {validating ? "…" : "Validar"}
                   </button>
                 </div>
               </form>

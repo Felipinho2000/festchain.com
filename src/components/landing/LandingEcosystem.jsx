@@ -10,7 +10,7 @@ export default function LandingEcosystem() {
       <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-14">
           <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.ecosystem.kicker}</p>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-5xl text-white uppercase leading-[1.05] tracking-[-0.02em] mb-4">
+          <h2 className="font-heading font-bold text-3xl sm:text-5xl text-white leading-[1.05] tracking-[-0.02em] mb-4">
             {c.ecosystem.title}
           </h2>
           <p className="text-white/50 text-base leading-relaxed max-w-2xl mx-auto">{c.ecosystem.sub}</p>
