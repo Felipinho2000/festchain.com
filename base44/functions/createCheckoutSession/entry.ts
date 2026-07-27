@@ -177,13 +177,21 @@ Deno.serve(async (req) => {
 
     // 8. Create Stripe Checkout session
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), { apiVersion: '2024-06-20' });
-    // IMPORTANT: do NOT derive this from req.url — this function is invoked through
-    // Base44's internal dispatcher, so req.url is the internal routing address, not
-    // the public site. Using it here previously sent Stripe's redirect straight at
-    // Base44's internal worker, which rejected the browser with "invalid dispatcher
-    // secret" after every successful payment. Use the known public app origin instead.
-    const PUBLIC_APP_ORIGIN = 'https://festchain.com';
-    const origin = PUBLIC_APP_ORIGIN;
+    // Derive the public origin from the browser's Origin/Referer headers — these
+    // reflect the actual domain the user is browsing on. Do NOT use req.url,
+    // which is Base44's internal dispatcher address and would send Stripe's
+    // redirect straight at the internal worker (causing "invalid dispatcher
+    // secret" after every payment). Fall back to the known domain.
+    const headerOrigin = req.headers.get('origin') || req.headers.get('referer');
+    let origin = 'https://festchain.com';
+    if (headerOrigin) {
+      try {
+        const parsed = new URL(headerOrigin);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          origin = parsed.origin;
+        }
+      } catch (_) {}
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['pix', 'card'],
