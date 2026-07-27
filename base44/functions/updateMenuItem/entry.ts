@@ -23,7 +23,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'You are not authorized to manage this event' }, { status: 403 });
     }
 
-    const updated = await base44.asServiceRole.entities.VenueMenuItem.update(id, updates);
+    // Allowlist of fields that can be updated — excludes event_id and
+    // other association/ownership keys that could reassign the item.
+    const ALLOWED = [
+      'name', 'description', 'category', 'price_ftc', 'price_brl',
+      'image_url', 'is_available', 'stock', 'emoji', 'accepts_ftc',
+      'cashback_eligible',
+    ];
+    const safeUpdates = {};
+    for (const key of ALLOWED) {
+      if (key in updates) safeUpdates[key] = updates[key];
+    }
+
+    if (Object.keys(safeUpdates).length === 0) {
+      return Response.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    const updated = await base44.asServiceRole.entities.VenueMenuItem.update(id, safeUpdates);
     return Response.json(updated);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

@@ -19,6 +19,22 @@ const genreLabels = {
   rock: "Rock", sertanejo: "Sertanejo", other: "Other"
 };
 
+function safeUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  // Allow only http/https; prepend https:// for schemeless URLs (e.g. "instagram.com/foo")
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") return trimmed;
+    } catch (_) {}
+    return null;
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return null; // other schemes (javascript:, data:, etc.)
+  return `https://${trimmed}`;
+}
+
 function getActivePhase(event) {
   if (!event.ticket_phases || !event.ticket_phases.length) return null;
   const now = new Date();
@@ -240,11 +256,16 @@ export default function EventDetail() {
                         {dj.set_time && <span className="text-xs text-primary flex items-center gap-1"><Clock className="w-3 h-3" /> {dj.set_time}</span>}
                       </div>
                       {dj.bio && <p className="text-xs text-[#888] mt-0.5">{dj.bio}</p>}
-                      {dj.social_link && (
-                        <a href={dj.social_link} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1">
-                          <Instagram className="w-3 h-3" /> {dj.social_link.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
-                        </a>
-                      )}
+                      {(() => {
+                        const safe = safeUrl(dj.social_link);
+                        if (!safe) return null;
+                        const label = safe.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+                        return (
+                          <a href={safe} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-1">
+                            <Instagram className="w-3 h-3" /> {label}
+                          </a>
+                        );
+                      })()}
                     </div>
                   </div>
                 ))}
