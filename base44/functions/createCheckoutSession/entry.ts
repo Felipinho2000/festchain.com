@@ -182,12 +182,17 @@ Deno.serve(async (req) => {
     // which is Base44's internal dispatcher address and would send Stripe's
     // redirect straight at the internal worker (causing "invalid dispatcher
     // secret" after every payment). Fall back to the known domain.
+    // Validate the browser Origin/Referer against a strict allowlist of trusted
+    // domains. An attacker can spoof these headers to redirect users to a
+    // phishing site after Stripe payment (open redirect / CWE-601), so we never
+    // trust an arbitrary origin — only known public domains fall back safely.
+    const ALLOWED_HOSTS = ['festchain.com', 'www.festchain.com'];
     const headerOrigin = req.headers.get('origin') || req.headers.get('referer');
     let origin = 'https://festchain.com';
     if (headerOrigin) {
       try {
         const parsed = new URL(headerOrigin);
-        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && ALLOWED_HOSTS.includes(parsed.hostname)) {
           origin = parsed.origin;
         }
       } catch (_) {}
