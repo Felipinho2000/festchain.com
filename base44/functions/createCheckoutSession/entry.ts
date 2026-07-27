@@ -229,6 +229,25 @@ Deno.serve(async (req) => {
         organizer_id: organizerId || '',
         quantity: String(quantity),
       },
+      // Checkout Session metadata does NOT automatically propagate to the
+      // underlying PaymentIntent/Charge. Mirror it into payment_intent_data
+      // so a later charge.refunded webhook event can see which tickets this
+      // charge belongs to — without this, refunds are unattributable.
+      payment_intent_data: {
+        metadata: {
+          base44_app_id: Deno.env.get('BASE44_APP_ID'),
+          event_id: event.id,
+          ticket_ids: ticketIds.join(','),
+          reward_tx_ids: rewardTxIds.join(','),
+          cashback_tx_ids: cashbackTxIds.join(','),
+          ticket_type: ticket_type,
+          ticket_tier: ticket_tier,
+          ticket_phase: phase ? phase.name : '',
+          user_id: String(user.id),
+          organizer_id: organizerId || '',
+          quantity: String(quantity),
+        },
+      },
     });
 
     // 9. Store stripe session ID on all tickets for traceability
