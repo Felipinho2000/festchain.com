@@ -11,16 +11,16 @@ export const COPY = {
     nav: { organizers: "Para organizadores", how: "Como funciona", crowd: "Para a galera", openApp: "Abrir app", login: "Entrar", cta: "Quero levar minha festa" },
     hero: {
       badge: "Feito para a vida noturna do Brasil",
-      title1: "O sistema operacional", title2: "da vida noturna.",
-      sub: "A FestChain ajuda clubs, festivais, coletivos e promoters a vender mais ingressos, controlar a portaria, recompensar quem aparece e transformar o público de uma noite em uma audiência que é realmente sua.",
+      title1: "O sistema operacional",       title2: "da night.",
+      sub: "A FestChain ajuda clubs, festivais, coletivos e promoters a vender mais ingresso, controlar a portaria, recompensar quem aparece e transformar a galera de uma noite em audiência que é sua de verdade.",
       ctaPrimary: "Quero levar minha festa", ctaSecondary: "Ver como funciona",
       note: "Comissão de promoter automática · Pix na hora · Cashback que traz a galera de volta",
     },
     strip: ["Taxas menores", "Pix confirmado na hora", "Proteção contra fraude", "Repasse confiável"],
     wedge: {
       kicker: "Por que trocam de plataforma",
-      title: "Feito pra como a noite vende de verdade.",
-      sub: "Não é ferramenta genérica de eventos. É construída em cima das três coisas que fazem uma festa lotar no Brasil — promoter, WhatsApp e Instagram.",
+      title: "Feito pra como a night vende de verdade.",
+      sub: "Não é ferramenta genérica de evento. É construída nas três coisas que lotam festa no Brasil — promoter, WhatsApp e Instagram.",
       cards: [
         { icon: Users, t: "Promoter que vende", d: "Cada promoter e RP ganha um link próprio. Cada venda é atribuída automaticamente e a comissão é calculada sozinha. Eles veem quanto venderam e quanto vão receber, em tempo real. É onde as outras plataformas são mais fracas." },
         { icon: Zap, t: "Pix na hora", d: "Checkout com Pix instantâneo, cartão e parcelamento pra ingresso de festival. Confirmação automática na hora do pagamento e o ingresso chega no WhatsApp de quem comprou. Sem fila, sem fricção, mais conversão." },

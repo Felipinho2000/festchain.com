@@ -155,7 +155,7 @@ export default function Dashboard() {
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList className="bg-transparent p-0 gap-4 border-b border-border rounded-none h-auto">
           <TabsTrigger value="events" className={tabClass}>Eventos</TabsTrigger>
-          <TabsTrigger value="inventory" className={tabClass}>Estoque</TabsTrigger>
+          <TabsTrigger value="inventory" className={tabClass}>Cardápio</TabsTrigger>
           <TabsTrigger value="redemptions" className={tabClass}>Resgates</TabsTrigger>
           <TabsTrigger value="festcoin" className={tabClass}>FestCoin</TabsTrigger>
         </TabsList>

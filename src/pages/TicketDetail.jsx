@@ -172,7 +172,7 @@ export default function TicketDetail() {
                 <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> Check-in realizado — ingresso usado
               </p>
             ) : (
-              <p className="text-sm font-medium text-primary mt-4 text-center">Mostre este QR na entrada do evento.</p>
+              <p className="text-sm font-medium text-primary mt-4 text-center">Mostra esse QR na porta.</p>
             )}
             {ticket.qr_code && (
               <span className="text-[10px] font-mono text-muted-foreground/50 mt-2 break-all max-w-[240px]">{ticket.qr_code}</span>
@@ -186,7 +186,7 @@ export default function TicketDetail() {
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-foreground">{ticket.festcoin_earned || (event?.festcoin_reward || 0)} FTC de recompensa</p>
-              <p className="text-muted-foreground text-xs">Ganho quando você participa — creditado no seu saldo.</p>
+              <p className="text-muted-foreground text-xs">Ganha quando você aparece — cai no seu saldo.</p>
             </div>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function TicketDetail() {
           {/* Available perks */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
             <h3 className="font-heading font-semibold text-foreground text-base mb-3 flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.5} /> Produtos &amp; Benefícios
+              <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.5} /> Bebidas &amp; Perks
             </h3>
             {perks && perks.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -251,7 +251,7 @@ export default function TicketDetail() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-xs">Nenhum produto disponível para este evento ainda. Use seu saldo no local quando disponível.</p>
+              <p className="text-muted-foreground text-xs">Nada disponível pra esse rolê ainda. Usa seu saldo no local quando tiver.</p>
             )}
           </div>
 

@@ -217,7 +217,7 @@ export default function EventDetail() {
                     {event.ftc_discount_percent > 0 && <span className="text-xs text-primary">{t("festcoin.ftcDiscount")}: {event.ftc_discount_percent}%</span>}
                     {event.ftc_cashback_enabled && event.ftc_cashback_percent > 0 && <span className="text-xs text-emerald-400">{t("festcoin.cashbackAvailable")}: {event.ftc_cashback_percent}%</span>}
                   </div>
-                  <Link to="/festcoin" className="text-xs text-primary hover:underline mt-1 inline-block">Add FTC credits →</Link>
+                  <Link to="/festcoin" className="text-xs text-primary hover:underline mt-1 inline-block">Adicionar FTC →</Link>
                 </div>
               </div>
             )}
@@ -284,7 +284,7 @@ export default function EventDetail() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.75} />
-                <h3 className="font-heading font-semibold text-foreground">Drinks &amp; Perks</h3>
+                <h3 className="font-heading font-semibold text-foreground">Bebidas &amp; Perks</h3>
                 <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">FTC</span>
               </div>
               <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? "Ocultar" : "Ver"}</button>
@@ -292,7 +292,7 @@ export default function EventDetail() {
             {showMenu ? (
               <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} />
             ) : (
-              <p className="text-xs text-muted-foreground">Use seu saldo para resgatar bebidas, produtos e benefícios VIP neste evento.</p>
+              <p className="text-xs text-muted-foreground">Usa seu saldo pra resgatar bebida, merch e perks VIP nesse rolê.</p>
             )}
           </div>
         </div>
@@ -301,23 +301,23 @@ export default function EventDetail() {
         <div className="lg:col-span-1">
           <div className="hidden lg:block bg-card border border-border rounded-2xl p-5 sticky top-8 space-y-5 shadow-card">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">{phase ? `${phase.name}` : "Ingresso piloto"}</p>
+              <p className="text-xs text-muted-foreground mb-1">{phase ? `${phase.name}` : "Ingresso do piloto"}</p>
               {displayPrice !== null ? (
                 <p className="font-heading font-bold text-3xl text-foreground">R$ {displayPrice.toFixed(2)}</p>
               ) : (
                 <p className="font-heading font-bold text-2xl text-muted-foreground">Em breve</p>
               )}
-              <p className="text-xs text-muted-foreground mt-1">Ingresso QR seguro · pague com Pix ou cartão.</p>
+              <p className="text-xs text-muted-foreground mt-1">Ingresso QR seguro · paga com Pix ou cartão.</p>
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
-                <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC ao comparecer
+              <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC quando você aparece
               </div>
               {spotsLeft > 0 && spotsLeft <= Math.ceil(event.total_capacity * 0.2) && (
                 <div className="inline-flex items-center gap-1.5 bg-destructive/15 text-destructive text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-2">
-                  🔥 Últimos {spotsLeft} ingressos!
+                  🔥 Últimos {spotsLeft}!
                 </div>
               )}
               {hasPhases && (
-                <p className="text-[10px] text-muted-foreground mt-2">O preço reflete a fase atual e muda conforme os lotes abrem e esgotam.</p>
+                <p className="text-[10px] text-muted-foreground mt-2">O preço é do lote atual e muda conforme os lotes abrem e esgotam.</p>
               )}
             </div>
 
@@ -325,7 +325,7 @@ export default function EventDetail() {
               <Ticket className="w-4 h-4 mr-2" strokeWidth={1.75} />
               {spotsLeft <= 0 ? "Esgotado" : (hasPhases && !phase) ? "Ingressos em breve" : "Comprar ingresso"}
             </Button>
-            <p className="text-[10px] text-muted-foreground text-center leading-relaxed">As recompensas FestChain fazem parte da experiência piloto e podem ser usadas em perks dos eventos.</p>
+            <p className="text-[10px] text-muted-foreground text-center leading-relaxed">As recompensas FestChain são parte do piloto — usa em perks dos eventos.</p>
             <Link to="/legal" className="block text-center text-[10px] text-primary hover:underline">Termos do piloto</Link>
 
             <div className="border-t border-border pt-4">

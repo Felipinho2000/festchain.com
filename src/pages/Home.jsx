@@ -13,21 +13,21 @@ const pillars = [
   { icon: QrCode, label: "Ingressos QR seguros", desc: "Códigos únicos e invioláveis — nada de print falso." },
   { icon: Zap, label: "Funciona offline", desc: "Seu QR fica no celular e é lido na portaria sem internet." },
   { icon: ShieldCheck, label: "Sem entrada dupla", desc: "Check-in validado no servidor; cada ingresso é lido uma vez." },
-  { icon: Sparkles, label: "Recompensas", desc: "Ganhe créditos por participar — benefícios no app." },
+  { icon: Sparkles, label: "Recompensas", desc: "Ganha crédito por aparecer — perks no app." },
 ];
 
 const flow = [
-  { step: "01", icon: Ticket, title: "Compre seu ingresso", desc: "O ingresso QR é emitido na hora, direto na sua carteira." },
-  { step: "02", icon: QrCode, title: "Mostre o QR na porta", desc: "Abra a carteira e apresente o QR — funciona offline." },
+  { step: "01", icon: Ticket, title: "Compra seu ingresso", desc: "O ingresso QR sai na hora, direto na carteira." },
+  { step: "02", icon: QrCode, title: "Mostra o QR na porta", desc: "Abre a carteira e mostra o QR — funciona offline." },
   { step: "03", icon: ShieldCheck, title: "Entrada liberada", desc: "O porteiro escaneia e a entrada dupla é bloqueada." },
-  { step: "04", icon: Sparkles, title: "Ganhe recompensas", desc: "Acumule créditos por participar. Use em benefícios." },
+  { step: "04", icon: Sparkles, title: "Ganha recompensa", desc: "Acumula crédito por aparecer. Usa em perks." },
 ];
 
 const forOrganizers = [
   { icon: QrCode, label: "Emitir e validar ingressos QR" },
   { icon: TrendingUp, label: "Vendas e check-in em tempo real" },
   { icon: Users, label: "Saiba quem está na porta" },
-  { icon: ShieldCheck, label: "Sem repasse, sem fraude" },
+  { icon: ShieldCheck, label: "Sem caô, sem fraude" },
 ];
 
 const genres = [
@@ -115,10 +115,10 @@ export default function Home() {
                 Piloto privado · Ingressos QR
               </div>
               <h1 className="font-heading font-extrabold text-4xl lg:text-[52px] leading-[1.08] tracking-tight text-white mb-4 text-balance">
-                Compre ingressos. <span className="text-primary">Evite filas.</span> Aproveite mais.
+                Compra ingresso. <span className="text-primary">Corta fila.</span> Curte mais.
               </h1>
               <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-xl mx-auto">
-                Plataforma para descobrir eventos, guardar ingressos e comprar produtos antes mesmo de chegar ao local.
+                Descobre rolê, guarda ingresso e compra bebida antes mesmo de chegar no local.
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link to="/events">
@@ -235,10 +235,10 @@ export default function Home() {
             <div className="flex-1">
               <p className="text-xs text-primary font-bold uppercase tracking-widest mb-3">Para organizadores</p>
               <h2 className="font-heading font-extrabold text-3xl text-foreground mb-3 leading-tight text-balance">
-                Controle de acesso em escala.
+                Controle de acesso sem enrolação.
               </h2>
               <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-md">
-                Crie eventos, emita ingressos QR e escaneie o público na porta com proteção contra entrada dupla e lista de participantes em tempo real.
+                Cria rolê, emite ingresso QR e escaneia a galera na porta — sem entrada dupla e com lista de participantes em tempo real.
               </p>
               <Link to="/dashboard">
                 <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-11 rounded-xl text-sm shadow-glow">

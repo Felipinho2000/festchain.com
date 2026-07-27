@@ -180,17 +180,17 @@ export default function Scan() {
     <div className="max-w-2xl mx-auto px-4 lg:px-8 py-8 space-y-4">
       <div>
         <h1 className="font-heading font-bold text-3xl text-foreground mb-1">Check-in</h1>
-        <p className="text-muted-foreground text-sm">Selecione um evento para começar a escanear.</p>
+        <p className="text-muted-foreground text-sm">Seleciona um rolê pra começar a escanear.</p>
       </div>
 
       {!eventId ? (
         <div className="bg-card border border-border rounded-2xl p-5 space-y-3 shadow-soft">
-          <p className="text-sm text-foreground font-medium">Selecione o evento que você vai escanear</p>
+          <p className="text-sm text-foreground font-medium">Seleciona o rolê que você vai escanear</p>
           {loadingEvents ? (
             <p className="text-muted-foreground text-sm">Carregando seus eventos…</p>
           ) : events.length === 0 ? (
             <div className="text-muted-foreground text-sm">
-              <p className="mb-2">Nenhum evento atribuído a você.</p>
+              <p className="mb-2">Nenhum rolê atribuído a você.</p>
               <Link to="/dashboard" className="text-primary hover:underline text-sm">Criar evento</Link> ou peça a um admin para te adicionar como equipe.
             </div>
           ) : (

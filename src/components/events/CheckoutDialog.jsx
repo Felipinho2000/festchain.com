@@ -173,7 +173,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
                 <span className="text-foreground font-semibold">R$ {total.toFixed(2)}</span>
               </div>
               <p className="text-muted-foreground pt-1 border-t border-border flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={1.75} /> Pix (instantâneo) ou cartão · ingresso enviado no WhatsApp
+                <ShieldCheck className="w-3 h-3 text-primary" strokeWidth={1.75} /> Pix ou cartão · ingresso no WhatsApp
               </p>
             </div>
 

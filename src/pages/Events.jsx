@@ -43,8 +43,8 @@ export default function Events() {
   return (
     <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8 lg:py-12 space-y-6">
       <div>
-        <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-1 tracking-tight">Encontre sua próxima festa</h1>
-        <p className="text-muted-foreground text-sm">Ingressos com QR seguro. Recompensas reais. Noites melhores.</p>
+        <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-1 tracking-tight">Acha seu próximo rolê</h1>
+        <p className="text-muted-foreground text-sm">Ingresso QR seguro. Recompensa real. Night melhor.</p>
       </div>
 
       {/* Filters */}
@@ -52,7 +52,7 @@ export default function Events() {
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" strokeWidth={1.75} />
           <Input
-            placeholder="Buscar eventos ou casas..."
+            placeholder="Busca rolê ou casa..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="pl-10 h-12 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground/60"
@@ -94,11 +94,11 @@ export default function Events() {
             <Calendar className="w-7 h-7 text-muted-foreground/50" strokeWidth={1.5} />
           </div>
           {search || genre !== "all" ? (
-            <p className="text-muted-foreground text-sm">Nenhum evento encontrado. Tente ajustar sua busca.</p>
+            <p className="text-muted-foreground text-sm">Nenhum rolê encontrado. Ajusta a busca aí.</p>
           ) : (
             <>
               <p className="text-foreground text-base font-semibold mb-1">Nenhuma festa no ar ainda.</p>
-              <p className="text-muted-foreground text-sm mb-4">Crie o primeiro evento FestChain.</p>
+              <p className="text-muted-foreground text-sm mb-4">Cria o primeiro rolê FestChain.</p>
               <a href="/#contact" className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold hover:underline">Criar evento →</a>
             </>
           )}

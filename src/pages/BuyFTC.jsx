@@ -16,7 +16,7 @@ export default function BuyFTC() {
         </div>
         <h1 className="font-heading font-bold text-3xl text-foreground mb-3">Recompensas, não compras</h1>
         <p className="text-muted-foreground leading-relaxed">
-          Durante o piloto, as recompensas FestChain são <span className="text-foreground font-semibold">créditos de fidelidade dentro do app</span>. Não há venda de tokens nem compra durante o piloto.
+          No piloto, as recompensas FestChain são <span className="text-foreground font-semibold">créditos de fidelidade no app</span>. Sem venda de token nem compra durante o piloto.
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export default function BuyFTC() {
           </div>
           <div>
             <p className="text-foreground font-semibold mb-0.5">Como você ganha</p>
-            <p className="text-muted-foreground text-sm">Ganhe recompensas ao comprar ingressos para eventos. Organizadores e administradores também podem conceder créditos durante o piloto.</p>
+            <p className="text-muted-foreground text-sm">Ganha recompensa ao comprar ingresso pra rolê. Organizadores e admins também podem dar créditos no piloto.</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -45,7 +45,7 @@ export default function BuyFTC() {
           </div>
           <div>
             <p className="text-foreground font-semibold mb-0.5">Onde você usa</p>
-            <p className="text-muted-foreground text-sm">A compra de créditos está desativada durante o piloto. O uso dentro dos eventos chega em breve.</p>
+            <p className="text-muted-foreground text-sm">A compra de créditos tá desativada no piloto. O uso dentro dos rolês chega em breve.</p>
           </div>
         </div>
       </div>

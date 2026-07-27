@@ -168,7 +168,7 @@ export default function WalletPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-1 tracking-tight">Minha Carteira</h1>
-          <p className="text-muted-foreground text-sm">Seus ingressos, QR codes e recompensas.</p>
+          <p className="text-muted-foreground text-sm">Seus ingressos, QR e recompensas.</p>
         </div>
         {currentUser?.role === "admin" && (
           <button onClick={() => setShowTopup(t => !t)} className="inline-flex items-center gap-1.5 bg-primary/15 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-xl hover:bg-primary/25 transition-colors">
@@ -179,7 +179,7 @@ export default function WalletPage() {
 
       {/* Pilot disclaimer */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-muted-foreground">
-        <span className="text-primary font-semibold">Piloto privado.</span> As recompensas FestChain fazem parte da experiência piloto e podem ser usadas em benefícios dos eventos. Não têm valor em dinheiro, não são investimento e não podem ser sacadas. <Link to="/legal" className="text-primary hover:underline">Saiba mais</Link>.
+        <span className="text-primary font-semibold">Piloto privado.</span> As recompensas FestChain são créditos de fidelidade no app — usa em perks dos eventos. Não têm valor em dinheiro, não são investimento e não dá pra sacar. <Link to="/legal" className="text-primary hover:underline">Saiba mais</Link>.
       </div>
 
       {showTopup && (
@@ -242,8 +242,8 @@ export default function WalletPage() {
                 <Ticket className="w-7 h-7 text-primary" strokeWidth={1.5} />
               </div>
               <h3 className="font-heading font-semibold text-foreground text-base mb-2">Sem ingressos ainda</h3>
-              <p className="text-muted-foreground text-sm mb-1 max-w-xs mx-auto">Participe de um evento FestChain para receber seu primeiro ingresso e ganhar recompensas automaticamente.</p>
-              <p className="text-muted-foreground/60 text-xs mb-5">Seus ingressos e recompensas aparecem aqui após a compra.</p>
+              <p className="text-muted-foreground text-sm mb-1 max-w-xs mx-auto">Bate num rolê FestChain pra receber seu primeiro ingresso e ganhar recompensa automática.</p>
+              <p className="text-muted-foreground/60 text-xs mb-5">Seus ingressos e recompensas aparecem aqui depois da compra.</p>
               <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Ver eventos</Button></Link>
             </div>
           ) : (
@@ -274,7 +274,7 @@ export default function WalletPage() {
                 <WalletIcon className="w-7 h-7 text-primary" strokeWidth={1.5} />
               </div>
               <h3 className="font-heading font-semibold text-foreground text-base mb-2">Seu extrato aparece aqui</h3>
-              <p className="text-muted-foreground text-sm mb-5 max-w-xs mx-auto">Participe de um evento FestChain para ganhar suas primeiras recompensas. Os créditos são creditados automaticamente após a compra do ingresso.</p>
+              <p className="text-muted-foreground text-sm mb-5 max-w-xs mx-auto">Bate num rolê FestChain pra ganhar suas primeiras recompensas. Os créditos caem sozinhos depois da compra.</p>
               <Link to="/events"><Button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-xl">Ver eventos</Button></Link>
             </div>
           ) : (
