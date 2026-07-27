@@ -132,6 +132,86 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case 'charge.refunded': {
+        const charge = event.data.object;
+        const meta = charge.metadata || {};
+        const ticketIds = (meta.ticket_ids || '').split(',').filter(Boolean);
+        const rewardTxIds = (meta.reward_tx_ids || '').split(',').filter(Boolean);
+        const cashbackTxIds = (meta.cashback_tx_ids || '').split(',').filter(Boolean);
+        const eventId = meta.event_id;
+
+        if (!ticketIds.length) {
+          console.error('stripeWebhook: charge.refunded with no ticket_ids metadata — cannot auto-process (predates payment_intent_data metadata fix, or not a ticket charge):', charge.id);
+          break;
+        }
+
+        // SHORTCUT (logged in WAR_ROOM.md): Stripe's charge.refunded exposes a
+        // charge-level amount_refunded, not which specific ticket in a
+        // multi-ticket order was refunded. Only a FULL refund of the whole
+        // charge is auto-processed here; a partial refund is left for manual
+        // handling rather than guessing which ticket to revoke.
+        const isFullRefund = charge.refunded === true ||
+          (typeof charge.amount_refunded === 'number' && typeof charge.amount === 'number' && charge.amount_refunded >= charge.amount);
+        if (!isFullRefund) {
+          console.error('stripeWebhook: PARTIAL refund — not auto-processed, handle manually. charge:', charge.id, 'tickets:', meta.ticket_ids);
+          break;
+        }
+
+        let refundedCount = 0;
+        for (const tid of ticketIds) {
+          try {
+            const ticket = await base44.asServiceRole.entities.Ticket.get(tid);
+            if (!ticket) continue;
+            if (ticket.status === 'active') {
+              await base44.asServiceRole.entities.Ticket.update(tid, { status: 'refunded' });
+              refundedCount++;
+            } else if (ticket.status === 'used') {
+              console.error('stripeWebhook: refund issued for an already CHECKED-IN ticket — not auto-revoked, handle manually:', tid);
+            }
+            // 'refunded' already / 'pending' / 'expired' -> nothing to do (idempotent redelivery or edge case)
+          } catch (e) {
+            console.error('stripeWebhook: failed to refund ticket:', tid, e.message);
+          }
+        }
+
+        // Reverse reward + cashback by flipping the ORIGINAL transaction off
+        // 'confirmed' (same pattern already used above for
+        // checkout.session.expired) so it drops out of the buyer's balance.
+        // Deliberately not creating a new compensating row here: this webhook
+        // has no authenticated user context, so a row created via
+        // asServiceRole would get stamped with the service identity instead of
+        // the real buyer, and would silently vanish from their wallet balance
+        // instead of reversing it.
+        const reverseIfConfirmed = async (txId) => {
+          try {
+            const tx = await base44.asServiceRole.entities.FestCoinTransaction.get(txId);
+            if (tx && tx.status === 'confirmed') {
+              await base44.asServiceRole.entities.FestCoinTransaction.update(txId, { status: 'cancelled' });
+            }
+          } catch (e) {
+            console.error('stripeWebhook: failed to reverse FTC transaction:', txId, e.message);
+          }
+        };
+        for (const rtxId of rewardTxIds) await reverseIfConfirmed(rtxId);
+        for (const ctxId of cashbackTxIds) await reverseIfConfirmed(ctxId);
+
+        // Free up capacity for the refunded tickets (mirror of the increment
+        // in checkout.session.completed).
+        if (eventId && refundedCount > 0) {
+          try {
+            const ev = await base44.asServiceRole.entities.Event.get(eventId);
+            if (ev) {
+              await base44.asServiceRole.entities.Event.update(eventId, {
+                tickets_sold: Math.max(0, (ev.tickets_sold || 0) - refundedCount),
+              });
+            }
+          } catch (e) {
+            console.error('stripeWebhook: failed to decrement tickets_sold on refund:', e.message);
+          }
+        }
+        break;
+      }
+
       default:
         break;
     }
