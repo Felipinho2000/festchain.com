@@ -8,7 +8,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import moment from "moment";
 
-// All possible badges definition
 const BADGE_DEFS = [
   { key: "first_ticket", emoji: "🎟️", name: "Primeiro ingresso", desc: "Comprou seu primeiro ingresso" },
   { key: "five_events", emoji: "🔥", name: "Pegando fogo", desc: "Participou de 5 eventos" },
@@ -44,7 +43,6 @@ export default function Profile() {
       setTickets(t);
       setMoments(m);
       setFriendRequests(fr);
-      // connections where I'm either side
       setConnections(conn.filter(c => c.from_user_id === currentUser.id || c.to_user_id === currentUser.id));
     }).finally(() => setLoading(false));
   }, [currentUser]);
@@ -66,56 +64,56 @@ export default function Profile() {
     : "FC";
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto px-4 lg:px-8 py-8 lg:py-12 space-y-6">
       {/* Profile Header */}
-      <div className="bg-gradient-to-br from-[#1f1f1f] to-card border border-border rounded-2xl p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-secondary to-card border border-border rounded-3xl p-6 shadow-card">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl bg-primary/20 border-2 border-primary/40 flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-2xl bg-primary/15 border-2 border-primary/30 flex items-center justify-center flex-shrink-0">
             <span className="font-heading font-bold text-2xl text-primary">{initials}</span>
           </div>
-          <div className="flex-1">
-            <h1 className="font-heading font-bold text-xl text-white">{currentUser?.full_name || "Participante"}</h1>
-            <p className="text-[#666] text-sm">{currentUser?.email}</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-heading font-bold text-xl text-foreground truncate">{currentUser?.full_name || "Participante"}</h1>
+            <p className="text-muted-foreground text-sm truncate">{currentUser?.email}</p>
             <div className="flex items-center gap-4 mt-2">
-              <span className="flex items-center gap-1 text-xs text-[#888]">
-                <Ticket className="w-3 h-3" /> <span className="text-white font-semibold">{tickets.length}</span> eventos
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Ticket className="w-3 h-3" /> <span className="text-foreground font-semibold">{tickets.length}</span> eventos
               </span>
-              <span className="flex items-center gap-1 text-xs text-[#888]">
-                <Users className="w-3 h-3" /> <span className="text-white font-semibold">{connections.length}</span> conexões
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Users className="w-3 h-3" /> <span className="text-foreground font-semibold">{connections.length}</span> conexões
               </span>
-              <span className="flex items-center gap-1 text-xs text-[#888]">
-                <Camera className="w-3 h-3" /> <span className="text-white font-semibold">{moments.length}</span> momentos
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Camera className="w-3 h-3" /> <span className="text-foreground font-semibold">{moments.length}</span> momentos
               </span>
             </div>
           </div>
           <div className="flex-shrink-0">
-            <div className="flex items-center gap-1 bg-primary/20 border border-primary/30 rounded-xl px-3 py-1.5">
+            <div className="flex items-center gap-1 bg-primary/15 border border-primary/30 rounded-xl px-3 py-1.5">
               <Award className="w-4 h-4 text-primary" />
               <span className="text-primary font-bold text-sm">{earnedKeys.size}</span>
-              <span className="text-[#888] text-xs">conquistas</span>
+              <span className="text-muted-foreground text-xs">conquistas</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
+      <div className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between shadow-soft">
         <div>
-          <p className="text-white text-sm font-medium">{t("profile.legalCardTitle")}</p>
-          <p className="text-[#666] text-xs">{t("profile.legalCardDesc")}</p>
+          <p className="text-foreground text-sm font-medium">{t("profile.legalCardTitle")}</p>
+          <p className="text-muted-foreground text-xs">{t("profile.legalCardDesc")}</p>
         </div>
         <Link to="/legal" className="text-primary text-sm font-medium hover:underline">{t("profile.view")}</Link>
       </div>
 
       <Tabs defaultValue="social" className="space-y-4">
         <TabsList className="bg-card border border-border p-1 rounded-xl h-auto gap-1 w-full">
-          <TabsTrigger value="social" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
+          <TabsTrigger value="social" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-muted-foreground text-sm py-2">
             Social
           </TabsTrigger>
-          <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
+          <TabsTrigger value="badges" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-muted-foreground text-sm py-2">
             Conquistas
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-[#888] text-sm py-2">
+          <TabsTrigger value="history" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white text-muted-foreground text-sm py-2">
             Eventos
           </TabsTrigger>
         </TabsList>
@@ -123,27 +121,27 @@ export default function Profile() {
         {/* Social */}
         <TabsContent value="social" className="space-y-4">
           {friendRequests.length > 0 && (
-            <div className="bg-card border border-primary/30 rounded-xl p-4 space-y-3">
+            <div className="bg-card border border-primary/30 rounded-2xl p-4 space-y-3 shadow-soft">
               <div className="flex items-center gap-2 mb-1">
                 <Bell className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-white text-sm">{friendRequests.length} solicitação{friendRequests.length > 1 ? "ões" : ""} de conexão</span>
+                <span className="font-semibold text-foreground text-sm">{friendRequests.length} solicitação{friendRequests.length > 1 ? "ões" : ""} de conexão</span>
               </div>
               {friendRequests.map(req => (
-                <div key={req.id} className="flex items-center justify-between bg-[#1a1a1a] rounded-xl p-3">
+                <div key={req.id} className="flex items-center justify-between bg-secondary rounded-xl p-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
                       <span className="text-primary font-bold text-xs">?</span>
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">{req.from_alias || "Participante anônimo"}</p>
-                      {req.message && <p className="text-[#666] text-xs">"{req.message}"</p>}
+                      <p className="text-foreground text-sm font-medium">{req.from_alias || "Participante anônimo"}</p>
+                      {req.message && <p className="text-muted-foreground text-xs">"{req.message}"</p>}
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => handleAccept(req)} className="w-8 h-8 rounded-lg bg-emerald-900/40 text-emerald-400 flex items-center justify-center hover:bg-emerald-800/50 transition-colors">
+                    <button onClick={() => handleAccept(req)} className="w-8 h-8 rounded-lg bg-success/15 text-success flex items-center justify-center hover:bg-success/25 transition-colors">
                       <Check className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDecline(req)} className="w-8 h-8 rounded-lg bg-red-900/30 text-red-400 flex items-center justify-center hover:bg-red-800/40 transition-colors">
+                    <button onClick={() => handleDecline(req)} className="w-8 h-8 rounded-lg bg-destructive/15 text-destructive flex items-center justify-center hover:bg-destructive/25 transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -152,10 +150,12 @@ export default function Profile() {
             </div>
           )}
           {connections.length === 0 && friendRequests.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-10 text-center">
-              <Users className="w-8 h-8 text-[#444] mx-auto mb-2" />
-              <p className="text-[#666] text-sm">Sem conexões ainda.</p>
-              <p className="text-[#555] text-xs mt-1">Conecte-se com quem vai nas mesmas festas.</p>
+            <div className="bg-card border border-border rounded-2xl p-12 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-3">
+                <Users className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
+              </div>
+              <p className="text-muted-foreground text-sm">Sem conexões ainda.</p>
+              <p className="text-muted-foreground/60 text-xs mt-1">Conecte-se com quem vai nas mesmas festas.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -163,16 +163,16 @@ export default function Profile() {
                 const isMe = c.from_user_id === currentUser.id;
                 const alias = isMe ? (c.to_alias || "Participante anônimo") : (c.from_alias || "Participante anônimo");
                 return (
-                  <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <div key={c.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 shadow-soft">
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                       <Users className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <p className="text-white text-sm font-medium">{alias}</p>
-                      <p className="text-[#555] text-xs">Conectado {moment(c.updated_date).fromNow()}</p>
+                      <p className="text-foreground text-sm font-medium">{alias}</p>
+                      <p className="text-muted-foreground text-xs">Conectado {moment(c.updated_date).fromNow()}</p>
                     </div>
                     <div className="ml-auto">
-                      <Badge className="bg-emerald-900/40 text-emerald-400 border-0 text-[10px]">Conectado</Badge>
+                      <Badge className="bg-success/15 text-success border-0 text-[10px]">Conectado</Badge>
                     </div>
                   </div>
                 );
@@ -188,14 +188,14 @@ export default function Profile() {
               const earned = earnedKeys.has(def.key);
               const earnedRecord = badges.find(b => b.badge_key === def.key);
               return (
-                <div key={def.key} className={`relative rounded-xl border p-4 transition-all ${
+                <div key={def.key} className={`relative rounded-2xl border p-4 transition-all duration-200 ${
                   earned
-                    ? "bg-card border-primary/40 shadow-[0_0_16px_-4px_rgba(255,85,0,0.2)]"
-                    : "bg-[#111] border-[#222] opacity-50"
+                    ? "bg-card border-primary/40 shadow-glow"
+                    : "bg-secondary border-border opacity-50"
                 }`}>
                   <div className="text-3xl mb-2">{def.emoji}</div>
-                  <p className={`font-semibold text-sm mb-0.5 ${earned ? "text-white" : "text-[#555]"}`}>{def.name}</p>
-                  <p className="text-[10px] text-[#666] leading-relaxed">{def.desc}</p>
+                  <p className={`font-semibold text-sm mb-0.5 ${earned ? "text-foreground" : "text-muted-foreground"}`}>{def.name}</p>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">{def.desc}</p>
                   {earned && earnedRecord?.event_title && (
                     <p className="text-[10px] text-primary mt-1.5">em {earnedRecord.event_title}</p>
                   )}
@@ -213,27 +213,29 @@ export default function Profile() {
         {/* Event History */}
         <TabsContent value="history" className="space-y-3">
           {loading ? (
-            [1,2,3].map(i => <div key={i} className="h-16 bg-card border border-border rounded-xl animate-pulse" />)
+            [1,2,3].map(i => <div key={i} className="h-16 bg-card border border-border rounded-xl shimmer" />)
           ) : tickets.length === 0 ? (
-            <div className="bg-card border border-border rounded-xl p-10 text-center">
-              <Ticket className="w-8 h-8 text-[#444] mx-auto mb-2" />
-              <p className="text-[#666] text-sm">Sem eventos ainda.</p>
+            <div className="bg-card border border-border rounded-2xl p-12 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-3">
+                <Ticket className="w-7 h-7 text-muted-foreground/40" strokeWidth={1.5} />
+              </div>
+              <p className="text-muted-foreground text-sm">Sem eventos ainda.</p>
               <Link to="/events" className="inline-flex items-center gap-1 mt-3 text-primary text-sm font-medium">
                 Encontrar eventos <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           ) : (
             tickets.map(t => (
-              <div key={t.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <div key={t.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 shadow-soft">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Ticket className="w-5 h-5 text-primary" strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{t.event_title}</p>
-                  <p className="text-[#666] text-xs">{t.event_date ? moment(t.event_date).format("D MMM, YYYY") : "—"} · {t.event_location || ""}</p>
+                  <p className="text-foreground text-sm font-medium truncate">{t.event_title}</p>
+                  <p className="text-muted-foreground text-xs">{t.event_date ? moment(t.event_date).format("D MMM, YYYY") : "—"} · {t.event_location || ""}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-[#555] uppercase">{t.ticket_type === "vip" ? "VIP" : t.ticket_type === "backstage" ? "Backstage" : "Pista"}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">{t.ticket_type === "vip" ? "VIP" : t.ticket_type === "backstage" ? "Backstage" : "Pista"}</p>
                 </div>
               </div>
             ))
