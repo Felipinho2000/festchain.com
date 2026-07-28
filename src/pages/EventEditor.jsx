@@ -106,6 +106,23 @@ export default function EventEditor() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    if (isEdit) return;
+    const cap = parseInt(form.total_capacity);
+    if (!cap || cap < 1) return;
+    setForm(p => {
+      const per = Math.floor(cap / p.ticket_phases.length);
+      const remainder = cap - per * p.ticket_phases.length;
+      return {
+        ...p,
+        ticket_phases: p.ticket_phases.map((ph, i) => ({
+          ...ph,
+          quantity: per + (i < remainder ? 1 : 0),
+        })),
+      };
+    });
+  }, [form.total_capacity, isEdit]);
+
+  useEffect(() => {
     if (!isEdit) return;
     base44.entities.Event.get(id)
       .then(ev => {
