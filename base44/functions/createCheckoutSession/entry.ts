@@ -186,9 +186,12 @@ Deno.serve(async (req) => {
     // domains. An attacker can spoof these headers to redirect users to a
     // phishing site after Stripe payment (open redirect / CWE-601), so we never
     // trust an arbitrary origin — only known public domains fall back safely.
-    const ALLOWED_HOSTS = ['festchain.com', 'www.festchain.com'];
+    const ALLOWED_HOSTS = [
+      'festchain.com', 'www.festchain.com',
+      'fest-chain-flow.base44.app',
+    ];
     const headerOrigin = req.headers.get('origin') || req.headers.get('referer');
-    let origin = 'https://festchain.com';
+    let origin = 'https://fest-chain-flow.base44.app';
     if (headerOrigin) {
       try {
         const parsed = new URL(headerOrigin);
