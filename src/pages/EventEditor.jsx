@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   ArrowLeft, Plus, Trash2, ImagePlus, Loader2, Music, Calendar,
-  Ticket as TicketIcon, Save, Clock, Coins
+  Ticket as TicketIcon, Save, Clock, Coins, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,27 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const GENRES = ["techno","house","trance","drum_and_bass","hip_hop","reggaeton","funk","pop","rock","sertanejo","other"];
 const genreLabel = (g) => g.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+const GENRE_PRICING = {
+  techno:         { min: 40,  max: 120, typical: 60 },
+  house:          { min: 40,  max: 100, typical: 50 },
+  trance:         { min: 50,  max: 150, typical: 80 },
+  drum_and_bass:  { min: 30,  max: 80,  typical: 45 },
+  hip_hop:        { min: 25,  max: 60,  typical: 40 },
+  reggaeton:      { min: 30,  max: 70,  typical: 40 },
+  funk:           { min: 20,  max: 50,  typical: 30 },
+  pop:            { min: 40,  max: 120, typical: 60 },
+  rock:           { min: 40,  max: 100, typical: 60 },
+  sertanejo:      { min: 40,  max: 150, typical: 80 },
+  other:          { min: 30,  max: 80,  typical: 40 },
+};
+
+const SUGGESTED_PHASES = [
+  { name: "Early Bird",  pct: 0.55, reward: 60 },
+  { name: "Lote 2",      pct: 0.75, reward: 50 },
+  { name: "Lote 3",      pct: 0.90, reward: 40 },
+  { name: "Últimos",     pct: 1.15, reward: 20 },
+];
 
 const toLocal = (iso) => iso ? moment(iso).format("YYYY-MM-DDTHH:mm") : "";
 const fromLocal = (val) => val ? moment(val).toISOString() : null;
@@ -135,6 +156,26 @@ export default function EventEditor() {
   });
   const addPhase = () => setForm(p => ({ ...p, ticket_phases: [...p.ticket_phases, { name: "", price: 0, quantity: 0, sales_start: moment().toISOString(), sales_end: moment().add(7, "days").toISOString(), active: true, festcoin_reward: 0 }] }));
   const removePhase = (i) => setForm(p => ({ ...p, ticket_phases: p.ticket_phases.filter((_, idx) => idx !== i) }));
+
+  const suggestPhasePrices = () => {
+    const base = parseFloat(form.ticket_price) || GENRE_PRICING[form.genre]?.typical || 40;
+    setForm(p => ({
+      ...p,
+      ticket_phases: p.ticket_phases.map((ph, i) => {
+        const sug = SUGGESTED_PHASES[i % SUGGESTED_PHASES.length];
+        const cap = parseInt(p.total_capacity) || 200;
+        const qty = Math.round(cap / p.ticket_phases.length);
+        return {
+          ...ph,
+          name: ph.name || sug.name,
+          price: Math.round(base * sug.pct),
+          quantity: ph.quantity || qty,
+          festcoin_reward: sug.reward,
+        };
+      }),
+    }));
+    toast({ title: "Preços sugeridos!", description: `Base: R$ ${base} · lotes calculados automaticamente.` });
+  };
 
   const updateLineup = (i, k, v) => setForm(p => { const l = [...p.lineup]; l[i] = { ...l[i], [k]: v }; return { ...p, lineup: l }; });
   const addLineup = () => setForm(p => ({ ...p, lineup: [...p.lineup, { name: "", bio: "", social_link: "", set_time: "" }] }));
@@ -257,7 +298,14 @@ export default function EventEditor() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Capacidade *"><Input type="number" value={form.total_capacity} onChange={e => set("total_capacity", e.target.value)} className="rounded-xl" placeholder="500" /></Field>
-          <Field label="Preço base (R$)"><Input type="number" value={form.ticket_price} onChange={e => set("ticket_price", e.target.value)} className="rounded-xl" placeholder="40" /></Field>
+          <Field label="Preço base (R$)">
+            <Input type="number" value={form.ticket_price} onChange={e => set("ticket_price", e.target.value)} className="rounded-xl" placeholder={String(GENRE_PRICING[form.genre]?.typical || 40)} />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {form.genre && GENRE_PRICING[form.genre] ? (
+                <>Pra <span className="text-primary font-medium">{genreLabel(form.genre)}</span> em SP: <span className="text-foreground font-medium">R$ {GENRE_PRICING[form.genre].min}–{GENRE_PRICING[form.genre].max}</span> · típico <span className="text-primary font-medium">R$ {GENRE_PRICING[form.genre].typical}</span></>
+              ) : null}
+            </p>
+          </Field>
         </div>
         <Field label="Banner / imagem do evento">
           <div className="flex items-center gap-3">
@@ -278,7 +326,10 @@ export default function EventEditor() {
       </Section>
 
       {/* TICKET PHASES */}
-      <Section title={t("eventEditor.ticketPhases")} icon={TicketIcon} subtitle="Fases padrão já carregadas. Só a fase ativa dentro do período de vendas fica disponível; as fases avançam automaticamente.">
+      <Section title={t("eventEditor.ticketPhases")} icon={TicketIcon} subtitle="Os lotes avançam sozinho. A gente sugere os preços — é só ajustar se quiser.">
+        <button onClick={suggestPhasePrices} className="flex items-center gap-1.5 bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-lg hover:bg-primary/20 transition-colors w-fit mb-1">
+          <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> Sugerir preços dos lotes
+        </button>
         <div className="space-y-3">
           {form.ticket_phases.map((ph, i) => (
             <div key={i} className={subItemClass}>
