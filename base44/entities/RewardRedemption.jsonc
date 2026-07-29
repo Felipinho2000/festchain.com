@@ -1,0 +1,114 @@
+{
+  "name": "RewardRedemption",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "reward_item_id": {
+      "type": "string"
+    },
+    "reward_item_name": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "organizer_id": {
+      "type": "string"
+    },
+    "ftc_spent": {
+      "type": "number",
+      "description": "Computed server-side from RewardItem.ftc_cost \u2014 never from the request"
+    },
+    "brl_value_cents": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "delivered",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "redemption_code": {
+      "type": "string",
+      "description": "Short human-readable code for the bar/staff to verify"
+    },
+    "redeemed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "delivered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "delivered_by_user_id": {
+      "type": "string"
+    },
+    "delivered_by_name": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "reward_item_id",
+    "ftc_spent"
+  ],
+  "rls": {
+    "create": {
+      "$and": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.status": "pending"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organizer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.organizer_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

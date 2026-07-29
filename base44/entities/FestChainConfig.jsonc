@@ -1,0 +1,41 @@
+{
+  "name": "FestChainConfig",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": "string",
+      "default": "global"
+    },
+    "ftc_to_brl_rate": {
+      "type": "number",
+      "default": 10,
+      "description": "How many FTC equal R$1. Default: 10 FTC = R$1,00."
+    },
+    "ftc_earn_rate_percent": {
+      "type": "number",
+      "default": 5,
+      "description": "Percentage of ticket BRL value earned as FTC. Default: 5%."
+    }
+  },
+  "required": [
+    "ftc_to_brl_rate"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

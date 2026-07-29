@@ -1,0 +1,99 @@
+{
+  "name": "RewardItem",
+  "type": "object",
+  "properties": {
+    "organizer_id": {
+      "type": "string",
+      "description": "The organizer user id \u2014 set to created_by_id"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "null means valid at all of this organizer's events"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "ftc_cost": {
+      "type": "number"
+    },
+    "brl_value_cents": {
+      "type": "number",
+      "description": "What the organizer says it's worth in BRL cents"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "bebida",
+        "comida",
+        "upgrade",
+        "brinde",
+        "experiencia"
+      ]
+    },
+    "stock_total": {
+      "type": "number",
+      "description": "null = unlimited"
+    },
+    "stock_remaining": {
+      "type": "number"
+    },
+    "per_user_limit": {
+      "type": "number",
+      "default": 1
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "redeem_window": {
+      "type": "string",
+      "enum": [
+        "durante_evento",
+        "qualquer_momento"
+      ],
+      "default": "qualquer_momento"
+    }
+  },
+  "required": [
+    "organizer_id",
+    "name",
+    "ftc_cost",
+    "category"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

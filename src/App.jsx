@@ -30,6 +30,8 @@ import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
 import OrganizerFinanceiro from '@/pages/OrganizerFinanceiro';
 import Convidados from '@/pages/Convidados';
+import OrganizerRecompensas from '@/pages/OrganizerRecompensas';
+import ValidarRecompensa from '@/pages/ValidarRecompensa';
 import Social from '@/pages/Social';
 import TrustSafety from '@/pages/TrustSafety';
 import TicketDetail from '@/pages/TicketDetail';
@@ -94,6 +96,8 @@ const AuthenticatedApp = () => {
           <Route path="/pilot-setup" element={<PilotSetup />} />
           <Route path="/organizer/financeiro" element={<OrganizerFinanceiro />} />
           <Route path="/organizer/convidados" element={<Convidados />} />
+          <Route path="/organizer/recompensas" element={<OrganizerRecompensas />} />
+          <Route path="/organizer/validar-recompensa" element={<ValidarRecompensa />} />
         </Route>
       </Route>
 

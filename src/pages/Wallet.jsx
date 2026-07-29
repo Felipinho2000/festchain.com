@@ -7,6 +7,9 @@ import {
   ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Zap
 } from "lucide-react";
 import PilotTopupCard from "@/components/wallet/PilotTopupCard";
+import RewardCatalogue from "@/components/wallet/RewardCatalogue";
+import { ftcToBrlString, DEFAULT_FTC_TO_BRL_RATE } from "@/lib/rewardConfig";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -119,20 +122,24 @@ function TicketCard({ ticket }) {
 
 export default function WalletPage() {
   const { currentUser } = useAuth();
+  const { t } = useLanguage();
   const [tickets, setTickets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showTopup, setShowTopup] = useState(false);
+  const [ftcRate, setFtcRate] = useState(DEFAULT_FTC_TO_BRL_RATE);
 
   const loadWallet = () => {
     if (!currentUser?.id) return;
     setLoading(true);
     Promise.all([
       base44.entities.Ticket.filter({ created_by_id: currentUser.id }, "-created_date", 50).catch(() => []),
-      base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id }, "-created_date", 100).catch(() => [])
-    ]).then(([tix, txs]) => {
+      base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id }, "-created_date", 100).catch(() => []),
+      base44.entities.FestChainConfig.filter({ label: "global" }, "-created_date", 1).catch(() => [])
+    ]).then(([tix, txs, configs]) => {
       setTickets(tix);
       setTransactions(txs);
+      if (configs && configs.length > 0) setFtcRate(configs[0].ftc_to_brl_rate || DEFAULT_FTC_TO_BRL_RATE);
     }).finally(() => setLoading(false));
   };
 
@@ -199,7 +206,7 @@ export default function WalletPage() {
             <span className="font-heading font-bold text-5xl text-foreground tracking-tight">{balance.toLocaleString()}</span>
             <span className="text-muted-foreground text-sm">FTC</span>
           </div>
-          <p className="text-[10px] text-muted-foreground mb-4">Créditos do piloto · sem valor em dinheiro</p>
+          <p className="text-[10px] text-muted-foreground mb-4">{ftcToBrlString(balance, ftcRate)} em consumação · não é resgatável em dinheiro</p>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-background/60 border border-border rounded-xl p-3">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Ativos</p>
@@ -304,6 +311,7 @@ export default function WalletPage() {
 
         {/* Rewards Tab */}
         <TabsContent value="rewards" className="space-y-4">
+          <RewardCatalogue balance={balance} t={t} />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-soft">
               <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto mb-3">
