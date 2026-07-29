@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       return Response.json({
         status: 'used',
         message: 'This ticket was already used for entry',
-        ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location },
+        ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location, is_complimentary: ticket.is_complimentary || false, comp_category: ticket.comp_category || null },
         attendee,
         previous_scan: {
           at: ticket.scanned_at || ticket.checked_in_at || null,
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
     return Response.json({
       status: 'valid',
       message: 'Entry approved',
-      ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location },
+      ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location, is_complimentary: ticket.is_complimentary || false, comp_category: ticket.comp_category || null },
       attendee,
       scanned_at: now
     });

@@ -305,6 +305,11 @@ export default function Scan() {
                       {result.ticket && (
                         <div className="mt-3 pt-3 border-t border-border space-y-1.5 text-xs">
                           <p className="text-foreground font-medium truncate"><TicketIcon className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />{result.ticket.event_title}</p>
+                          {result.ticket.is_complimentary && result.ticket.comp_category && (
+                            <div className="inline-flex items-center gap-1.5 bg-warning/20 text-warning px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wide">
+                              CORTESIA · {result.ticket.comp_category}
+                            </div>
+                          )}
                           {result.attendee && (result.attendee.full_name || result.attendee.email) && (
                             <>
                               {result.attendee.full_name && <p className="text-muted-foreground"><User className="w-3 h-3 inline mr-1.5" strokeWidth={1.75} />{result.attendee.full_name}</p>}

@@ -1,0 +1,80 @@
+{
+  "name": "ComplimentaryBatch",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "issued_by_user_id": {
+      "type": "string"
+    },
+    "ticket_type_id": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "comp_category": {
+      "type": "string",
+      "enum": [
+        "cortesia",
+        "lista",
+        "staff",
+        "artista",
+        "imprensa",
+        "parceria"
+      ]
+    },
+    "note": {
+      "type": "string"
+    },
+    "claim_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "idempotency_key": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "issued_by_user_id",
+    "quantity",
+    "comp_category"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.issued_by_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

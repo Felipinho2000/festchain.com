@@ -49,6 +49,23 @@
       "type": "boolean",
       "default": false
     },
+    "comp_category": {
+      "type": "string",
+      "enum": [
+        "cortesia",
+        "lista",
+        "staff",
+        "artista",
+        "imprensa",
+        "parceria"
+      ]
+    },
+    "comp_note": {
+      "type": "string"
+    },
+    "issued_by_user_id": {
+      "type": "string"
+    },
     "payment_method": {
       "type": "string",
       "enum": [

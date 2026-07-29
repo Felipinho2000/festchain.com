@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Plus, Calendar, TrendingUp,
-  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine
+  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine, Users
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -100,6 +100,9 @@ export default function Dashboard() {
           )}
           <Link to="/organizer/financeiro" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
             <TrendingUp className="w-3.5 h-3.5" /> Financeiro
+          </Link>
+          <Link to="/organizer/convidados" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
+            <Users className="w-3.5 h-3.5" /> Convidados
           </Link>
         </div>
         <Link to="/dashboard/events/new">
