@@ -140,6 +140,9 @@ export async function recalculatePayoutForEvent(base44: any, event: any): Promis
   let ticketsComplimentary = 0;
 
   for (const ticket of tickets) {
+    // Skip pending and expired — not yet sold
+    if (ticket.status === 'pending' || ticket.status === 'expired') continue;
+
     ticketsSold++;
     if (ticket.is_complimentary) {
       ticketsComplimentary++;
