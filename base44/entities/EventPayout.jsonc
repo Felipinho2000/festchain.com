@@ -1,0 +1,100 @@
+{
+  "name": "EventPayout",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "organizer_id": {
+      "type": "string"
+    },
+    "gross_sales_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "platform_fee_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "refunded_amount_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "unrecovered_processing_cost_cents": {
+      "type": "number",
+      "default": 0,
+      "description": "Sum of stripe_fee_cents on refunded tickets \u2014 FestChain's real loss on refunds. Admin-visible only."
+    },
+    "net_payable_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "tickets_sold": {
+      "type": "number",
+      "default": 0
+    },
+    "tickets_refunded": {
+      "type": "number",
+      "default": 0
+    },
+    "tickets_complimentary": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "accruing",
+        "settlement_window",
+        "payable",
+        "paid",
+        "failed"
+      ],
+      "default": "accruing"
+    },
+    "event_ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payout_due_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payment_reference": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "organizer_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -45,6 +45,10 @@
     "price_paid": {
       "type": "number"
     },
+    "is_complimentary": {
+      "type": "boolean",
+      "default": false
+    },
     "payment_method": {
       "type": "string",
       "enum": [
@@ -112,6 +116,27 @@
     },
     "buyer_email": {
       "type": "string"
+    },
+    "fee_percentage_applied": {
+      "type": "number",
+      "description": "Snapshot of the rate at time of sale"
+    },
+    "platform_fee_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "stripe_fee_cents": {
+      "type": "number",
+      "default": 0,
+      "description": "Actual processing cost from the Stripe balance transaction"
+    },
+    "net_to_organizer_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "fee_reversed": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

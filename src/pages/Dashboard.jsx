@@ -98,6 +98,9 @@ export default function Dashboard() {
               <Settings className="w-3.5 h-3.5" /> Pilot Setup checklist
             </Link>
           )}
+          <Link to="/organizer/financeiro" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
+            <TrendingUp className="w-3.5 h-3.5" /> Financeiro
+          </Link>
         </div>
         <Link to="/dashboard/events/new">
           <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">

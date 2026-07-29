@@ -28,6 +28,7 @@ import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
 import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
+import OrganizerFinanceiro from '@/pages/OrganizerFinanceiro';
 import Social from '@/pages/Social';
 import TrustSafety from '@/pages/TrustSafety';
 import TicketDetail from '@/pages/TicketDetail';
@@ -90,6 +91,7 @@ const AuthenticatedApp = () => {
           <Route path="/scan" element={<Scan />} />
           <Route path="/social" element={<Social />} />
           <Route path="/pilot-setup" element={<PilotSetup />} />
+          <Route path="/organizer/financeiro" element={<OrganizerFinanceiro />} />
         </Route>
       </Route>
 

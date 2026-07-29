@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import Stripe from 'npm:stripe@^14.0.0';
+import { getOrCreateOrganizerAccount, getEffectiveFeePercentage, calculatePlatformFeeCents, brlToCents } from '../../shared/feeLogic.ts';
 
 // Stripe webhook handler for ticket purchases.
 // On checkout.session.completed: activates all pre-created pending tickets
@@ -43,14 +44,25 @@ Deno.serve(async (req) => {
           break;
         }
 
-        // Determine payment method from payment intent
+        // Determine payment method from payment intent + extract Stripe processing fee
         let paymentMethod = 'credit_card';
+        let stripeFeeCents = 0;
         try {
           if (session.payment_intent) {
-            const pi = await stripe.paymentIntents.retrieve(session.payment_intent);
+            const pi = await stripe.paymentIntents.retrieve(session.payment_intent, {
+              expand: ['charges.data.balance_transaction']
+            });
             if (pi.payment_method) {
               const pm = await stripe.paymentMethods.retrieve(pi.payment_method);
               if (pm.type === 'pix') paymentMethod = 'pix';
+            }
+            // Read actual Stripe processing fee from the balance transaction
+            if (pi.charges && pi.charges.data && pi.charges.data.length > 0) {
+              const charge = pi.charges.data[0];
+              const bt = charge.balance_transaction;
+              if (bt && typeof bt === 'object' && typeof bt.fee === 'number') {
+                stripeFeeCents = bt.fee;
+              }
             }
           }
         } catch (_) {}
@@ -66,6 +78,46 @@ Deno.serve(async (req) => {
           } catch (e) {
             console.error('stripeWebhook: failed to activate ticket:', tid, e.message);
           }
+        }
+
+        // --- Platform fee calculation (server-side, additive) ---
+        // Computes fee_percentage_applied, platform_fee_cents, stripe_fee_cents,
+        // net_to_organizer_cents for each ticket. Complimentary tickets have zero fee.
+        // FestChain absorbs the Stripe processing fee out of its own cut — the
+        // organizer's net is gross minus the FestChain fee ONLY.
+        try {
+          let organizerUserId = null;
+          try {
+            const firstT = await base44.asServiceRole.entities.Ticket.get(ticketIds[0]);
+            organizerUserId = firstT ? firstT.organizer_id : null;
+          } catch (_) {}
+          const organizer = await getOrCreateOrganizerAccount(base44, organizerUserId);
+          const feePercentage = organizer ? getEffectiveFeePercentage(organizer, new Date()) : 8.0;
+          const ticketCount = ticketIds.length;
+          const baseFeePerTicket = ticketCount > 0 ? Math.floor(stripeFeeCents / ticketCount) : 0;
+          const feeRemainder = stripeFeeCents - baseFeePerTicket * ticketCount;
+          for (let i = 0; i < ticketIds.length; i++) {
+            const tid = ticketIds[i];
+            try {
+              const t = await base44.asServiceRole.entities.Ticket.get(tid);
+              if (!t) continue;
+              const priceCents = brlToCents(t.price_paid || 0);
+              const isComplimentary = !!t.is_complimentary;
+              const platformFee = isComplimentary ? 0 : calculatePlatformFeeCents(priceCents, feePercentage);
+              const net = priceCents - platformFee;
+              const ticketStripeFee = i === 0 ? baseFeePerTicket + feeRemainder : baseFeePerTicket;
+              await base44.asServiceRole.entities.Ticket.update(tid, {
+                fee_percentage_applied: feePercentage,
+                platform_fee_cents: platformFee,
+                stripe_fee_cents: ticketStripeFee,
+                net_to_organizer_cents: net,
+              });
+            } catch (e) {
+              console.error('stripeWebhook: failed to set fee on ticket:', tid, e.message);
+            }
+          }
+        } catch (e) {
+          console.error('stripeWebhook: fee calculation failed:', e.message);
         }
 
         // Confirm all reward transactions

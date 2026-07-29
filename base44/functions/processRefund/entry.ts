@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import Stripe from 'npm:stripe@^14.0.0';
 import { secrets } from 'base44:runtime';
+import { recalculatePayoutForEvent } from '../../shared/feeLogic.ts';
 
 // Issues a full refund for a ticket purchased via Stripe checkout.
 // Admin-only for now. The charge.refunded webhook handler (in stripeWebhook)
@@ -13,7 +14,7 @@ export default async function(req) {
     if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json();
-    const { ticket_id } = body;
+    const { ticket_id, idempotency_key } = body;
     if (!ticket_id) return Response.json({ error: 'ticket_id is required' }, { status: 400 });
 
     // Service role to bypass RLS — admin can access all tickets
@@ -39,11 +40,36 @@ export default async function(req) {
       ? session.payment_intent
       : session.payment_intent.id;
 
-    // Create a full refund — Stripe fires charge.refunded webhook automatically
-    const refund = await stripe.refunds.create({
+    // Create a full refund — Stripe fires charge.refunded webhook automatically.
+    // Pass idempotency_key to Stripe so a repeat call returns the same refund.
+    const refundOpts = {
       payment_intent: paymentIntentId,
       reason: 'requested_by_customer',
-    });
+    };
+    const refund = idempotency_key
+      ? await stripe.refunds.create(refundOpts, { idempotencyKey: idempotency_key })
+      : await stripe.refunds.create(refundOpts);
+
+    // Set fee_reversed = true and platform_fee_cents = 0 for this ticket.
+    // Leave stripe_fee_cents as recorded — that processing cost is NOT recovered.
+    try {
+      await base44.asServiceRole.entities.Ticket.update(ticket_id, {
+        fee_reversed: true,
+        platform_fee_cents: 0,
+      });
+    } catch (e) {
+      console.error('processRefund: failed to set fee_reversed:', e.message);
+    }
+
+    // Recompute the event's payout figures
+    try {
+      const event = await base44.asServiceRole.entities.Event.get(ticket.event_id);
+      if (event) {
+        await recalculatePayoutForEvent(base44, event);
+      }
+    } catch (e) {
+      console.error('processRefund: failed to recalculate payout:', e.message);
+    }
 
     return Response.json({
       success: true,
