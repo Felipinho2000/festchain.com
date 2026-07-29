@@ -34,7 +34,7 @@ export default function AppLayout() {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-[244px] bg-sidebar border-r border-sidebar-border z-40 px-4 py-6">
         <Link to="/app" className="px-2 mb-9 flex items-center">
-          <Logo size={30} />
+          <Logo size={44} />
         </Link>
 
         <nav className="flex-1 flex flex-col gap-1">
@@ -87,7 +87,7 @@ export default function AppLayout() {
       {/* Mobile Header */}
       <header className="lg:hidden glass fixed top-0 left-0 right-0 h-14 border-b border-border z-50 flex items-center justify-between px-4">
         <Link to="/app" className="flex-shrink-0">
-          <Logo size={24} />
+          <Logo size={34} />
         </Link>
         <div className="flex items-center gap-1">
           <Link to="/legal" className="p-2.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors" aria-label="Confiança & Segurança">

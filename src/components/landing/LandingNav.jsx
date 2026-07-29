@@ -23,7 +23,7 @@ export default function LandingNav() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-white/[0.06]">
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center">
-          <Logo size={28} />
+          <Logo size={40} />
         </Link>
 
         <div className="hidden md:flex items-center gap-7 text-sm text-white/50">
