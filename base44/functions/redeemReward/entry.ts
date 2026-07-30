@@ -57,7 +57,9 @@ Deno.serve(async (req) => {
     if (!rewardItem) return Response.json({ error: 'Reward not found' }, { status: 404 });
     if (!rewardItem.active) return Response.json({ error: 'inactive', message: 'This reward is not active' }, { status: 400 });
 
-    const organizerId = rewardItem.organizer_id || String(rewardItem.created_by_id);
+    // Authoritative owner is the record author — organizer_id is client-writable
+    // and must never be used for authorisation.
+    const organizerId = String(rewardItem.created_by_id);
 
     // ── Verify event scope ──
     // If the reward is event-scoped, the provided event_id must match.

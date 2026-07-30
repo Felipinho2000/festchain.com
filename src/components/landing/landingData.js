@@ -2,7 +2,7 @@ import {
   Users, Zap, Gift, CalendarPlus, Ticket, DoorOpen, Repeat, Search,
 } from "lucide-react";
 
-export const WHATSAPP_NUMBER = "5511999999999";
+export const WHATSAPP_NUMBER = "5519994174868";
 export const CONTACT_EMAIL = "contato@festchain.com";
 
 export const COPY = {

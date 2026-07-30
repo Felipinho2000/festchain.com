@@ -67,12 +67,17 @@ export function addBusinessDays(startDate: Date, days: number): Date {
 // Fee percentage — computed from stored dates, never silently mutated
 // ---------------------------------------------------------------------------
 
+export const STANDARD_FEE_PERCENTAGE = 8.0;
+export const PILOT_FEE_PERCENTAGE = 5.0;
+
 export function getEffectiveFeePercentage(organizer: any, atDate: Date = new Date()): number {
+  if (!organizer) return STANDARD_FEE_PERCENTAGE;
   if (organizer.fee_tier === 'pilot' && organizer.pilot_expires_at) {
-    const expiresAt = new Date(organizer.pilot_expires_at);
-    if (atDate <= expiresAt) return 5.0;
+    if (atDate <= new Date(organizer.pilot_expires_at)) return PILOT_FEE_PERCENTAGE;
+    // Expired — always revert to standard, never to the stored value.
+    return STANDARD_FEE_PERCENTAGE;
   }
-  return organizer.fee_percentage || 8.0;
+  return organizer.fee_percentage || STANDARD_FEE_PERCENTAGE;
 }
 
 // ---------------------------------------------------------------------------
