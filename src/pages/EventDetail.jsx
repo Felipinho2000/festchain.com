@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
+import { ftcToBrlString } from "@/lib/rewardConfig";
 
 const genreLabels = {
   techno: "Techno", house: "House", trance: "Trance",
@@ -309,7 +310,7 @@ export default function EventDetail() {
               )}
               <p className="text-xs text-muted-foreground mt-1">Ingresso QR seguro · paga com Pix ou cartão.</p>
               <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-3">
-              <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC quando você aparece
+              <Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> +{reward} FTC <span className="font-normal">({ftcToBrlString(reward)} em consumação)</span> quando você aparece
               </div>
               {spotsLeft > 0 && spotsLeft <= Math.ceil(event.total_capacity * 0.2) && (
                 <div className="inline-flex items-center gap-1.5 bg-destructive/15 text-destructive text-xs font-semibold px-2.5 py-1.5 rounded-lg mt-2">

@@ -5,6 +5,7 @@ import { Zap, Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { ftcToBrlString } from "@/lib/rewardConfig";
 
 const PRESETS = {
   BRL: [25, 50, 100, 200],
@@ -116,7 +117,7 @@ export default function TopupPanel({ selectedEvent, onSuccess }) {
       {nativeAmount > 0 && (
         <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg px-3 py-3">
           <span className="text-sm text-[#bbb]">{t("festcoin.ftcToReceive")}</span>
-          <span className="font-heading font-bold text-lg text-primary">{ftcToReceive.toLocaleString()} FTC</span>
+          <span className="font-heading font-bold text-lg text-primary">{ftcToReceive.toLocaleString()} FTC <span className="text-xs font-normal text-[#888]">({ftcToBrlString(ftcToReceive)} em consumação)</span></span>
         </div>
       )}
 

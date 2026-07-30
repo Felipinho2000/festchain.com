@@ -2,6 +2,7 @@ import React from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { ArrowUpRight, ArrowDownLeft, Zap } from "lucide-react";
 import moment from "moment";
+import { ftcToBrlString } from "@/lib/rewardConfig";
 
 const TX_LABEL_MAP = {
   pilot_topup: "txPilotTopup",
@@ -71,9 +72,12 @@ export default function TransactionList({ transactions, loading }) {
                     <span className="text-[10px] text-amber-400">{tx.status}</span>
                   )}
                 </div>
-                <span className={`font-heading font-bold text-sm ${positive ? "text-emerald-400" : "text-red-400"}`}>
-                  {positive ? "+" : "-"}{(tx.amount || 0).toLocaleString()} FTC
-                </span>
+                <div className="text-right">
+                  <span className={`font-heading font-bold text-sm ${positive ? "text-emerald-400" : "text-red-400"}`}>
+                    {positive ? "+" : "-"}{(tx.amount || 0).toLocaleString()} FTC
+                  </span>
+                  <span className="block text-[10px] text-[#666]">{ftcToBrlString(tx.amount || 0)} em consumação</span>
+                </div>
               </div>
             );
           })}

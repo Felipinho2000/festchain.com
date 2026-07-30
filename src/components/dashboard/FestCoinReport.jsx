@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Zap, TrendingUp, TrendingDown, Gift, RotateCcw, ShoppingBag } from "lucide-react";
+import { ftcToBrlString } from "@/lib/rewardConfig";
 
 export default function FestCoinReport({ events }) {
   const { t } = useLanguage();
@@ -37,12 +38,12 @@ export default function FestCoinReport({ events }) {
   const currencyCode = report.events[0]?.currency_code || "BRL";
 
   const cards = [
-    { label: t("festcoin.reportTopups"), value: totals.topups, icon: TrendingUp, color: "text-emerald-400 bg-emerald-900/20" },
-    { label: t("festcoin.reportSpent"), value: totals.spent, icon: TrendingDown, color: "text-red-400 bg-red-900/20" },
-    { label: t("festcoin.reportCashback"), value: totals.cashback, icon: Gift, color: "text-primary bg-primary/10" },
-    { label: t("festcoin.reportTicketRewards"), value: totals.ticket_rewards, icon: Zap, color: "text-primary bg-primary/10" },
-    { label: t("festcoin.reportRefunds"), value: totals.refunds, icon: RotateCcw, color: "text-amber-400 bg-amber-900/20" },
-    { label: t("festcoin.reportPurchaseCount"), value: totals.purchase_count, icon: ShoppingBag, color: "text-primary bg-primary/10" },
+    { label: t("festcoin.reportTopups"), value: totals.topups, icon: TrendingUp, color: "text-emerald-400 bg-emerald-900/20", isFtc: true },
+    { label: t("festcoin.reportSpent"), value: totals.spent, icon: TrendingDown, color: "text-red-400 bg-red-900/20", isFtc: true },
+    { label: t("festcoin.reportCashback"), value: totals.cashback, icon: Gift, color: "text-primary bg-primary/10", isFtc: true },
+    { label: t("festcoin.reportTicketRewards"), value: totals.ticket_rewards, icon: Zap, color: "text-primary bg-primary/10", isFtc: true },
+    { label: t("festcoin.reportRefunds"), value: totals.refunds, icon: RotateCcw, color: "text-amber-400 bg-amber-900/20", isFtc: true },
+    { label: t("festcoin.reportPurchaseCount"), value: totals.purchase_count, icon: ShoppingBag, color: "text-primary bg-primary/10", isFtc: false },
   ];
 
   return (
@@ -55,6 +56,7 @@ export default function FestCoinReport({ events }) {
             </div>
             <p className="font-heading font-bold text-xl text-white">{(card.value || 0).toLocaleString()}</p>
             <p className="text-xs text-[#888]">{card.label}</p>
+            {card.isFtc && <p className="text-[10px] text-[#555] mt-0.5">{ftcToBrlString(card.value || 0)} em consumação</p>}
           </div>
         ))}
       </div>

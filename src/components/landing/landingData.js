@@ -14,7 +14,7 @@ export const COPY = {
       title1: "O sistema operacional",       title2: "da night.",
       sub: "A FestChain ajuda clubs, festivais, coletivos e promoters a vender mais ingresso, controlar a portaria, recompensar quem aparece e transformar a galera de uma noite em audiência que é sua de verdade.",
       ctaPrimary: "Quero levar minha festa", ctaSecondary: "Ver como funciona",
-      note: "Comissão de promoter automática · Pix na hora · Cashback que traz a galera de volta",
+      note: "Comissão de promoter automática · Pix na hora · Crédito que traz a galera de volta",
     },
     strip: ["Taxas menores", "Pix confirmado na hora", "Proteção contra fraude", "Repasse confiável"],
     wedge: {
@@ -24,14 +24,14 @@ export const COPY = {
       cards: [
         { icon: Users, t: "Promoter que vende", d: "Cada promoter e RP ganha um link próprio. Cada venda é atribuída automaticamente e a comissão é calculada sozinha. Eles veem quanto venderam e quanto vão receber, em tempo real. É onde as outras plataformas são mais fracas." },
         { icon: Zap, t: "Pix na hora", d: "Checkout com Pix instantâneo, cartão e parcelamento pra ingresso de festival. Confirmação automática na hora do pagamento e o ingresso chega no WhatsApp de quem comprou. Sem fila, sem fricção, mais conversão." },
-        { icon: Gift, t: "Cashback que volta", d: "Cada ingresso gera crédito pra próxima festa. A galera volta — e você sabe exatamente quem são. Duplique o evento com um toque e chame de volta todo mundo que foi e todo mundo que tem crédito guardado." },
+        { icon: Gift, t: "Crédito que volta", d: "Cada ingresso gera crédito pra próxima festa. A galera volta — e você sabe exatamente quem são. Duplique o evento com um toque e chame de volta todo mundo que foi e todo mundo que tem crédito guardado." },
       ],
     },
     own: {
       kicker: "Retenção",
       title1: "Uma audiência que é sua.", title2: "De verdade.",
       p1: "Nas plataformas de sempre, o cliente é da plataforma — você aluga acesso ao seu próprio público. Na FestChain, o público, os dados e o relacionamento são seus.",
-      p2: "Depois da festa, o cashback, o histórico e o contato ficam com você. Um toque duplica o evento e avisa todo mundo que foi — mais quem ainda tem crédito pra gastar.",
+      p2: "Depois da festa, o crédito, o histórico e o contato ficam com você. Um toque duplica o evento e avisa todo mundo que foi — mais quem ainda tem crédito pra gastar.",
       quote: "É o loop de retenção que uma plataforma genérica de ingressos não consegue fechar.",
       rows: [
         { i: "M", n: "Mari S.", s: "Foi na última · R$18 de crédito", b: "Voltou" },
@@ -46,9 +46,9 @@ export const COPY = {
       steps: [
         { icon: CalendarPlus, t: "Criar", d: "Monte o evento em minutos — lotes, line-up, horários e preços numa página só. Salve como modelo e duplique festas semanais em segundos." },
         { icon: Ticket, t: "Vender", d: "Ative seus promoters com links e comissão automática. Um toque compartilha no WhatsApp e no Instagram. É assim que a noite vende." },
-        { icon: Wine, t: "Bar & consumação", d: "Venda bebidas, combos e open bar pelo app. O público gasta o cashback no bar, a casa fatura mais e sabe o gasto médio por pessoa." },
+        { icon: Wine, t: "Bar & consumação", d: "Venda bebidas, combos e open bar pelo app. O público gasta o crédito no bar, a casa fatura mais e sabe o gasto médio por pessoa." },
         { icon: DoorOpen, t: "Portaria", d: "Check-in por QR à prova de duplicidade, vários operadores, contador ao vivo de quem já entrou. Lista e cortesia com nome na porta." },
-        { icon: Repeat, t: "Trazer de volta", d: "Receita, vendas por lote e por promoter em tempo real. Cashback e follows puxam a galera pra próxima. O ciclo recomeça." },
+        { icon: Repeat, t: "Trazer de volta", d: "Receita, vendas por lote e por promoter em tempo real. Crédito e follows puxam a galera pra próxima. O ciclo recomeça." },
       ],
     },
     crowd: {
@@ -59,7 +59,7 @@ export const COPY = {
         { icon: Search, t: "Descubra", d: "O que rola hoje, no fim de semana e pra onde os amigos vão." },
         { icon: Zap, t: "Compre em segundos", d: "Pix na hora ou cartão parcelado. Ingresso no WhatsApp na hora." },
         { icon: Ticket, t: "Entre rápido", d: "QR na carteira, funciona offline, sem fila na porta." },
-        { icon: Gift, t: "Ganhe cashback", d: "Crédito que volta e paga parte do próximo rolê." },
+        { icon: Gift, t: "Ganhe crédito", d: "Crédito que volta e paga parte do próximo rolê." },
       ],
     },
     trust: {
@@ -86,9 +86,9 @@ export const COPY = {
       sub: "A FestChain não é só ticketing. É a infra da noite inteira — onde cada lado sai ganhando.",
       cards: [
         { icon: Users, t: "Organizadores", d: "Vendem mais, rodam a noite inteira (ingresso, bar, porta), recebem certo e ficam donos do próprio público e dos dados." },
-        { icon: Ticket, t: "Público", d: "Compram em segundos no Pix, entram sem fila, ganham cashback que volta pra próxima e têm a noite inteira no celular." },
+        { icon: Ticket, t: "Público", d: "Compram em segundos no Pix, entram sem fila, ganham crédito que volta pra próxima e têm a noite inteira no celular." },
         { icon: Music, t: "DJs & artistas", d: "Constroem uma base de fãs que é deles, com reputação por presença real — quem lotou a pista, não quem inflou o Instagram." },
-        { icon: TrendingUp, t: "Marcas & patrocinadores", d: "Financiam o cashback e transformam patrocínio em campanha medível, alcançando o público real do evento e pagando por resultado." },
+        { icon: TrendingUp, t: "Marcas & patrocinadores", d: "Financiam o crédito e transformam patrocínio em campanha medível, alcançando o público real do evento e pagando por resultado." },
       ],
     },
     waMsg: "Oi! Quero levar minha festa pra FestChain.",
@@ -100,7 +100,7 @@ export const COPY = {
       title1: "The operating system", title2: "for nightlife.",
       sub: "FestChain helps clubs, festivals, collectives and promoters sell more tickets, run the door, reward the people who show up, and turn a one-night crowd into an audience they actually own.",
       ctaPrimary: "Bring your party", ctaSecondary: "See how it works",
-      note: "Automatic promoter commissions · Instant Pix checkout · Cashback that brings the crowd back",
+      note: "Automatic promoter commissions · Instant Pix checkout · Credit that brings the crowd back",
     },
     strip: ["Lower fees", "Pix confirmed instantly", "Fraud protection", "Reliable payouts"],
     wedge: {
@@ -110,14 +110,14 @@ export const COPY = {
       cards: [
         { icon: Users, t: "Promoters that sell", d: "Every promoter and RP gets their own link. Every sale is attributed automatically and commission is calculated for them. They see what they sold and what they'll earn, live. It's exactly where the other platforms are weakest." },
         { icon: Zap, t: "Instant Pix", d: "Checkout with instant Pix, card and installments for festival-tier prices. Auto-confirmed the moment payment lands, and the ticket arrives on the buyer's WhatsApp. No queue, no friction, more conversion." },
-        { icon: Gift, t: "Cashback that returns", d: "Every ticket earns credit toward the next party. The crowd comes back — and you know exactly who they are. Duplicate the event in one tap and invite back everyone who came and everyone holding credit." },
+        { icon: Gift, t: "Credit that returns", d: "Every ticket earns credit toward the next party. The crowd comes back — and you know exactly who they are. Duplicate the event in one tap and invite back everyone who came and everyone holding credit." },
       ],
     },
     own: {
       kicker: "Retention",
       title1: "An audience that is", title2: "actually yours.",
       p1: "On the usual platforms, the customer belongs to the platform — you're renting access to your own crowd. On FestChain, the audience, the data and the relationship are yours.",
-      p2: "After the party, the cashback, the history and the contact stay with you. One tap duplicates the event and notifies everyone who came — plus everyone still holding credit to spend.",
+      p2: "After the party, the credit, the history and the contact stay with you. One tap duplicates the event and notifies everyone who came — plus everyone still holding credit to spend.",
       quote: "It's the retention loop a generic ticketing platform structurally can't close.",
       rows: [
         { i: "M", n: "Mari S.", s: "Last event · R$18 credit", b: "Returned" },
@@ -133,7 +133,7 @@ export const COPY = {
         { icon: CalendarPlus, t: "Create", d: "Build the event in minutes — phases, line-up, set times and prices on one page. Save as a template and duplicate weekly parties in seconds." },
         { icon: Ticket, t: "Sell", d: "Activate your promoters with links and automatic commission. One tap shares to WhatsApp and Instagram. That's how the night sells." },
         { icon: DoorOpen, t: "Run the door", d: "Duplicate-proof QR check-in, multiple scanners, a live counter of who's inside. Guest list and comps with name-at-the-door." },
-        { icon: Repeat, t: "Bring them back", d: "See revenue, sales by phase and by promoter in real time. Cashback and follows pull the crowd to the next one. The cycle restarts." },
+        { icon: Repeat, t: "Bring them back", d: "See revenue, sales by phase and by promoter in real time. Credit and follows pull the crowd to the next one. The cycle restarts." },
       ],
     },
     crowd: {
@@ -144,7 +144,7 @@ export const COPY = {
         { icon: Search, t: "Discover", d: "What's on tonight, this weekend, and where your friends are going." },
         { icon: Zap, t: "Buy in seconds", d: "Instant Pix or card in installments. Ticket on WhatsApp right away." },
         { icon: Ticket, t: "Get in fast", d: "QR in your wallet, works offline, no queue at the door." },
-        { icon: Gift, t: "Earn cashback", d: "Credit that comes back and covers part of the next night out." },
+        { icon: Gift, t: "Earn credit", d: "Credit that comes back and covers part of the next night out." },
       ],
     },
     trust: {
