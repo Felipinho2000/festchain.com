@@ -9,6 +9,11 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import GuestList from "@/components/scan/GuestList";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useDoorScanner } from "@/hooks/useDoorScanner";
+import OfflineBanner from "@/components/scan/OfflineBanner";
+import SyncStatus from "@/components/scan/SyncStatus";
+import ManifestStatus from "@/components/scan/ManifestStatus";
 
 export default function Scan() {
   const { currentUser } = useAuth();
@@ -26,6 +31,8 @@ export default function Scan() {
   const [view, setView] = useState("scanner");
 
   const isHTTPS = window.location.protocol === "https:" || window.location.hostname === "localhost";
+  const { t } = useLanguage();
+  const door = useDoorScanner(eventId, currentUser);
 
   useEffect(() => {
     if (!canScan) { setLoadingEvents(false); return; }
@@ -118,6 +125,22 @@ export default function Scan() {
   const runValidation = async (qr) => {
     setValidating(true);
     try {
+      // Offline path: validate against the local manifest.
+      if (!door.isOnline && door.manifest) {
+        const res = await door.validateOffline(qr);
+        setResult(res);
+        return;
+      }
+      // Expired manifest — refuse to validate, tell staff to reconnect.
+      if (!door.isOnline && door.manifestStatus === "expired") {
+        setResult({ status: "expired", message: t("door.manifestExpiredDesc") });
+        return;
+      }
+      // No manifest and offline — cannot validate.
+      if (!door.isOnline && door.manifestStatus === "no_manifest") {
+        setResult({ status: "expired", message: t("door.noManifestDesc") });
+        return;
+      }
       const res = await base44.functions.invoke("validateTicket", { qr_code: qr, event_id: eventId });
       setResult(res.data || { status: "error", message: "Sem resposta" });
     } catch (e) {
@@ -165,6 +188,7 @@ export default function Scan() {
     invalid:      { icon: XCircle, title: "Ingresso inválido",          text: "text-destructive", border: "border-destructive/50", badge: "bg-destructive" },
     unauthorized: { icon: Ban, title: "Sem autorização",             text: "text-destructive", border: "border-destructive/50", badge: "bg-destructive" },
     error:        { icon: XCircle, title: "Erro",                   text: "text-destructive", border: "border-destructive/50", badge: "bg-destructive" },
+    expired:      { icon: AlertTriangle, title: "Lista expirada",     text: "text-amber-400",   border: "border-amber-500/50",   badge: "bg-amber-500" },
   }[result?.status] || {};
 
   const selectedEvent = events.find(e => e.id === eventId);
@@ -218,6 +242,24 @@ export default function Scan() {
             <button onClick={changeEvent} className="text-primary text-xs font-medium hover:underline">Trocar evento</button>
           </div>
 
+          {/* Offline / manifest status */}
+          <ManifestStatus
+            status={door.manifestStatus}
+            ticketCount={door.ticketCount}
+            isOnline={door.isOnline}
+            onRefresh={door.refreshManifest}
+          />
+          {!door.isOnline && door.manifestStatus === "loaded" && (
+            <OfflineBanner ticketCount={door.ticketCount} lastSyncAgo={door.lastSyncAgo} />
+          )}
+          <SyncStatus
+            pendingCount={door.pendingCount}
+            syncing={door.syncing}
+            syncResult={door.syncResult}
+            syncError={door.syncError}
+            onSync={door.syncPending}
+          />
+
           {/* Scanner / Guest List toggle */}
           <div className="flex gap-1 bg-card border border-border rounded-xl p-1">
             <button onClick={() => setView("scanner")}
@@ -242,6 +284,55 @@ export default function Scan() {
               {/* Camera area */}
               <div className="relative bg-black rounded-2xl overflow-hidden aspect-square sm:aspect-video shadow-card">
                 <div id="reader" className="w-full h-full" />
+
+                {/* Offline result overlay — big, bold, high-contrast for night use */}
+                {result?.offline && (
+                  <div className={`absolute inset-0 flex flex-col items-center justify-center p-6 ${
+                    result.status === "valid" ? "bg-emerald-600/95" : "bg-red-600/95"
+                  }`}>
+                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                      {result.status === "valid"
+                        ? <CheckCircle2 className="w-10 h-10 text-white" strokeWidth={2.5} />
+                        : result.status === "used"
+                        ? <AlertTriangle className="w-10 h-10 text-white" strokeWidth={2.5} />
+                        : <XCircle className="w-10 h-10 text-white" strokeWidth={2.5} />}
+                    </div>
+                    <p className="text-white font-heading font-extrabold text-2xl text-center uppercase tracking-tight leading-tight">
+                      {result.status === "valid"
+                        ? t("door.entryGranted")
+                        : result.status === "used"
+                        ? t("door.alreadyUsedAt").replace("{time}", result.scanned_at ? moment(result.scanned_at).format("HH:mm") : "--:--")
+                        : t("door.notFound")}
+                    </p>
+                    {result.ticket && (
+                      <div className="mt-3 text-center space-y-1">
+                        {result.ticket.holder_first_name && (
+                          <p className="text-white/80 text-sm font-medium">{result.ticket.holder_first_name}</p>
+                        )}
+                        {result.ticket.is_complimentary && (
+                          <span className="inline-block bg-white/20 text-white text-xs font-bold uppercase px-2 py-0.5 rounded">
+                            {t("door.compBadge")} · {result.ticket.comp_category || ""}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <button onClick={resume} className="mt-6 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl px-8 py-3 text-sm transition-colors">
+                      {t("common.back")}
+                    </button>
+                  </div>
+                )}
+
+                {/* Expired / no-manifest overlay */}
+                {result?.status === "expired" && !result?.offline && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-amber-600/95">
+                    <Clock className="w-12 h-12 text-white mb-4" strokeWidth={2} />
+                    <p className="text-white font-heading font-bold text-lg text-center">{t("door.manifestExpired")}</p>
+                    <p className="text-white/80 text-sm text-center mt-2 max-w-xs">{result.message}</p>
+                    <button onClick={resume} className="mt-6 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl px-6 py-2.5 text-sm transition-colors">
+                      OK
+                    </button>
+                  </div>
+                )}
 
                 {cameraState === "idle" && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 gap-4">
@@ -286,7 +377,7 @@ export default function Scan() {
                 )}
 
                 {/* Result overlay */}
-                {result && config.icon && (
+                {result && config.icon && !result?.offline && result?.status !== "expired" && (
                   <div className="absolute inset-x-0 bottom-0 p-4">
                     <div className={`rounded-xl p-4 bg-card border ${config.border} shadow-raised`}>
                       <div className="flex items-start gap-3">

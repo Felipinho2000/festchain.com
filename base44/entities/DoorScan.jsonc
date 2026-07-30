@@ -1,0 +1,102 @@
+{
+  "name": "DoorScan",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_title": {
+      "type": "string"
+    },
+    "organizer_id": {
+      "type": "string",
+      "description": "Event owner user id \u2014 set server-side for RLS read access"
+    },
+    "ticket_id": {
+      "type": "string"
+    },
+    "ticket_holder_name": {
+      "type": "string"
+    },
+    "device_id": {
+      "type": "string",
+      "description": "Persistent UUID generated on the scanning device"
+    },
+    "staff_user_id": {
+      "type": "string"
+    },
+    "staff_user_name": {
+      "type": "string"
+    },
+    "scanned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Device clock timestamp at scan time"
+    },
+    "synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "applied",
+        "conflito_duplicado",
+        "already_known"
+      ],
+      "default": "applied"
+    },
+    "conflicting_scan_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The earlier online scan timestamp when a conflict is detected"
+    },
+    "conflicting_scanned_by": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "ticket_id:device_id:scanned_at \u2014 dedup key"
+    }
+  },
+  "required": [
+    "event_id",
+    "ticket_id",
+    "device_id",
+    "staff_user_id",
+    "scanned_at",
+    "sync_status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.organizer_id": "{{user.id}}"
+        },
+        {
+          "data.staff_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

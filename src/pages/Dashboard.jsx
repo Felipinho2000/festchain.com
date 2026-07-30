@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import RedemptionManager from "@/components/dashboard/RedemptionManager";
 import FestCoinReport from "@/components/dashboard/FestCoinReport";
+import OfflineScansPanel from "@/components/dashboard/OfflineScansPanel";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import moment from "moment";
 
@@ -164,6 +165,8 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <OfflineScansPanel events={events} />
 
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList className="bg-transparent p-0 gap-4 border-b border-border rounded-none h-auto">
