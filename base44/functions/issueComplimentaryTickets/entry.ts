@@ -151,10 +151,12 @@ Deno.serve(async (req) => {
 
     const createdTickets = await base44.asServiceRole.entities.Ticket.bulkCreate(ticketsToCreate);
 
-    // Increment event tickets_sold — comps consume real capacity
-    await base44.asServiceRole.entities.Event.update(event_id, {
-      tickets_sold: alreadySold + requestedQty,
-    });
+    // Increment event tickets_sold atomically — comps consume real capacity.
+    // $inc avoids the read-modify-write race that loses sales under concurrency.
+    await base44.asServiceRole.entities.Event.updateMany(
+      { id: event_id },
+      { $inc: { tickets_sold: requestedQty } }
+    );
 
     // Create batch record (audit log)
     const batch = await base44.asServiceRole.entities.ComplimentaryBatch.create({

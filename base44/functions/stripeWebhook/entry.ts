@@ -146,15 +146,14 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Increment tickets_sold by quantity
+        // Increment tickets_sold atomically — $inc avoids the read-modify-write
+        // race that loses sales during concurrent purchases (lote drops).
         if (eventId) {
           try {
-            const ev = await base44.asServiceRole.entities.Event.get(eventId);
-            if (ev) {
-              await base44.asServiceRole.entities.Event.update(eventId, {
-                tickets_sold: (ev.tickets_sold || 0) + quantity,
-              });
-            }
+            await base44.asServiceRole.entities.Event.updateMany(
+              { id: eventId },
+              { $inc: { tickets_sold: quantity } }
+            );
           } catch (e) {
             console.error('stripeWebhook: failed to increment tickets_sold:', e.message);
           }
@@ -255,12 +254,12 @@ Deno.serve(async (req) => {
         // in checkout.session.completed).
         if (eventId && refundedCount > 0) {
           try {
-            const ev = await base44.asServiceRole.entities.Event.get(eventId);
-            if (ev) {
-              await base44.asServiceRole.entities.Event.update(eventId, {
-                tickets_sold: Math.max(0, (ev.tickets_sold || 0) - refundedCount),
-              });
-            }
+            // $inc with $gte guard — atomic decrement that never goes negative
+            // even on duplicate webhook delivery.
+            await base44.asServiceRole.entities.Event.updateMany(
+              { id: eventId, tickets_sold: { $gte: refundedCount } },
+              { $inc: { tickets_sold: -refundedCount } }
+            );
           } catch (e) {
             console.error('stripeWebhook: failed to decrement tickets_sold on refund:', e.message);
           }
