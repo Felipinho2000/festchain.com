@@ -11,8 +11,6 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
-
     const body = await req.json();
     const { ticket_id, idempotency_key } = body;
     if (!ticket_id) return Response.json({ error: 'ticket_id is required' }, { status: 400 });
@@ -20,6 +18,14 @@ export default async function(req) {
     // Service role to bypass RLS — admin can access all tickets
     const ticket = await base44.asServiceRole.entities.Ticket.get(ticket_id);
     if (!ticket) return Response.json({ error: 'Ticket not found' }, { status: 404 });
+
+    // Authorization: admin OR the event organizer who owns this ticket
+    if (user.role !== 'admin') {
+      const event = await base44.asServiceRole.entities.Event.get(ticket.event_id);
+      if (!event || event.created_by_id !== user.id) {
+        return Response.json({ error: 'Not authorized to refund this ticket' }, { status: 403 });
+      }
+    }
 
     if (!ticket.stripe_session_id) {
       return Response.json({ error: 'Ticket has no Stripe session — cannot refund' }, { status: 400 });

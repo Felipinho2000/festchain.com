@@ -202,6 +202,17 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
               </div>
             </div>
 
+            {event?.refund_policy && event.refund_policy !== "caso_a_caso" && (
+              <div className="bg-secondary rounded-lg p-2.5 flex items-start gap-1.5">
+                <ShieldCheck className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+                <p className="text-[10px] text-muted-foreground">
+                  {event.refund_policy === "ate_7_dias" && "Reembolso disponível até 7 dias antes do evento, mediante solicitação."}
+                  {event.refund_policy === "ate_48h" && "Reembolso disponível até 48h antes do evento, mediante solicitação."}
+                  {event.refund_policy === "sem_reembolso" && "Este evento não oferece reembolso. Confirme a data antes de comprar."}
+                </p>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <Button variant="outline" className="h-11 rounded-xl px-4" onClick={() => setStep(1)} disabled={submitting}>
                 <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />

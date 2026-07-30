@@ -32,6 +32,9 @@ import OrganizerFinanceiro from '@/pages/OrganizerFinanceiro';
 import Convidados from '@/pages/Convidados';
 import OrganizerRecompensas from '@/pages/OrganizerRecompensas';
 import ValidarRecompensa from '@/pages/ValidarRecompensa';
+import OrganizerReembolsos from '@/pages/OrganizerReembolsos';
+import OrganizerAjuda from '@/pages/OrganizerAjuda';
+import PoliticaDePrecos from '@/pages/PoliticaDePrecos';
 import Social from '@/pages/Social';
 import TrustSafety from '@/pages/TrustSafety';
 import TicketDetail from '@/pages/TicketDetail';
@@ -74,6 +77,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/legal" element={<Legal />} />
       <Route path="/trust-safety" element={<TrustSafety />} />
+      <Route path="/politica-de-precos" element={<PoliticaDePrecos />} />
 
       {/* Protected app routes */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
@@ -98,6 +102,8 @@ const AuthenticatedApp = () => {
           <Route path="/organizer/convidados" element={<Convidados />} />
           <Route path="/organizer/recompensas" element={<OrganizerRecompensas />} />
           <Route path="/organizer/validar-recompensa" element={<ValidarRecompensa />} />
+          <Route path="/organizer/reembolsos" element={<OrganizerReembolsos />} />
+          <Route path="/organizer/ajuda" element={<OrganizerAjuda />} />
         </Route>
       </Route>
 

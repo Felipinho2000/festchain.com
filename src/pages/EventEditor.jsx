@@ -69,6 +69,7 @@ const emptyForm = {
   ftc_cashback_percent: "0",
   ftc_cashback_on_ftc_purchase: false,
   ftc_pilot_mode: true,
+  refund_policy: "caso_a_caso",
 };
 
 function Section({ title, icon: Icon, subtitle, children }) {
@@ -104,6 +105,7 @@ export default function EventEditor() {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [hasSoldTickets, setHasSoldTickets] = useState(false);
 
   useEffect(() => {
     if (isEdit) return;
@@ -146,7 +148,9 @@ export default function EventEditor() {
           ftc_cashback_percent: ev.ftc_cashback_percent?.toString() || "0",
           ftc_cashback_on_ftc_purchase: ev.ftc_cashback_on_ftc_purchase || false,
           ftc_pilot_mode: ev.ftc_pilot_mode !== false,
+          refund_policy: ev.refund_policy || "caso_a_caso",
         });
+        setHasSoldTickets((ev.tickets_sold || 0) > 0);
       })
       .catch(() => { toast({ title: "Evento não encontrado", variant: "destructive" }); navigate("/dashboard"); })
       .finally(() => setLoading(false));
@@ -243,6 +247,7 @@ export default function EventEditor() {
       ftc_cashback_percent: Math.max(0, Math.min(100, parseFloat(form.ftc_cashback_percent) || 0)),
       ftc_cashback_on_ftc_purchase: form.ftc_cashback_on_ftc_purchase,
       ftc_pilot_mode: form.ftc_pilot_mode,
+      refund_policy: form.refund_policy,
     };
     try {
       if (isEdit) {
@@ -339,6 +344,33 @@ export default function EventEditor() {
             <p className="text-[10px] text-muted-foreground mt-0.5">{form.visibility === "public" ? "Aparece na busca e pode ser compartilhado publicamente." : "Oculto da listagem pública — só quem tem o link ou o ingresso consegue acessar."}</p>
           </div>
           <Switch checked={form.visibility === "public"} onCheckedChange={v => set("visibility", v ? "public" : "private")} />
+        </div>
+
+        {/* Refund policy */}
+        <div className="bg-secondary rounded-xl p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 mr-3">
+              <Label className="text-xs">Política de reembolso</Label>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                {hasSoldTickets
+                  ? "Não pode ser alterada após ingressos vendidos."
+                  : "Mostrada ao comprador antes do pagamento."}
+              </p>
+            </div>
+          </div>
+          <Select
+            value={form.refund_policy}
+            onValueChange={v => !hasSoldTickets && set("refund_policy", v)}
+            disabled={hasSoldTickets}
+          >
+            <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ate_7_dias">Reembolso até 7 dias antes</SelectItem>
+              <SelectItem value="ate_48h">Reembolso até 48h antes</SelectItem>
+              <SelectItem value="sem_reembolso">Sem reembolso</SelectItem>
+              <SelectItem value="caso_a_caso">Análise caso a caso</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </Section>
 

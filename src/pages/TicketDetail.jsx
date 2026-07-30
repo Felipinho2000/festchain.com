@@ -4,13 +4,15 @@ import { base44 } from "@/api/base44Client";
 import {
   ArrowLeft, Calendar, MapPin, Music, QrCode, Sparkles, Clock,
   Ticket as TicketIcon, Users, Share2, ShoppingBag, Loader2,
-  ShieldCheck, CheckCircle2, XCircle,
+  ShieldCheck, CheckCircle2, XCircle, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Qr from "@/components/shared/Qr";
 import EventShareButtons from "@/components/events/EventShareButtons";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/AuthContext";
+import { Textarea } from "@/components/ui/textarea";
 import moment from "moment";
 
 const statusConfig = {
@@ -36,6 +38,11 @@ export default function TicketDetail() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { currentUser } = useAuth();
+  const [refundReq, setRefundReq] = useState(null);
+  const [showRefundForm, setShowRefundForm] = useState(false);
+  const [refundReason, setRefundReason] = useState("");
+  const [refundSubmitting, setRefundSubmitting] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -51,6 +58,40 @@ export default function TicketDetail() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !currentUser?.id) return;
+    let active = true;
+    base44.entities.RefundRequest.filter({ ticket_id: id, created_by_id: currentUser.id }, "-requested_at", 1)
+      .then(res => { if (active) setRefundReq(res[0] || null); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [id, currentUser]);
+
+  const submitRefund = async () => {
+    if (!data?.ticket) return;
+    setRefundSubmitting(true);
+    try {
+      const req = await base44.entities.RefundRequest.create({
+        ticket_id: data.ticket.id,
+        user_id: currentUser.id,
+        user_name: currentUser.full_name,
+        event_id: data.ticket.event_id,
+        event_title: data.ticket.event_title,
+        organizer_id: data.ticket.organizer_id,
+        reason: refundReason,
+        status: "pendente",
+        requested_at: new Date().toISOString(),
+      });
+      setRefundReq(req);
+      setShowRefundForm(false);
+      setRefundReason("");
+      toast({ title: "Solicitação enviada", description: "O organizador vai responder." });
+    } catch (e) {
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
+    }
+    setRefundSubmitting(false);
+  };
 
   if (loading) {
     return (
@@ -276,6 +317,70 @@ export default function TicketDetail() {
             />
           </div>
         </>
+      )}
+
+      {/* Refund request */}
+      {ticket && ticket.status === "active" && !isUsed && (
+        <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
+          {refundReq ? (
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                refundReq.status === "aprovado" ? "bg-success/15" : refundReq.status === "recusado" ? "bg-destructive/15" : "bg-warning/15"
+              }`}>
+                <RefreshCw className={`w-5 h-5 ${
+                  refundReq.status === "aprovado" ? "text-success" : refundReq.status === "recusado" ? "text-destructive" : "text-warning"
+                }`} strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <p className="font-heading font-semibold text-foreground text-sm">
+                  {refundReq.status === "aprovado" ? "Reembolso aprovado" : refundReq.status === "recusado" ? "Reembolso recusado" : "Solicitação enviada"}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {refundReq.status === "aprovado" ? "O reembolso está sendo processado." : refundReq.status === "recusado" ? (refundReq.organizer_note || "O organizador recusou.") : "Aguardando resposta do organizador."}
+                </p>
+              </div>
+            </div>
+          ) : showRefundForm ? (
+            <div className="space-y-3">
+              <h3 className="font-heading font-semibold text-foreground text-sm flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-primary" strokeWidth={1.75} /> Solicitar reembolso
+              </h3>
+              <Textarea
+                value={refundReason}
+                onChange={e => setRefundReason(e.target.value)}
+                placeholder="Conte por que você precisa do reembolso…"
+                className="bg-secondary border-border text-foreground resize-none rounded-xl"
+                rows={3}
+              />
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { setShowRefundForm(false); setRefundReason(""); }}>
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-xl"
+                  onClick={submitRefund}
+                  disabled={refundSubmitting}
+                >
+                  {refundSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar solicitação"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-heading font-semibold text-foreground text-sm">Não vai conseguir ir?</p>
+                <p className="text-muted-foreground text-xs">Solicite reembolso — o organizador aprova ou recusa.</p>
+              </div>
+              <Button
+                variant="outline"
+                className="rounded-xl border-primary/30 text-primary hover:bg-primary/10"
+                onClick={() => setShowRefundForm(true)}
+              >
+                <RefreshCw className="w-4 h-4 mr-1.5" strokeWidth={1.75} /> Solicitar reembolso
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Pilot disclaimer */}

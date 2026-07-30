@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Plus, Calendar, TrendingUp,
   Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine, Users,
-  Gift, Package
+  Gift, Package, RefreshCw, HelpCircle, FileText
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -111,6 +111,15 @@ export default function Dashboard() {
           </Link>
           <Link to="/organizer/validar-recompensa" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
             <Package className="w-3.5 h-3.5" /> Validar recompensa
+          </Link>
+          <Link to="/organizer/reembolsos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
+            <RefreshCw className="w-3.5 h-3.5" /> Reembolsos
+          </Link>
+          <Link to="/organizer/ajuda" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
+            <HelpCircle className="w-3.5 h-3.5" /> Ajuda
+          </Link>
+          <Link to="/politica-de-precos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
+            <FileText className="w-3.5 h-3.5" /> Política de Preços
           </Link>
         </div>
         <Link to="/dashboard/events/new">

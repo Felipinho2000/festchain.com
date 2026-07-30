@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   LayoutDashboard, Calendar, Wallet, Users, LogOut, User, FileText, Home as HomeIcon,
+  RefreshCw, HelpCircle,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Logo from "@/components/shared/Logo";
@@ -61,9 +62,25 @@ export default function AppLayout() {
         </nav>
 
         <div className="border-t border-sidebar-border pt-4 mt-2 space-y-1">
+          {isOrganizer && (
+            <>
+              <Link to="/organizer/reembolsos" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
+                <RefreshCw className="w-[18px] h-[18px]" strokeWidth={1.75} />
+                <span>Reembolsos</span>
+              </Link>
+              <Link to="/organizer/ajuda" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
+                <HelpCircle className="w-[18px] h-[18px]" strokeWidth={1.75} />
+                <span>Ajuda</span>
+              </Link>
+            </>
+          )}
           <Link to="/legal" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
             <FileText className="w-[18px] h-[18px]" strokeWidth={1.75} />
             <span>Confiança &amp; Segurança</span>
+          </Link>
+          <Link to="/politica-de-precos" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
+            <FileText className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            <span>Política de Preços</span>
           </Link>
           <div className="flex items-center gap-3 px-2 pt-2">
             <Avatar className="w-9 h-9 ring-1 ring-border">

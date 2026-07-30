@@ -190,6 +190,17 @@
     "ftc_pilot_mode": {
       "type": "boolean",
       "default": true
+    },
+    "refund_policy": {
+      "type": "string",
+      "enum": [
+        "ate_7_dias",
+        "ate_48h",
+        "sem_reembolso",
+        "caso_a_caso"
+      ],
+      "default": "caso_a_caso",
+      "description": "Shown to buyers at checkout. Cannot be changed after tickets are sold."
     }
   },
   "required": [
