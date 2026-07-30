@@ -120,7 +120,30 @@ export function useDoorScanner(eventId, currentUser) {
     if (!ticket)
       return { status: "invalid", message: "Ingresso não encontrado", offline: true };
 
-    // Check local scan queue for duplicates on this device.
+    // Guard 1: server already marked this ticket as used (manifest flag).
+    if (ticket.already_used) {
+      return {
+        status: "used",
+        message: "Já utilizado",
+        scanned_at: ticket.used_at,
+        offline: true,
+        ticket: { ...ticket, event_title: manifest.event_title },
+      };
+    }
+
+    // Guard 2: this device has scanned this ticket before (persistent store).
+    const priorLocal = await doorDB.getLocalScan(eventId, ticket.ticket_id);
+    if (priorLocal) {
+      return {
+        status: "used",
+        message: "Já escaneado neste dispositivo",
+        scanned_at: priorLocal.scanned_at,
+        offline: true,
+        ticket: { ...ticket, event_title: manifest.event_title },
+      };
+    }
+
+    // Guard 3: ticket is still in the unsynced pending queue (pre-sync dup).
     const localScans = await doorDB.getPendingScans(eventId);
     const already = localScans.find(s => s.ticket_id === ticket.ticket_id);
     if (already) {
@@ -129,16 +152,11 @@ export function useDoorScanner(eventId, currentUser) {
         message: "Já escaneado neste dispositivo",
         scanned_at: already.scanned_at,
         offline: true,
-        ticket: {
-          ...ticket,
-          event_title: manifest.event_title,
-          is_complimentary: ticket.is_complimentary,
-          comp_category: ticket.comp_category,
-        },
+        ticket: { ...ticket, event_title: manifest.event_title },
       };
     }
 
-    // Valid first scan — queue it locally.
+    // Valid first scan — queue it for sync AND persist it locally.
     const deviceId = await doorDB.getDeviceId();
     const scan = {
       ticket_id: ticket.ticket_id,
@@ -148,6 +166,7 @@ export function useDoorScanner(eventId, currentUser) {
       staff_user_name: currentUser?.full_name,
     };
     await doorDB.queueScan(eventId, scan);
+    await doorDB.markScanned(eventId, ticket.ticket_id, scan.scanned_at);
     refreshPendingCount();
 
     return {

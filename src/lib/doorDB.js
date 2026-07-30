@@ -3,7 +3,7 @@
 // works with no internet connection.
 
 const DB_NAME = "festchain-door";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 let _db = null;
 
 function openDB() {
@@ -16,6 +16,8 @@ function openDB() {
         db.createObjectStore("manifests", { keyPath: "event_id" });
       if (!db.objectStoreNames.contains("scans"))
         db.createObjectStore("scans", { keyPath: "id", autoIncrement: true });
+      if (!db.objectStoreNames.contains("scanned"))
+        db.createObjectStore("scanned", { keyPath: "key" });
       if (!db.objectStoreNames.contains("meta"))
         db.createObjectStore("meta", { keyPath: "key" });
     };
@@ -92,9 +94,40 @@ async function clearPendingScans(eventId, ids) {
   });
 }
 
+async function markScanned(eventId, ticketId, scannedAt) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("scanned", "readwrite");
+    tx.objectStore("scanned").put({
+      key: `${eventId}:${ticketId}`,
+      event_id: eventId,
+      ticket_id: ticketId,
+      scanned_at: scannedAt,
+    });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getLocalScan(eventId, ticketId) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("scanned", "readonly");
+    const req = tx.objectStore("scanned").get(`${eventId}:${ticketId}`);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 async function getScannedTicketIds(eventId) {
-  const scans = await getPendingScans(eventId);
-  return new Set(scans.map(s => s.ticket_id));
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("scanned", "readonly");
+    const req = tx.objectStore("scanned").getAll();
+    req.onsuccess = () =>
+      resolve(new Set((req.result || []).filter(s => s.event_id === eventId).map(s => s.ticket_id)));
+    req.onerror = () => reject(req.error);
+  });
 }
 
 function isManifestExpired(manifest) {
@@ -136,5 +169,6 @@ function formatTimeAgo(timestamp) {
 export const doorDB = {
   getDeviceId, storeManifest, getManifest, queueScan,
   getPendingScans, clearPendingScans, getScannedTicketIds,
+  markScanned, getLocalScan,
   isManifestExpired, computeHMAC, formatTimeAgo,
 };

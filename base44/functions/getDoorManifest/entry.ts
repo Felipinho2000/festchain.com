@@ -46,6 +46,8 @@ export default async function(req) {
         holder_doc_last4: docLast4,
         is_complimentary: !!t.is_complimentary,
         comp_category: t.comp_category || null,
+        already_used: t.status === 'used' || !!t.checked_in,
+        used_at: t.scanned_at || t.checked_in_at || null,
       });
     }
 
