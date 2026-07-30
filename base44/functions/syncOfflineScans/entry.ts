@@ -52,7 +52,7 @@ export default async function(req) {
         await base44.asServiceRole.entities.DoorScan.create({
           event_id, event_title: eventTitle, organizer_id: organizerId,
           ticket_id, device_id, staff_user_id, staff_user_name: user.full_name,
-          scanned_at, synced_at, sync_status: 'conflito_duplicado',
+          scanned_at, synced_at: syncedAt, sync_status: 'conflito_duplicado',
           idempotency_key: idempotencyKey,
         });
         conflicts++;
@@ -75,7 +75,7 @@ export default async function(req) {
           event_id, event_title: eventTitle, organizer_id: organizerId,
           ticket_id, ticket_holder_name: ticket.buyer_name,
           device_id, staff_user_id, staff_user_name: user.full_name,
-          scanned_at, synced_at, sync_status: 'applied',
+          scanned_at, synced_at: syncedAt, sync_status: 'applied',
           idempotency_key: idempotencyKey,
         });
         applied++;
@@ -85,7 +85,7 @@ export default async function(req) {
           event_id, event_title: eventTitle, organizer_id: organizerId,
           ticket_id, ticket_holder_name: ticket.buyer_name,
           device_id, staff_user_id, staff_user_name: user.full_name,
-          scanned_at, synced_at, sync_status: 'conflito_duplicado',
+          scanned_at, synced_at: syncedAt, sync_status: 'conflito_duplicado',
           conflicting_scan_at: ticket.scanned_at,
           conflicting_scanned_by: ticket.scanned_by,
           idempotency_key: idempotencyKey,
@@ -97,14 +97,14 @@ export default async function(req) {
           event_id, event_title: eventTitle, organizer_id: organizerId,
           ticket_id, ticket_holder_name: ticket.buyer_name,
           device_id, staff_user_id, staff_user_name: user.full_name,
-          scanned_at, synced_at, sync_status: 'already_known',
+          scanned_at, synced_at: syncedAt, sync_status: 'already_known',
           idempotency_key: idempotencyKey,
         });
         alreadyKnown++;
       }
     }
 
-    return Response.json({ applied, conflicts, already_known, total: sorted.length });
+    return Response.json({ applied, conflicts, already_known: alreadyKnown, total: sorted.length });
   } catch (error) {
     console.error('syncOfflineScans error:', error);
     return Response.json({ error: error.message }, { status: 500 });
