@@ -68,13 +68,27 @@
   ],
   "rls": {
     "create": {
-      "created_by_id": "{{user.id}}"
+      "$and": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.organizer_id": "{{user.id}}"
+        }
+      ]
     },
     "read": {},
     "update": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
+          "$and": [
+            {
+              "created_by_id": "{{user.id}}"
+            },
+            {
+              "data.organizer_id": "{{user.id}}"
+            }
+          ]
         },
         {
           "user_condition": {
