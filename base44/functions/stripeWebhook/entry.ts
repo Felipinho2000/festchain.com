@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
         // Idempotency: check first ticket — if already active, skip
         let firstTicket = null;
-        try { firstTicket = await base44.asServiceRole.entities.Ticket.get(ticketIds[0]); } catch (_) {}
+        try { firstTicket = await base44.asServiceRole.entities.Ticket.get(ticketIds[0]); } catch (e) { console.error('stripeWebhook: idempotency check failed for ticket', ticketIds[0], e.message); }
         if (!firstTicket || firstTicket.status !== 'pending') {
           break;
         }
@@ -50,22 +50,26 @@ Deno.serve(async (req) => {
         try {
           if (session.payment_intent) {
             const pi = await stripe.paymentIntents.retrieve(session.payment_intent, {
-              expand: ['charges.data.balance_transaction']
+              expand: ['latest_charge.balance_transaction']
             });
             if (pi.payment_method) {
               const pm = await stripe.paymentMethods.retrieve(pi.payment_method);
               if (pm.type === 'pix') paymentMethod = 'pix';
             }
-            // Read actual Stripe processing fee from the balance transaction
-            if (pi.charges && pi.charges.data && pi.charges.data.length > 0) {
-              const charge = pi.charges.data[0];
+            const charge = pi.latest_charge;
+            if (charge && typeof charge === 'object') {
               const bt = charge.balance_transaction;
               if (bt && typeof bt === 'object' && typeof bt.fee === 'number') {
                 stripeFeeCents = bt.fee;
               }
             }
+            if (stripeFeeCents === 0) {
+              console.error('stripeWebhook: could not read Stripe fee for session', session.id);
+            }
           }
-        } catch (_) {}
+        } catch (e) {
+          console.error('stripeWebhook: fee extraction failed:', e.message);
+        }
 
         // Activate all tickets
         for (const tid of ticketIds) {
@@ -90,7 +94,7 @@ Deno.serve(async (req) => {
           try {
             const firstT = await base44.asServiceRole.entities.Ticket.get(ticketIds[0]);
             organizerUserId = firstT ? firstT.organizer_id : null;
-          } catch (_) {}
+          } catch (e) { console.error('stripeWebhook: failed to read organizer_id from ticket', ticketIds[0], e.message); }
           const organizer = await getOrCreateOrganizerAccount(base44, organizerUserId);
           const feePercentage = organizer ? getEffectiveFeePercentage(organizer, new Date()) : 8.0;
           const ticketCount = ticketIds.length;
@@ -176,10 +180,10 @@ Deno.serve(async (req) => {
           }
         }
         for (const rtxId of rewardTxIds) {
-          try { await base44.asServiceRole.entities.FestCoinTransaction.update(rtxId, { status: 'cancelled' }); } catch (_) {}
+          try { await base44.asServiceRole.entities.FestCoinTransaction.update(rtxId, { status: 'cancelled' }); } catch (e) { console.error('stripeWebhook: failed to cancel reward tx on session expiry', rtxId, e.message); }
         }
         for (const ctxId of cashbackTxIds) {
-          try { await base44.asServiceRole.entities.FestCoinTransaction.update(ctxId, { status: 'cancelled' }); } catch (_) {}
+          try { await base44.asServiceRole.entities.FestCoinTransaction.update(ctxId, { status: 'cancelled' }); } catch (e) { console.error('stripeWebhook: failed to cancel cashback tx on session expiry', ctxId, e.message); }
         }
         break;
       }
