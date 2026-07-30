@@ -1,9 +1,11 @@
 import React from "react";
 import { Check } from "lucide-react";
 import { COPY } from "./landingData";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LandingTrustStrip() {
-  const c = COPY["pt-BR"];
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
 
   return (
     <div className="border-t border-b border-white/[0.06] bg-white/[0.015]">

@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import { Mail, MapPin, MessageCircle } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import { COPY, getWaHref } from "./landingData";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LandingFooter() {
-  const c = COPY["pt-BR"];
-  const waHref = getWaHref();
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
+  const waHref = getWaHref(lang);
 
   return (
     <footer className="py-12 px-5 border-t border-white/[0.06] bg-black">

@@ -1,9 +1,11 @@
 import React from "react";
 import { COPY } from "./landingData";
 import Reveal from "./Reveal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LandingEcosystem() {
-  const c = COPY["pt-BR"];
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
 
   return (
     <section className="py-24 sm:py-28 px-5 bg-white/[0.015] border-t border-b border-white/[0.06]">

@@ -1,9 +1,11 @@
 import React from "react";
 import { COPY } from "./landingData";
 import Reveal from "./Reveal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LandingHowItWorks() {
-  const c = COPY["pt-BR"];
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
 
   return (
     <section id="how" className="py-24 sm:py-28 px-5">
@@ -15,7 +17,7 @@ export default function LandingHowItWorks() {
           </h2>
         </Reveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {c.how.steps.map((step, i) => {
             const Icon = step.icon;
             return (

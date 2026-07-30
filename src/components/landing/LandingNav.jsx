@@ -5,18 +5,21 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/shared/Logo";
 import { COPY, getWaHref } from "./landingData";
 import { useAuth } from "@/lib/AuthContext";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 export default function LandingNav() {
   const { currentUser } = useAuth();
   const authed = !!currentUser;
-  const c = COPY["pt-BR"];
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
   const [menuOpen, setMenuOpen] = useState(false);
-  const waHref = getWaHref();
+  const waHref = getWaHref(lang);
 
   const links = [
-    { href: "#promoters", label: c.nav.organizers },
+    { href: "#why", label: c.nav.organizers },
     { href: "#how", label: c.nav.how },
-    { href: "#crowd", label: c.nav.crowd },
+    { href: "#pricing", label: c.nav.prices },
   ];
 
   return (
@@ -36,6 +39,7 @@ export default function LandingNav() {
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden sm:inline-flex" />
           {authed ? (
             <Link to="/app" className="hidden sm:block">
               <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold shadow-[0_4px_16px_-4px_rgba(255,101,0,0.4)] transition-all duration-300 hover:shadow-[0_4px_24px_-4px_rgba(255,101,0,0.6)]">
@@ -57,6 +61,7 @@ export default function LandingNav() {
 
       {menuOpen && (
         <div className="md:hidden border-t border-white/[0.06] px-5 py-4 flex flex-col gap-4 text-sm text-white/50 bg-black/80 backdrop-blur-xl">
+          <LanguageSwitcher />
           {links.map((link) => (
             <a key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors">
               {link.label}

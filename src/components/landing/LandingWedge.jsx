@@ -1,12 +1,14 @@
 import React from "react";
 import { COPY } from "./landingData";
 import Reveal from "./Reveal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LandingWedge() {
-  const c = COPY["pt-BR"];
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
 
   return (
-    <section id="promoters" className="py-24 sm:py-28 px-5">
+    <section id="why" className="py-24 sm:py-28 px-5">
       <div className="max-w-5xl mx-auto">
         <Reveal className="max-w-2xl mb-14">
           <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{c.wedge.kicker}</p>

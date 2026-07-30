@@ -5,13 +5,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { COPY, CONTACT_EMAIL, getWaHref } from "./landingData";
 import Reveal from "./Reveal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LandingContact() {
-  const c = COPY["pt-BR"];
-  const waHref = getWaHref();
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
+  const waHref = getWaHref(lang);
   const { toast } = useToast();
 
-  const [form, setForm] = useState({ name: "", email: "", message: "", role: c.contact.roles[0] });
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -20,13 +22,13 @@ export default function LandingContact() {
     setSending(true);
     try {
       await base44.entities.PilotApplication.create({
-        name: form.name, email: form.email, role: form.role || "",
+        name: form.name, email: form.email,
         message: form.message, status: "new", source: "landing_form",
       });
       base44.integrations.Core.SendEmail({
         to: CONTACT_EMAIL,
-        subject: `Pilot application — ${form.name}${form.role ? ` (${form.role})` : ""}`,
-        body: `Name: ${form.name}\nEmail: ${form.email}\nRole: ${form.role || "not specified"}\nMessage: ${form.message}`,
+        subject: `Pilot application — ${form.name}`,
+        body: `Name: ${form.name}\nEmail: ${form.email}\nMessage: ${form.message}`,
       }).catch(() => {});
       setSent(true);
       toast({ title: c.contact.sentTitle, description: c.contact.sentSub });
@@ -74,17 +76,6 @@ export default function LandingContact() {
                   <label className="text-xs text-white/40 uppercase tracking-wide block mb-2">{c.contact.emailL}</label>
                   <input required type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     className={inputClass} placeholder={c.contact.emailPh} />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-white/40 uppercase tracking-wide block mb-2">{c.contact.roleLabel}</label>
-                <div className="flex flex-wrap gap-2">
-                  {c.contact.roles.map((r) => (
-                    <button key={r} type="button" onClick={() => setForm((p) => ({ ...p, role: r }))}
-                      className={"px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 " + (form.role === r ? "bg-primary/15 border-primary/40 text-primary" : "bg-white/[0.03] border-white/[0.08] text-white/40 hover:border-white/20 hover:text-white")}>
-                      {r}
-                    </button>
-                  ))}
                 </div>
               </div>
               <div>

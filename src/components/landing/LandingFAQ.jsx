@@ -1,68 +1,87 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-const FAQ_EN = [
-  {
-    q: "Do guests need crypto to use FestChain?",
-    a: "No. The pilot is designed to be simple and accessible. Guests can use FestChain without needing any crypto knowledge, wallet setup, or technical steps — just sign up with your email and get your ticket."
-  },
-  {
-    q: "What is FestCoin?",
-    a: "FestCoin is the reward and utility credit of the FestChain ecosystem. During the pilot, it is used for perks, loyalty, and event experiences. It is not a cryptocurrency, has no cash value, and cannot be sold or withdrawn."
-  },
-  {
-    q: "Is FestChain already live?",
-    a: "FestChain is currently preparing selected pilot events with DJs, organizers, venues, and partner brands. Join the pilot to be part of the first wave."
-  },
-  {
-    q: "How can I join the pilot?",
-    a: "DJs, organizers, venues, and brands can request access through the contact form below. We'll review your request and get back to you quickly."
-  },
-  {
-    q: "Is FestCoin an investment?",
-    a: "No. FestCoin should be understood as a utility and reward mechanism for the FestChain ecosystem. The pilot does not make financial promises. FTC has no monetary value and is for in-app use only."
-  },
-  {
-    q: "What problem does FestChain solve?",
-    a: "FestChain helps reduce ticket fraud, improve event access, reward loyal guests, connect DJs with fans, and give organizers better tools to manage event experiences."
-  }
-];
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const FAQ_PT = [
   {
-    q: "Os convidados precisam de cripto para usar o FestChain?",
-    a: "Não. O piloto foi criado para ser simples e acessível. Os convidados podem usar o FestChain sem nenhum conhecimento de cripto, configuração de carteira ou passos técnicos — basta criar uma conta com seu e-mail e receber o ingresso."
+    q: "Qual é a taxa da FestChain?",
+    a: "8% sobre cada ingresso pago. Sem mensalidade, sem taxa de adesão, sem custo pra criar e publicar um evento. Ingresso reembolsado não gera taxa. Casas piloto pagam 5% fixo por 12 meses."
   },
   {
-    q: "O que é FestCoin?",
-    a: "FestCoin é o crédito de recompensa e utilidade do ecossistema FestChain. Durante o piloto, é usado para benefícios, fidelidade e experiências no evento. Não é criptomoeda, não tem valor em dinheiro e não pode ser vendido ou sacado."
+    q: "Quando eu recebo o dinheiro das vendas?",
+    a: "Até 2 dias úteis depois do evento, via Pix, com o extrato do valor líquido. A data exata aparece no seu painel desde o dia que você publica o evento."
   },
   {
-    q: "O FestChain já está no ar?",
-    a: "O FestChain está atualmente preparando eventos piloto selecionados com DJs, organizadores, locais e marcas parceiras. Junte-se ao piloto para fazer parte da primeira onda."
+    q: "Meus clientes podem pedir reembolso?",
+    a: "Podem. Você define a política antes de vender o primeiro ingresso, ela aparece pro comprador no checkout, e você aprova ou recusa cada pedido no painel."
   },
   {
-    q: "Como posso entrar no piloto?",
-    a: "DJs, organizadores, locais e marcas podem solicitar acesso pelo formulário de contato abaixo. Vamos analisar seu pedido e retornar rapidamente."
+    q: "Como funciona a validação na entrada?",
+    a: "Pelo celular do seu staff. Lê o QR, libera em menos de um segundo, e ingresso duplicado é recusado na hora. Vários operadores podem ler ao mesmo tempo."
   },
   {
-    q: "FestCoin é um investimento?",
-    a: "Não. FestCoin deve ser entendido como um mecanismo de utilidade e recompensa do ecossistema FestChain. O piloto não faz promessas financeiras. O FTC não tem valor monetário e é apenas para uso no app."
+    q: "E se a internet cair na portaria?",
+    a: "A lista de quem comprou fica salva no aparelho antes da festa. Sem internet, a portaria continua funcionando e sincroniza sozinha quando a conexão volta."
   },
   {
-    q: "Qual problema o FestChain resolve?",
-    a: "O FestChain ajuda a reduzir fraudes em ingressos, melhorar o acesso aos eventos, recompensar convidados fiéis, conectar DJs com fãs e dar aos organizadores melhores ferramentas para gerenciar experiências de eventos."
+    q: "Dá pra emitir cortesia?",
+    a: "Dá. Lista, staff, artista, imprensa, parceria — cada uma com sua categoria, e aparece marcada na portaria. Cortesia não paga taxa."
+  },
+  {
+    q: "Dá pra transferir um ingresso pra outra pessoa?",
+    a: "Ainda não — está no roteiro. Hoje dá pra reembolsar e revender, ou emitir uma cortesia pro novo convidado."
+  },
+  {
+    q: "O que é o crédito FestChain?",
+    a: "Quem compra ingresso ganha crédito pra usar na próxima festa da mesma casa — consumação, brinde ou upgrade. Você escolhe o que vale o quê. O crédito é usado no app e não é resgatável em dinheiro."
   }
 ];
 
-export default function LandingFAQ({ lang = "en" }) {
+const FAQ_EN = [
+  {
+    q: "What is FestChain's fee?",
+    a: "8% on each paid ticket. No monthly fee, no signup fee, no cost to create and publish an event. Refunded tickets don't incur a fee. Pilot venues pay a fixed 5% for 12 months."
+  },
+  {
+    q: "When do I receive the sales money?",
+    a: "Within 2 business days after the event, via Pix, with a statement of the net amount. The exact date shows in your dashboard from the day you publish the event."
+  },
+  {
+    q: "Can my customers request a refund?",
+    a: "Yes. You set the policy before selling the first ticket, it's shown to the buyer at checkout, and you approve or decline each request in the dashboard."
+  },
+  {
+    q: "How does door validation work?",
+    a: "On your staff's phone. It scans the QR, clears entry in under a second, and a duplicate ticket is rejected on the spot. Multiple operators can scan at the same time."
+  },
+  {
+    q: "What if the internet drops at the door?",
+    a: "The list of who bought is saved on the device before the party. Without internet, the door keeps working and syncs on its own when the connection comes back."
+  },
+  {
+    q: "Can I issue comps?",
+    a: "Yes. List, staff, artist, press, partner — each in its own category, and marked at the door. Comps don't pay a fee."
+  },
+  {
+    q: "Can I transfer a ticket to someone else?",
+    a: "Not yet — it's on the roadmap. Today you can refund and resell, or issue a comp for the new guest."
+  },
+  {
+    q: "What is FestChain credit?",
+    a: "Anyone who buys a ticket earns credit to use at the next party at the same venue — drinks, merch or upgrades. You decide what's worth what. The credit is used in the app and is not redeemable for cash."
+  }
+];
+
+export default function LandingFAQ({ lang = "pt-BR" }) {
+  const { lang: ctxLang } = useLanguage();
+  const active = ctxLang || lang;
   const [open, setOpen] = useState(null);
-  const faqs = lang === "pt-BR" ? FAQ_PT : FAQ_EN;
-  const title = lang === "pt-BR" ? "Perguntas Frequentes" : "Frequently Asked Questions";
-  const kicker = lang === "pt-BR" ? "Dúvidas" : "FAQ";
+  const faqs = active === "pt-BR" ? FAQ_PT : FAQ_EN;
+  const title = active === "pt-BR" ? "Perguntas Frequentes" : "Frequently Asked Questions";
+  const kicker = active === "pt-BR" ? "Dúvidas" : "FAQ";
 
   return (
-    <section className="py-16 px-5">
+    <section id="faq" className="py-16 px-5">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-primary text-xs uppercase tracking-widest font-bold mb-3">{kicker}</p>

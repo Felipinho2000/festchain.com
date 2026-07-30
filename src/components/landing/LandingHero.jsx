@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { MessageCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { COPY, getWaHref } from "./landingData";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const container = {
   hidden: {},
@@ -15,8 +16,9 @@ const item = {
 };
 
 export default function LandingHero() {
-  const c = COPY["pt-BR"];
-  const waHref = getWaHref();
+  const { lang } = useLanguage();
+  const c = COPY[lang] || COPY["pt-BR"];
+  const waHref = getWaHref(lang);
 
   return (
     <section className="relative pt-40 pb-24 px-5 overflow-hidden">
@@ -66,7 +68,7 @@ export default function LandingHero() {
               <MessageCircle className="w-5 h-5 mr-2" strokeWidth={2} /> {c.hero.ctaPrimary}
             </Button>
           </a>
-          <a href="#promoters">
+          <a href="#why">
             <Button variant="outline" className="w-full sm:w-auto h-12 px-7 rounded-2xl font-semibold text-sm border-white/10 text-white hover:bg-white/5 hover:border-white/20 transition-all duration-300">
               {c.hero.ctaSecondary}
             </Button>
