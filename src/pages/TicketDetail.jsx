@@ -17,6 +17,7 @@ import moment from "moment";
 
 const statusConfig = {
   active:      { label: "Válido",        color: "bg-success/15 text-success",         Icon: CheckCircle2 },
+  pending:     { label: "Pagamento pendente", color: "bg-warning/15 text-warning",      Icon: Clock },
   used:        { label: "Usado",         color: "bg-secondary text-muted-foreground",  Icon: CheckCircle2 },
   transferred: { label: "Transferido",   color: "bg-primary/15 text-primary",          Icon: TicketIcon },
   expired:     { label: "Expirado",      color: "bg-destructive/15 text-destructive",  Icon: XCircle },
@@ -119,8 +120,9 @@ export default function TicketDetail() {
 
   const { ticket, event, perks } = data;
   const isUsed = ticket.checked_in || ticket.status === "used";
+  const isPending = ticket.status === "pending";
   const effectiveStatus = isUsed && ticket.status === "active" ? "used" : ticket.status;
-  const statusInfo = statusConfig[effectiveStatus] || statusConfig.active;
+  const statusInfo = statusConfig[effectiveStatus] || statusConfig.pending;
 
   return (
     <div className="max-w-2xl mx-auto px-4 lg:px-8 space-y-5 py-8">
@@ -205,12 +207,16 @@ export default function TicketDetail() {
             <p className="text-xs font-semibold text-foreground tracking-wider mb-4 flex items-center gap-1.5">
               <QrCode className="w-4 h-4 text-primary" strokeWidth={1.75} /> Seu QR de entrada
             </p>
-            <div className={isUsed ? "opacity-40" : ""}>
+            <div className={(isUsed || isPending) ? "opacity-40" : ""}>
               <Qr value={ticket.qr_code} size={200} />
             </div>
             {isUsed ? (
               <p className="text-sm font-semibold text-muted-foreground mt-4 flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} /> Check-in realizado — ingresso usado
+              </p>
+            ) : isPending ? (
+              <p className="text-sm font-semibold text-warning mt-4 flex items-center gap-1.5">
+                <Clock className="w-4 h-4" strokeWidth={1.75} /> Aguardando confirmação do pagamento — esse QR ainda não vale entrada.
               </p>
             ) : (
               <p className="text-sm font-medium text-primary mt-4 text-center">Mostra esse QR na porta.</p>
