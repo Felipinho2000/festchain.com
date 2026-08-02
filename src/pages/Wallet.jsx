@@ -167,7 +167,18 @@ export default function WalletPage() {
   const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
 
   const activeTickets = tickets.filter(t => t.status === "active");
-  const pastTickets   = tickets.filter(t => t.status !== "active");
+  // "Próximos"/"Anteriores" is grouped by the event's actual date, not by
+  // payment status — a still-pending ticket for a future event belongs in
+  // "Próximos", not "Anteriores". Previously this used ticket status
+  // (active vs not), which misfiled pending future tickets as past and
+  // old already-happened active/used tickets as upcoming.
+  const now = new Date();
+  const upcomingTickets = [...tickets]
+    .filter(t => !t.event_date || new Date(t.event_date) >= now)
+    .sort((a, b) => new Date(a.event_date || 0) - new Date(b.event_date || 0));
+  const pastTickets = [...tickets]
+    .filter(t => t.event_date && new Date(t.event_date) < now)
+    .sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
 
   return (
     <div className="max-w-4xl mx-auto px-4 lg:px-8 py-8 lg:py-12 space-y-6">
@@ -255,10 +266,10 @@ export default function WalletPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {activeTickets.length > 0 && (
+              {upcomingTickets.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Próximos ({activeTickets.length})</p>
-                  <div className="space-y-3">{activeTickets.map(t => <TicketCard key={t.id} ticket={t} />)}</div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Próximos ({upcomingTickets.length})</p>
+                  <div className="space-y-3">{upcomingTickets.map(t => <TicketCard key={t.id} ticket={t} />)}</div>
                 </div>
               )}
               {pastTickets.length > 0 && (
