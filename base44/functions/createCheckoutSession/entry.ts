@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
       } catch (_) {}
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams = {
       payment_method_types: ['pix', 'card'],
       line_items: [{
         price_data: {
@@ -251,7 +251,23 @@ Deno.serve(async (req) => {
           quantity: String(quantity),
         },
       },
-    });
+    };
+
+    // Live accounts that haven't activated Pix reject `payment_method_types: ['pix',...]`,
+    // which would block ALL checkout — including card. Fall back to card-only so real
+    // cards keep working; Pix returns automatically once enabled in the Stripe dashboard.
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create(sessionParams);
+    } catch (e) {
+      if (e && e.message && /pix is invalid|payment method type.*pix/i.test(e.message)) {
+        console.log('createCheckoutSession: Pix not enabled on this account — retrying card-only.');
+        sessionParams.payment_method_types = ['card'];
+        session = await stripe.checkout.sessions.create(sessionParams);
+      } else {
+        throw e;
+      }
+    }
 
     // 9. Store stripe session ID on all tickets for traceability
     for (const tid of ticketIds) {
