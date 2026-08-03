@@ -6,6 +6,27 @@ import Stripe from 'npm:stripe@^14.0.0';
 // + quantity. Pre-creates N pending tickets + rewards + cashback via
 // user-scoped SDK so created_by_id is stamped correctly.
 // The webhook activates them after payment confirmation.
+
+// Rolls back a purchase attempt that never got a usable Stripe Checkout
+// session (session creation failed outright). Mirrors stripeWebhook's
+// checkout.session.expired handler — expire the ticket, cancel the pending
+// reward/cashback rows — so an attempt that never even reached Stripe ends
+// up in the same state as one that reached Stripe and timed out unpaid,
+// instead of being left as an orphaned 'pending' row with no session and
+// no way to ever complete. Fixes the orphaned-ticket gap logged in
+// WAR_ROOM.md on 2026-08-03.
+async function expireOrphanedPurchase(base44, ticketIds, rewardTxIds, cashbackTxIds) {
+  for (const tid of ticketIds) {
+    try { await base44.asServiceRole.entities.Ticket.update(tid, { status: 'expired' }); } catch (_) {}
+  }
+  for (const rtxId of rewardTxIds) {
+    try { await base44.asServiceRole.entities.FestCoinTransaction.update(rtxId, { status: 'cancelled' }); } catch (_) {}
+  }
+  for (const ctxId of cashbackTxIds) {
+    try { await base44.asServiceRole.entities.FestCoinTransaction.update(ctxId, { status: 'cancelled' }); } catch (_) {}
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -263,8 +284,14 @@ Deno.serve(async (req) => {
       if (e && e.message && /pix is invalid|payment method type.*pix/i.test(e.message)) {
         console.log('createCheckoutSession: Pix not enabled on this account — retrying card-only.');
         sessionParams.payment_method_types = ['card'];
-        session = await stripe.checkout.sessions.create(sessionParams);
+        try {
+          session = await stripe.checkout.sessions.create(sessionParams);
+        } catch (e2) {
+          await expireOrphanedPurchase(base44, ticketIds, rewardTxIds, cashbackTxIds);
+          throw e2;
+        }
       } else {
+        await expireOrphanedPurchase(base44, ticketIds, rewardTxIds, cashbackTxIds);
         throw e;
       }
     }
