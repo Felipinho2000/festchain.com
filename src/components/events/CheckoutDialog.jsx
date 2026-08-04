@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,7 @@ function formatPhone(value) {
 
 export default function CheckoutDialog({ event, phase, displayPrice, open, onOpenChange }) {
   const { toast } = useToast();
+  const { isAuthenticated, navigateToLogin } = useAuth();
   const [step, setStep] = useState(1);
   const [tier, setTier] = useState("inteira");
   const [quantity, setQuantity] = useState(1);
@@ -60,6 +62,13 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
   const handleSubmit = async () => {
     if (window.self !== window.top) {
       toast({ title: "Abra em nova aba", description: "O checkout só funciona no app publicado, não na prévia.", variant: "destructive" });
+      return;
+    }
+    // Defense in depth: the UI already routes signed-out buyers to login
+    // before this point, but createCheckoutSession rejects anonymous calls
+    // server-side and a raw 401 toast would be a dead end.
+    if (!isAuthenticated) {
+      navigateToLogin();
       return;
     }
     setSubmitting(true);
@@ -164,6 +173,40 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
             <Button className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-glow" onClick={() => setStep(2)}>
               Continuar <ArrowRight className="w-4 h-4 ml-2" strokeWidth={1.75} />
             </Button>
+          </div>
+        ) : !isAuthenticated ? (
+          /* Signed-out buyers stop here instead of filling in four fields they
+             would lose on the redirect. The ticket has to belong to an account
+             so it can live in a wallet and be validated at the door. */
+          <div className="space-y-4">
+            <div className="bg-secondary rounded-xl p-3 text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">{TIERS.find((t) => t.key === tier).label} × {quantity}</span>
+                <span className="text-foreground font-semibold">R$ {total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="text-center py-2 space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                <Ticket className="w-6 h-6 text-primary" strokeWidth={1.5} />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Entra pra garantir teu ingresso</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Leva 30 segundos. O ingresso fica salvo na tua carteira, com QR próprio pra validar na porta.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button variant="outline" className="h-11 rounded-xl px-4" onClick={() => setStep(1)}>
+                <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+              </Button>
+              <Button
+                className="flex-1 h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-glow"
+                onClick={() => navigateToLogin()}
+              >
+                Entrar e continuar <ArrowRight className="w-4 h-4 ml-2" strokeWidth={1.75} />
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
