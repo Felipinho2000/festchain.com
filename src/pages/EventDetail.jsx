@@ -280,22 +280,27 @@ export default function EventDetail() {
             </div>
           )}
 
-          {/* Event Menu (FestCoin redemptions) */}
-          <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.75} />
-                <h3 className="font-heading font-semibold text-foreground">Bebidas &amp; Perks</h3>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">FTC</span>
+          {/* Event Menu (FestCoin redemptions) — account-only. A first-time
+              visitor with no account has no balance to spend, and the panel
+              calls authenticated endpoints, so showing it signed-out would be
+              both broken and confusing on the page that has to sell them. */}
+          {currentUser && (
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-primary" strokeWidth={1.75} />
+                  <h3 className="font-heading font-semibold text-foreground">Bebidas &amp; Perks</h3>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">FTC</span>
+                </div>
+                <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? "Ocultar" : "Ver"}</button>
               </div>
-              <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? "Ocultar" : "Ver"}</button>
+              {showMenu ? (
+                <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} />
+              ) : (
+                <p className="text-xs text-muted-foreground">Usa seu saldo pra resgatar bebida, merch e perks VIP nesse rolê.</p>
+              )}
             </div>
-            {showMenu ? (
-              <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} />
-            ) : (
-              <p className="text-xs text-muted-foreground">Usa seu saldo pra resgatar bebida, merch e perks VIP nesse rolê.</p>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Purchase Card — sticky on desktop */}
