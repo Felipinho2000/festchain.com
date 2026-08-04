@@ -79,12 +79,21 @@ const AuthenticatedApp = () => {
       <Route path="/trust-safety" element={<TrustSafety />} />
       <Route path="/politica-de-precos" element={<PoliticaDePrecos />} />
 
+      {/* Public storefront — browse events and open a shared event link with
+          no account. This is the top of the funnel: every ticket sale starts
+          with someone who has never heard of FestChain clicking a link from a
+          friend. Gating it behind /login killed that funnel entirely.
+          Login is requested only at the moment of purchase, and
+          createCheckoutSession still enforces authentication server-side. */}
+      <Route element={<AppLayout />}>
+        <Route path="/events" element={<Events />} />
+        <Route path="/events/:id" element={<EventDetail />} />
+      </Route>
+
       {/* Protected app routes */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppLayout />}>
           <Route path="/app" element={<Home />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/events/:id" element={<EventDetail />} />
           <Route path="/tickets/:id" element={<TicketDetail />} />
           <Route path="/wallet" element={<WalletPage />} />
           <Route path="/festcoin" element={<FestCoin />} />
