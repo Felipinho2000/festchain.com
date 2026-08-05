@@ -28,7 +28,18 @@ export default function Events() {
   useEffect(() => {
     const query = { status: "published", visibility: "public" };
     if (genre !== "all") query.genre = genre;
-    base44.entities.Event.filter(query, "-date", 50)
+    // Public list — anonymous visitors hit this directly (no backend function
+    // in front of it), so we explicitly allow-list the fields returned.
+    // Without this, the raw entity API also returns created_by (the
+    // organizer's account email) for every event, which getEventDetails
+    // deliberately strips for non-owners. Keep this list in sync with what
+    // EventCard.jsx actually renders.
+    const publicFields = [
+      "id", "title", "date", "end_date", "location_name", "genre",
+      "image_url", "ticket_price", "tickets_sold", "total_capacity",
+      "status", "visibility", "currency_code",
+    ];
+    base44.entities.Event.filter(query, "-date", 50, 0, publicFields)
       .then(setEvents)
       .catch(() => {})
       .finally(() => setLoading(false));
