@@ -47,11 +47,20 @@ export default function LandingNav() {
               </Button>
             </Link>
           ) : (
-            <a href={waHref} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
-              <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold shadow-[0_4px_16px_-4px_rgba(255,101,0,0.4)] transition-all duration-300 hover:shadow-[0_4px_24px_-4px_rgba(255,101,0,0.6)]">
-                {c.nav.cta}
-              </Button>
-            </a>
+            <>
+              {/* Anyone can browse and buy without an account — login only happens
+                  at checkout. This is the only way a ticket buyer (as opposed to
+                  an organizer chasing the WhatsApp CTA) can find that path from
+                  the landing page. */}
+              <Link to="/events" className="hidden sm:block text-sm font-medium text-white/60 hover:text-white transition-colors duration-200 px-1">
+                {c.nav.findEvents}
+              </Link>
+              <a href={waHref} target="_blank" rel="noopener noreferrer" className="hidden sm:block">
+                <Button className="bg-primary hover:bg-primary/90 text-white h-9 px-4 rounded-xl text-sm font-semibold shadow-[0_4px_16px_-4px_rgba(255,101,0,0.4)] transition-all duration-300 hover:shadow-[0_4px_24px_-4px_rgba(255,101,0,0.6)]">
+                  {c.nav.cta}
+                </Button>
+              </a>
+            </>
           )}
           <button className="md:hidden p-2 text-white/50 hover:text-white transition-colors" onClick={() => setMenuOpen((m) => !m)} aria-label="Menu">
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -67,6 +76,11 @@ export default function LandingNav() {
               {link.label}
             </a>
           ))}
+          {!authed && (
+            <Link to="/events" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors">
+              {c.nav.findEvents}
+            </Link>
+          )}
           <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)} className="text-primary font-semibold">
             {c.nav.cta}
           </a>
