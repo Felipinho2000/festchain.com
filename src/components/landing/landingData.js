@@ -7,7 +7,7 @@ export const CONTACT_EMAIL = "contato@festchain.com";
 
 export const COPY = {
   "pt-BR": {
-    nav: { organizers: "Para organizadores", how: "Como funciona", prices: "Preços", openApp: "Abrir app", login: "Entrar", cta: "Quero levar minha festa" },
+    nav: { organizers: "Para organizadores", how: "Como funciona", prices: "Preços", openApp: "Abrir app", login: "Entrar", findEvents: "Ver eventos", cta: "Quero levar minha festa" },
     hero: {
       badge: "Feito para a vida noturna do Brasil",
       title1: "Venda os ingressos.",
@@ -123,7 +123,7 @@ export const COPY = {
     waMsg: "Oi! Quero levar minha festa pra FestChain.",
   },
   en: {
-    nav: { organizers: "For organizers", how: "How it works", prices: "Pricing", openApp: "Open app", login: "Log in", cta: "Bring your party" },
+    nav: { organizers: "For organizers", how: "How it works", prices: "Pricing", openApp: "Open app", login: "Log in", findEvents: "Find events", cta: "Bring your party" },
     hero: {
       badge: "Built for Brazil's nightlife",
       title1: "Sell the tickets.",
