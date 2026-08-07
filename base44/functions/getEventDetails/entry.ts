@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { countActiveHolds } from '../../shared/ticketHolds.ts';
 
 // Secure event details loader for the private pilot.
 // Uses service-role reads so ticket holders can view private event pages,
@@ -70,13 +71,9 @@ Deno.serve(async (req) => {
     // cheap price and the buyer only found out at checkout. Price shown must
     // equal price charged.
     let activePhase = null;
-    let heldCount = 0;
-    try {
-      const held = await base44.asServiceRole.entities.Ticket.filter(
-        { event_id: String(event.id), status: 'pending' }, '-created_date', 1000
-      );
-      heldCount = (held || []).length;
-    } catch (_) {}
+    // Read-only: this is the hottest public page in the product, so it counts
+    // live holds but never writes. Sweeping is the checkout path's job.
+    const { held: heldCount } = await countActiveHolds(base44, event.id);
 
     if (Array.isArray(event.ticket_phases) && event.ticket_phases.length) {
       const now = new Date();
