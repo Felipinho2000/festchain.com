@@ -58,6 +58,8 @@ export default function EventDetail() {
   const [notFound, setNotFound] = useState(false);
   const [deniedMessage, setDeniedMessage] = useState(null);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [serverPhase, setServerPhase] = useState(null);
+  const [serverSpotsLeft, setServerSpotsLeft] = useState(null);
   const [userBalance, setUserBalance] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -71,6 +73,11 @@ export default function EventDetail() {
         const data = res.data || res;
         if (data.status === "success" && data.event) {
           setEvent(data.event);
+          // The server resolves the live phase and remaining spots using the
+          // same rule checkout enforces (date window AND lote quantity), so
+          // the price on screen is the price that will actually be charged.
+          setServerPhase(data.active_phase ?? null);
+          setServerSpotsLeft(typeof data.spots_left === "number" ? data.spots_left : null);
         } else if (data.status === "denied") {
           setDeniedMessage(data.message || "This is a private event. You need an invitation or a valid ticket to view the details.");
         } else {
@@ -134,9 +141,13 @@ export default function EventDetail() {
     );
   }
 
-  const spotsLeft = event.total_capacity - (event.tickets_sold || 0);
+  // Prefer the server's numbers; fall back to the local estimate only if an
+  // older backend response is in flight.
+  const spotsLeft = serverSpotsLeft !== null
+    ? serverSpotsLeft
+    : event.total_capacity - (event.tickets_sold || 0);
   const hasPhases = event.ticket_phases && event.ticket_phases.length > 0;
-  const phase = getActivePhase(event);
+  const phase = serverSpotsLeft !== null ? serverPhase : getActivePhase(event);
   const reward = phase ? (phase.festcoin_reward ?? event.festcoin_reward ?? 0) : (event.festcoin_reward || 0);
   const displayPrice = phase ? phase.price : (hasPhases ? null : (event.ticket_price || 0));
   const canBuy = spotsLeft > 0 && (!hasPhases || !!phase);
