@@ -251,15 +251,17 @@ Deno.serve(async (req) => {
         for (const ctxId of cashbackTxIds) await reverseIfConfirmed(ctxId);
 
         // Free up capacity for the refunded tickets (mirror of the increment
-        // in checkout.session.completed).
+        // in checkout.session.completed). read-then-clamp-write instead of a
+        // filtered $inc — the same pattern used in revokeComplimentaryTicket,
+        // which is proven to persist; the updateMany($gte guard) form did not
+        // decrement reliably in the 08-07 live refund test.
         if (eventId && refundedCount > 0) {
           try {
-            // $inc with $gte guard — atomic decrement that never goes negative
-            // even on duplicate webhook delivery.
-            await base44.asServiceRole.entities.Event.updateMany(
-              { id: eventId, tickets_sold: { $gte: refundedCount } },
-              { $inc: { tickets_sold: -refundedCount } }
-            );
+            const ev = await base44.asServiceRole.entities.Event.get(eventId);
+            if (ev) {
+              const newSold = Math.max(0, (ev.tickets_sold || 0) - refundedCount);
+              await base44.asServiceRole.entities.Event.update(eventId, { tickets_sold: newSold });
+            }
           } catch (e) {
             console.error('stripeWebhook: failed to decrement tickets_sold on refund:', e.message);
           }
