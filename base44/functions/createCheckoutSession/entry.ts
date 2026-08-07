@@ -72,25 +72,90 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'error', message: 'This event is not open for booking' });
     }
 
-    // 3. Capacity check (account for quantity)
-    const spotsLeft = (event.total_capacity || 0) - (event.tickets_sold || 0);
-    if (spotsLeft < quantity) {
-      return Response.json({ status: 'error', message: `Only ${spotsLeft} tickets remaining` });
+    // 3. Capacity check — counts tickets already sold AND checkouts in flight.
+    //
+    //    `tickets_sold` is only incremented by stripeWebhook AFTER payment
+    //    confirms. Checking capacity against it alone meant that during a lote
+    //    drop N buyers could all clear the capacity gate in the same instant
+    //    and all pay, overselling the room. Pending tickets are held seats;
+    //    they are released automatically by the checkout.session.expired
+    //    webhook (and by expireOrphanedPurchase), so a hold is temporary.
+    let heldCount = 0;
+    try {
+      const held = await base44.asServiceRole.entities.Ticket.filter(
+        { event_id: String(event.id), status: 'pending' }, '-created_date', 1000
+      );
+      heldCount = (held || []).length;
+    } catch (e) {
+      console.error('createCheckoutSession: could not count held tickets:', e.message);
     }
 
-    // 4. Active ticket phase
+    const spotsLeft = (event.total_capacity || 0) - (event.tickets_sold || 0) - heldCount;
+    if (spotsLeft < quantity) {
+      return Response.json({
+        status: 'error',
+        message: spotsLeft <= 0
+          ? 'Sold out — no tickets left for this event.'
+          : `Only ${spotsLeft} ticket(s) remaining`,
+      });
+    }
+
+    // 4. Active ticket phase — a phase closes when its date window ends OR its
+    //    configured quantity sells out, whichever happens first.
+    //
+    //    Previously only the date window was checked, so an Early Bird lote of
+    //    50 kept selling at the Early Bird price for the rest of its date
+    //    range no matter how many were sold. The organizer-facing editor
+    //    literally promises "os lotes avancam sozinho" and collects a quantity
+    //    per phase — the backend now honours that promise, which is also real
+    //    money: every ticket sold past a sold-out cheap lote is revenue the
+    //    organizer should have earned at the next price.
     let phase = null;
     if (event.ticket_phases && event.ticket_phases.length) {
       const now = new Date();
-      phase = event.ticket_phases.find(p => {
-        if (!p.active) return false;
+      const openByDate = event.ticket_phases.filter((p) => {
+        if (!p || !p.active) return false;
         const start = p.sales_start ? new Date(p.sales_start) : null;
         const end = p.sales_end ? new Date(p.sales_end) : null;
         if (start && now < start) return false;
         if (end && now > end) return false;
         return true;
-      }) || null;
-      if (!phase) return Response.json({ status: 'error', message: 'Tickets are not on sale yet — check the next phase opening.' });
+      });
+
+      for (const candidate of openByDate) {
+        const phaseQty = Math.floor(Number(candidate.quantity) || 0);
+        // quantity 0/undefined means "no per-phase cap" — event capacity still applies.
+        if (phaseQty <= 0) { phase = candidate; break; }
+
+        let takenInPhase = 0;
+        try {
+          // Bounded read: we only need to know whether the cap is reached, so
+          // never fetch more rows than the cap itself.
+          const taken = await base44.asServiceRole.entities.Ticket.filter(
+            {
+              event_id: String(event.id),
+              ticket_phase: candidate.name,
+              status: { $in: ['active', 'used', 'pending'] },
+            },
+            '-created_date',
+            phaseQty
+          );
+          takenInPhase = (taken || []).length;
+        } catch (e) {
+          console.error('createCheckoutSession: phase inventory read failed:', e.message);
+          // Fail closed on this phase rather than risk overselling a lote.
+          continue;
+        }
+
+        if (takenInPhase + quantity <= phaseQty) { phase = candidate; break; }
+      }
+
+      if (!phase) {
+        return Response.json({
+          status: 'error',
+          message: 'This ticket phase just sold out. Refresh the page to see the next phase and its price.',
+        });
+      }
     }
 
     // 5. Prevent duplicate active tickets
