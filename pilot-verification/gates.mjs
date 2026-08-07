@@ -227,6 +227,30 @@ async function gate2() {
     check('Gate 2', 'checkout session carries a bounded expires_at', typeof r.json?.session_id === 'string');
   }
 
+  // --- late payment against a released hold must still deliver a ticket ---
+  {
+    const { store } = baseWorld();
+    seedEvent(store);
+    await buy(store, USERS.buyer);
+    const t = store.all('Ticket')[0];
+    const rtx = store.all('FestCoinTransaction')[0];
+    const meta = { ticket_ids: t.id, reward_tx_ids: rtx.id, cashback_tx_ids: '', event_id: 'ev_1', quantity: '1' };
+    // Hold released (swept / expired) BEFORE the payment lands.
+    await fireWebhook(store, 'checkout.session.expired', meta);
+    check('Gate 2', 'precondition: hold was released', store.all('Ticket')[0].status === 'expired');
+    await fireWebhook(store, 'checkout.session.completed', meta);
+    check('Gate 2', 'LATE payment on a released hold still produces a valid ticket (no ghost ticket)',
+      store.all('Ticket')[0].status === 'active', `status=${store.all('Ticket')[0].status}`);
+    check('Gate 2', 'late payment restores the FTC reward', store.all('FestCoinTransaction')[0].status === 'confirmed');
+    check('Gate 2', 'late payment counts toward tickets_sold', store.all('Event')[0].tickets_sold === 1);
+    const vt = loadFunction('validateTicket', { env: ENV });
+    const scan = await vt({ qr_code: store.all('Ticket')[0].qr_code, event_id: 'ev_1' }, { client: makeClient(store, USERS.organizer) });
+    check('Gate 2', 'late-paid ticket actually opens the door', scan.json?.status === 'valid');
+    // And a redelivery after that must not double count.
+    await fireWebhook(store, 'checkout.session.completed', meta);
+    check('Gate 2', 'redelivery after a used ticket does not re-process', store.all('Event')[0].tickets_sold === 1);
+  }
+
   // --- a FRESH hold must still block, or oversell returns ---
   {
     const { store } = baseWorld();
