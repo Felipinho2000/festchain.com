@@ -49,7 +49,11 @@ export default function Dashboard() {
 
   useEffect(() => { loadData(); }, [currentUser]);
 
-  const canOrganize = !!currentUser;
+  // This gate used to be `!!currentUser`, i.e. every signed-in account saw the
+  // organizer workspace and could reach the event editor. Match the same rule
+  // the scanner and ModeSwitcher already use — and that `saveEvent` now
+  // enforces server-side, which is the real boundary.
+  const canOrganize = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
   if (!canOrganize) {
     return (
       <div className="max-w-md mx-auto text-center py-20">
@@ -82,9 +86,17 @@ export default function Dashboard() {
   }
 
   const handleDelete = async (id) => {
-    await base44.entities.Event.delete(id);
-    toast({ title: "Event deleted" });
-    loadData();
+    // Deletion runs through saveEvent so the server can refuse to delete an
+    // event that already has tickets sold — buyers must keep a record.
+    try {
+      const res = await base44.functions.invoke("saveEvent", { action: "delete", event_id: id });
+      const data = res?.data || {};
+      if (data.status !== "success") throw new Error(data.message || "Não foi possível excluir o evento.");
+      toast({ title: "Evento excluído" });
+      loadData();
+    } catch (e) {
+      toast({ title: "Não foi possível excluir", description: e.message, variant: "destructive" });
+    }
   };
 
   return (
