@@ -63,7 +63,63 @@ Deno.serve(async (req) => {
       delete event.created_by;
     }
 
-    return Response.json({ status: 'success', event });
+    // Resolve the phase and remaining spots SERVER-SIDE, with exactly the same
+    // rule createCheckoutSession uses (date window AND per-phase quantity).
+    // The storefront used to compute the active phase in the browser from the
+    // date window alone, so a sold-out Early Bird lote kept advertising the
+    // cheap price and the buyer only found out at checkout. Price shown must
+    // equal price charged.
+    let activePhase = null;
+    let heldCount = 0;
+    try {
+      const held = await base44.asServiceRole.entities.Ticket.filter(
+        { event_id: String(event.id), status: 'pending' }, '-created_date', 1000
+      );
+      heldCount = (held || []).length;
+    } catch (_) {}
+
+    if (Array.isArray(event.ticket_phases) && event.ticket_phases.length) {
+      const now = new Date();
+      const openByDate = event.ticket_phases.filter((p) => {
+        if (!p || !p.active) return false;
+        const start = p.sales_start ? new Date(p.sales_start) : null;
+        const end = p.sales_end ? new Date(p.sales_end) : null;
+        if (start && now < start) return false;
+        if (end && now > end) return false;
+        return true;
+      });
+
+      for (const candidate of openByDate) {
+        const phaseQty = Math.floor(Number(candidate.quantity) || 0);
+        if (phaseQty <= 0) { activePhase = candidate; break; }
+        try {
+          const taken = await base44.asServiceRole.entities.Ticket.filter(
+            {
+              event_id: String(event.id),
+              ticket_phase: candidate.name,
+              status: { $in: ['active', 'used', 'pending'] },
+            },
+            '-created_date',
+            phaseQty
+          );
+          if ((taken || []).length < phaseQty) { activePhase = candidate; break; }
+        } catch (_) {
+          continue;
+        }
+      }
+    }
+
+    const spotsLeft = Math.max(
+      0,
+      (event.total_capacity || 0) - (event.tickets_sold || 0) - heldCount
+    );
+
+    return Response.json({
+      status: 'success',
+      event,
+      active_phase: activePhase,
+      spots_left: spotsLeft,
+    });
   } catch (error) {
     return Response.json({ status: 'error', message: error.message }, { status: 500 });
   }
