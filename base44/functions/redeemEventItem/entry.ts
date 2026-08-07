@@ -1,6 +1,7 @@
 // redeemEventItem — deducts FTC and creates a redemption record for a pilot event menu item.
 // No real payment is processed. This is a pilot redemption simulation.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { getFtcBalance, getFtcBalanceIncludingPendingDebits } from '../../shared/ftcLedger.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -48,14 +49,16 @@ Deno.serve(async (req) => {
     // Compute FTC balance — only 'confirmed' transactions count. A direct
     // client create can only ever land as 'pending' (enforced by entity RLS),
     // so counting pending here would let a forged transaction spend as if it
-    // were real money.
-    const allTx = await base44.entities.FestCoinTransaction.filter({ created_by_id: user.id }).catch(() => []);
-    const validTx = allTx.filter(t => t.status === 'confirmed');
-    const currentBalance = validTx.reduce((s, t) => {
-      if (['earned', 'transferred_in', 'pilot_topup'].includes(t.type)) return s + (t.amount || 0);
-      if (['spent', 'transferred_out'].includes(t.type)) return s - (t.amount || 0);
-      return s;
-    }, 0);
+    // were real money. Uses the shared ledger helper so the read is bounded
+    // and reports honestly when it is incomplete.
+    const { balance: currentBalance, complete: ledgerComplete } = await getFtcBalance(base44, user.id);
+    if (!ledgerComplete) {
+      console.error('redeemEventItem: FTC ledger read incomplete for user', String(user.id));
+      return Response.json({
+        status: 'error',
+        message: 'We could not verify your FestCoin balance right now. Please try again in a moment.',
+      }, { status: 503 });
+    }
 
     const cost = item.price_ftc || 0;
     if (currentBalance < cost) {
@@ -82,6 +85,21 @@ Deno.serve(async (req) => {
       balance_after: balanceAfter,
       status: 'pending'
     });
+    // Re-check before confirming, this time counting OTHER pending debits.
+    // Two redemptions fired at once would otherwise both read the same stale
+    // confirmed balance and both commit, taking the wallet negative. Whoever
+    // sees the combined total go below zero backs off and rolls back.
+    const { balance: provisional } = await getFtcBalanceIncludingPendingDebits(base44, user.id);
+    if (provisional < 0) {
+      await base44.asServiceRole.entities.FestCoinTransaction.update(spendTx.id, { status: 'cancelled' }).catch(() => {});
+      return Response.json({
+        status: 'error',
+        message: 'Another redemption is already using these FestCoins. Check your balance and try again.',
+        current_balance: currentBalance,
+        cost
+      }, { status: 409 });
+    }
+
     await base44.asServiceRole.entities.FestCoinTransaction.update(spendTx.id, { status: 'confirmed' });
 
     // Create redemption record with organizer_id so organizer can see it in their dashboard
