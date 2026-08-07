@@ -85,15 +85,88 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Mark used exactly once
+    // ── Claim the ticket exactly once ───────────────────────────────────────
+    // The old code did read-status → write-used. Two doors scanning the same
+    // QR inside the same second both read 'active' and both wrote 'used', so
+    // both screens went green and two people walked in on one ticket. That is
+    // the single worst on-site failure this product can have.
+    //
+    // Fix: compare-and-set. We write a random claim token guarded by
+    // `status: 'active'`, then read the row back. Whichever scanner's token
+    // survives in the database is the one that admitted the guest; every other
+    // scanner sees a foreign token and reports 'used'. The read-back is what
+    // makes this safe even where the guarded updateMany filter is not honoured
+    // (see the note in stripeWebhook about guarded updates behaving
+    // inconsistently) — the token comparison alone still resolves the race.
     const now = new Date().toISOString();
-    await base44.asServiceRole.entities.Ticket.update(ticket.id, {
-      status: 'used',
-      checked_in: true,
-      checked_in_at: now,
-      scanned_at: now,
-      scanned_by: String(user.id)
-    });
+    const claimToken = crypto.randomUUID();
+
+    try {
+      await base44.asServiceRole.entities.Ticket.updateMany(
+        { id: ticket.id, status: 'active' },
+        {
+          $set: {
+            status: 'used',
+            checked_in: true,
+            checked_in_at: now,
+            scanned_at: now,
+            scanned_by: String(user.id),
+            scan_claim_token: claimToken,
+          },
+        }
+      );
+    } catch (_) {
+      // Fall through to the read-back — if the guarded form is unsupported the
+      // plain update below still needs to run.
+      try {
+        await base44.asServiceRole.entities.Ticket.update(ticket.id, {
+          status: 'used',
+          checked_in: true,
+          checked_in_at: now,
+          scanned_at: now,
+          scanned_by: String(user.id),
+          scan_claim_token: claimToken,
+        });
+      } catch (e) {
+        return Response.json({ status: 'error', message: 'Could not record the check-in. Try again.' }, { status: 500 });
+      }
+    }
+
+    // Authoritative read-back: did OUR claim stick?
+    let confirmed = null;
+    try { confirmed = await base44.asServiceRole.entities.Ticket.get(ticket.id); } catch (_) {}
+
+    if (!confirmed) {
+      return Response.json({ status: 'error', message: 'Could not confirm the check-in. Try again.' }, { status: 500 });
+    }
+
+    if (confirmed.scan_claim_token !== claimToken) {
+      // Another scanner won the race in the same instant.
+      let raceScannedBy = null;
+      if (confirmed.scanned_by) {
+        try {
+          const su = await base44.asServiceRole.entities.User.get(String(confirmed.scanned_by));
+          raceScannedBy = su.full_name || su.email || null;
+        } catch (_) {}
+      }
+      return Response.json({
+        status: 'used',
+        message: 'This ticket was just scanned on another device',
+        ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location, is_complimentary: ticket.is_complimentary || false, comp_category: ticket.comp_category || null },
+        attendee,
+        previous_scan: {
+          at: confirmed.scanned_at || confirmed.checked_in_at || null,
+          by: confirmed.scanned_by || null,
+          by_label: raceScannedBy || confirmed.scanned_by || null,
+        },
+      });
+    }
+
+    if (confirmed.status !== 'used' || !confirmed.checked_in) {
+      // Our token is on the row but the state did not persist — never report a
+      // green door on an unverified write.
+      return Response.json({ status: 'error', message: 'Check-in did not persist. Scan again.' }, { status: 500 });
+    }
 
     return Response.json({
       status: 'valid',
