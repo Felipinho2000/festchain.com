@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import Stripe from 'npm:stripe@^14.0.0';
+import { sweepAndCountHolds, CHECKOUT_SESSION_TTL_SECONDS } from '../../shared/ticketHolds.ts';
 
 // Creates a Stripe Checkout session for ticket purchase (Pix + Credit Card).
 // Collects buyer info (name, CPF, phone, email) + ticket tier (inteira/meia)
@@ -80,15 +81,13 @@ Deno.serve(async (req) => {
     //    and all pay, overselling the room. Pending tickets are held seats;
     //    they are released automatically by the checkout.session.expired
     //    webhook (and by expireOrphanedPurchase), so a hold is temporary.
-    let heldCount = 0;
-    try {
-      const held = await base44.asServiceRole.entities.Ticket.filter(
-        { event_id: String(event.id), status: 'pending' }, '-created_date', 1000
-      );
-      heldCount = (held || []).length;
-    } catch (e) {
-      console.error('createCheckoutSession: could not count held tickets:', e.message);
-    }
+    //    A hold is only safe if it is guaranteed to be released, so this also
+    //    sweeps holds whose 30-minute checkout window has passed. Live data on
+    //    2026-08-07 showed pending tickets from four days earlier still
+    //    occupying seats because their Stripe session was gone and
+    //    `checkout.session.expired` could never fire — capacity must not
+    //    depend on webhook liveness.
+    const { held: heldCount } = await sweepAndCountHolds(base44, event.id);
 
     const spotsLeft = (event.total_capacity || 0) - (event.tickets_sold || 0) - heldCount;
     if (spotsLeft < quantity) {
@@ -301,6 +300,10 @@ Deno.serve(async (req) => {
         quantity: quantity,
       }],
       mode: 'payment',
+      // Bound the seat hold. Without this Stripe defaults to 24h, which on a
+      // 50-seat event means a handful of abandoned carts can strangle sales
+      // for a day. 30 min is Stripe's minimum and matches HOLD_WINDOW_MS.
+      expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_TTL_SECONDS,
       success_url: `${origin}/wallet?payment=success`,
       cancel_url: `${origin}/events/${event.id}?payment=cancelled`,
       customer_email: buyer_email,
