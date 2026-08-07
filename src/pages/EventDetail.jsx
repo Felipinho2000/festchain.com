@@ -90,15 +90,13 @@ export default function EventDetail() {
 
   useEffect(() => {
     if (!currentUser?.id) return;
-    base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id })
-      .then(txs => {
-        const valid = txs.filter(t => t.status === "confirmed");
-        const bal = valid.reduce((s, t) => {
-          if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
-          if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
-          return s;
-        }, 0);
-        setUserBalance(bal);
+    // Server-authoritative balance. Reading the whole transaction table into
+    // the browser to add it up was both a wrong number (page-limited) and an
+    // unnecessary full-ledger download on a public event page.
+    base44.functions.invoke("getFtcBalance", {})
+      .then(res => {
+        const data = res?.data || {};
+        if (data.status === "success" && typeof data.balance === "number") setUserBalance(data.balance);
       }).catch(() => {});
   }, [currentUser]);
 
