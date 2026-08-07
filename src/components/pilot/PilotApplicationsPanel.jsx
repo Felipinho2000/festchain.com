@@ -34,7 +34,7 @@ export default function PilotApplicationsPanel() {
     try {
       const rows = await base44.entities.PilotApplication.filter({}, "-created_date", 200);
       setApps(rows || []);
-    } catch (e) {
+    } catch (_) {
       setError("Não foi possível carregar as candidaturas. Confirme que sua conta é admin.");
     } finally {
       setLoading(false);
