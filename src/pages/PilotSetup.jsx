@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import PilotApplicationsPanel from "@/components/pilot/PilotApplicationsPanel";
 import {
   ArrowLeft, Lock, CheckCircle2, AlertTriangle, Loader2, FlaskConical,
   Rocket, UserCheck, Calendar, Wrench, FileText, Coins, Shield, Database,
@@ -238,6 +239,8 @@ export default function PilotSetup() {
             {row("topupAdminOnly", Lock, "Self top-up disabled or admin-only")}
             {row("publicSiteClean", FileText, "Public site metadata fixed")}
           </div>
+
+          <PilotApplicationsPanel />
 
           <div className="bg-card border border-border rounded-xl p-4 space-y-3">
             <div>
