@@ -106,6 +106,10 @@
     "scanned_by": {
       "type": "string"
     },
+    "scan_claim_token": {
+      "type": "string",
+      "description": "Single-use check-in claim token. validateTicket writes a fresh UUID and re-reads it; only the writer whose token survives may report a valid entry. This is what makes two simultaneous scanners resolve to exactly one admission."
+    },
     "festcoin_earned": {
       "type": "number",
       "default": 0
