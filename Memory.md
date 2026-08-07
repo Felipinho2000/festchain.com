@@ -366,7 +366,62 @@ Do not infer these from UI appearance. Verify end to end:
 
 ---
 
-## 23. Working rule for future AI sessions
+## 23. Pilot verification round — 2026-08-07 (second pass)
+
+An executable adversarial suite now lives in `pilot-verification/`. It loads the REAL
+`base44/functions/**/entry.ts` sources (esbuild TS transform, mocked Base44 SDK + Stripe) and
+runs them against an in-memory store with a cooperative scheduler that interleaves concurrent
+handlers at every I/O point. `node pilot-verification/gates.mjs` — **121/123 checks pass**.
+Run it before any change to ticketing, payments, wallet, scan or permissions.
+
+### Empirically established this round
+- **Stripe is in TEST MODE.** Only `acct_1TwklAHYnMyXnN0c` (livemode:false) is reachable and every
+  session in the database is `cs_test_`. No real money has moved.
+- **Guarded conditional writes ARE honoured.** Probed via the management API: a filtered update
+  whose predicate does not match returns `updated: 0` and writes nothing; a matching one returns
+  `updated: 1`. The `updateMany({id, status:'active'})` guard in `validateTicket` is therefore a
+  real conditional write, not a no-op. (Caveat: probed through the management API, not the Deno
+  SDK path.)
+- **The Stripe webhook endpoint is correctly configured** — `checkout.session.completed`,
+  `checkout.session.expired`, `charge.refunded`, enabled, pointed at the right URL, recreated
+  2026-08-06.
+
+### Defects found and fixed this round
+1. **Stale seat holds stranded capacity permanently (P0 for the capacity change).** Live data had
+   `pending` tickets from 2026-08-03 still holding seats on a 50-capacity event, with Stripe
+   sessions no longer retrievable — so `checkout.session.expired` could never fire for them.
+   Fixed with `base44/shared/ticketHolds.ts`: Checkout Sessions now carry an explicit 30-minute
+   `expires_at`, `getEventDetails` ignores holds past the window, and `createCheckoutSession`
+   actively sweeps them (releasing the ticket and cancelling its pending reward rows). Capacity no
+   longer depends on webhook liveness.
+2. **The sweeper opened a ghost-ticket path, which was then closed.** `stripeWebhook` only
+   activated tickets in state exactly `pending`, so a payment landing after its hold was released
+   would have been silently ignored — money taken, no ticket. It now activates an `expired` ticket
+   on a confirmed payment and logs loudly that capacity may be exceeded. Stripe saying "paid"
+   outranks our hold bookkeeping. Regression-tested end to end including the door scan.
+
+### Known-open, accepted for a controlled pilot
+**`createCheckoutSession` check-then-create is not atomic.** Measured: with the last seat
+available, N buyers clicking inside one backend round-trip all succeed — oversell of N-1. The bound
+is set by simultaneous clicks, not event size. A correct fix needs an atomic reservation counter
+(`$inc` on an `Event.tickets_held` field, with matching decrements in the completed/expired/refunded
+webhook paths). That is a money-path change with a new field and three new decrement sites, and the
+stale-hold bug above is direct evidence that hold counters in this system leak. Deliberately NOT
+shipped days before a first pilot. Operational mitigation: set `total_capacity` below the real room
+limit by at least the expected peak simultaneous clicks.
+
+### Measured architecture (round-trips per action, flat across 50 / 250 / 1000 attendees)
+event page 3 · door scan 5 · wallet balance 1 · bar redemption 3 · checkout 7.
+No N+1 and no per-attendee growth on any hot path. The scaling risk is rows-per-read, not
+round-trips: `getFtcBalance` reads up to 5,000 ledger rows, hold counting up to 1,000, and
+`getDoorManifest` up to 2,000 tickets — that last one is a hard ceiling on event size.
+
+Manual, human-only verification lives in `PILOT_TEST_PROCEDURE.md`. Part C (two devices scanning
+one QR simultaneously) is the single test that cannot be replaced by code.
+
+---
+
+## 24. Working rule for future AI sessions
 
 1. Read `aboutFestChain.md` first, then `MVP_SCOPE.md`, then this file.
 2. Verify current code before treating a historical item as still open.
