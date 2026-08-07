@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
-  LayoutDashboard, Plus, Calendar, TrendingUp,
+  Plus, Calendar, TrendingUp,
   Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine, Users,
   Gift, Package, RefreshCw, HelpCircle, FileText
 } from "lucide-react";
