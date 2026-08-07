@@ -19,6 +19,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import crypto from 'node:crypto';
+import { createRequire } from 'node:module';
+
+const nodeRequire = createRequire(import.meta.url);
+const esbuild = nodeRequire('/app/node_modules/esbuild');
 
 export const APP_ROOT = '/app';
 
@@ -235,43 +239,37 @@ export function makeClient(store, user, opts = {}) {
 }
 
 // ───────────────────────── function loader ─────────────────────────
-// Rewrites the Deno/ESM entry files into something evaluable in a Node vm
-// context, without touching the shipped source on disk.
-function transformSource(src) {
-  let out = src;
-  out = out.replace(/import\s+([\s\S]*?)\s+from\s+['"]npm:@base44\/sdk[^'"]*['"];?/g,
-    (_m, binding) => `const ${binding.trim()} = __req('base44sdk');`);
-  out = out.replace(/import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]npm:stripe[^'"]*['"];?/g,
-    (_m, name) => `const ${name} = __req('stripe');`);
-  out = out.replace(/import\s+([\s\S]*?)\s+from\s+['"]base44:runtime['"];?/g,
-    (_m, binding) => `const ${binding.trim()} = __req('base44runtime');`);
-  out = out.replace(/import\s+([\s\S]*?)\s+from\s+['"]\.\.\/\.\.\/shared\/([\w.]+?)(?:\.ts)?['"];?/g,
-    (_m, binding, mod) => `const ${binding.trim()} = __req('shared:${mod}');`);
-  out = out.replace(/export\s+default\s+async\s+function\s*\(/g, '__setHandler(async function (');
-  // `export default async function (req) { ... }` needs a closing paren; the
-  // files that use it end with the function, so append one.
-  if (/__setHandler\(async function \(/.test(out) && !/Deno\.serve/.test(out)) out += '\n);';
-  return out;
+// esbuild does the TypeScript -> CommonJS transform, so the code executed here
+// is the shipped source with types erased and nothing else changed. Module
+// resolution is intercepted to swap in the Base44/Stripe mocks.
+function compile(file) {
+  const src = fs.readFileSync(file, 'utf8');
+  return esbuild.transformSync(src, { loader: 'ts', format: 'cjs', target: 'node20' }).code;
 }
 
-function transformShared(src) {
-  const names = [];
-  let out = src;
-  out = out.replace(/export\s+(async\s+)?function\s+([A-Za-z_$][\w$]*)/g, (_m, a, n) => { names.push(n); return `${a || ''}function ${n}`; });
-  out = out.replace(/export\s+const\s+([A-Za-z_$][\w$]*)/g, (_m, n) => { names.push(n); return `const ${n}`; });
-  out += `\n__exports = { ${names.join(', ')} };`;
-  return out;
+function runModule(file, sandbox, resolve) {
+  const code = compile(file);
+  const module_ = { exports: {} };
+  const ctx = vm.createContext({
+    ...sandbox,
+    module: module_,
+    exports: module_.exports,
+    require: resolve,
+    __filename: file,
+    __dirname: path.dirname(file),
+  });
+  vm.runInContext(code, ctx, { filename: file });
+  return module_.exports;
 }
 
 const sharedCache = new Map();
-function loadShared(name, sandbox) {
+function loadShared(spec, sandbox) {
+  const name = path.basename(spec).replace(/\.ts$/, '');
   if (sharedCache.has(name)) return sharedCache.get(name);
-  const p = path.join(APP_ROOT, 'base44/shared', name.endsWith('.ts') ? name : `${name}.ts`);
-  const code = transformShared(fs.readFileSync(p, 'utf8'));
-  const ctx = vm.createContext({ ...sandbox, __exports: {} });
-  vm.runInContext(code, ctx, { filename: p });
-  sharedCache.set(name, ctx.__exports);
-  return ctx.__exports;
+  const p = path.join(APP_ROOT, 'base44/shared', `${name}.ts`);
+  const exp = runModule(p, sandbox, (s) => loadShared(s, sandbox));
+  sharedCache.set(name, exp);
+  return exp;
 }
 
 /**
@@ -280,7 +278,6 @@ function loadShared(name, sandbox) {
  */
 export function loadFunction(fnName, { stripe, env = {}, secrets = {} } = {}) {
   const file = path.join(APP_ROOT, 'base44/functions', fnName, 'entry.ts');
-  const src = transformSource(fs.readFileSync(file, 'utf8'));
 
   let handler = null;
   let clientFactory = null;
@@ -316,18 +313,19 @@ export function loadFunction(fnName, { stripe, env = {}, secrets = {} } = {}) {
       serve: (h) => { handler = h; },
       env: { get: (k) => env[k] },
     },
-    __setHandler: (h) => { handler = h; },
-    __req: (spec) => {
-      if (spec === 'base44sdk') return { createClientFromRequest: (req) => clientFactory(req) };
-      if (spec === 'stripe') return stripe;
-      if (spec === 'base44runtime') return { secrets: { get: (k) => secrets[k] } };
-      if (spec.startsWith('shared:')) return loadShared(spec.slice(7), baseSandbox);
-      throw new Error(`unmocked import: ${spec}`);
-    },
   };
 
-  const ctx = vm.createContext(sandbox);
-  vm.runInContext(src, ctx, { filename: file });
+  const resolve = (spec) => {
+    if (/^npm:@base44\/sdk/.test(spec)) return { createClientFromRequest: () => clientFactory() };
+    if (/^npm:stripe/.test(spec)) return stripe;
+    if (spec === 'base44:runtime') return { secrets: { get: (k) => secrets[k] } };
+    if (spec.includes('/shared/')) return loadShared(spec, baseSandbox);
+    throw new Error(`unmocked import: ${spec}`);
+  };
+
+  const exports_ = runModule(file, sandbox, resolve);
+  // Functions register either via Deno.serve(...) or `export default`.
+  if (!handler && typeof exports_.default === 'function') handler = exports_.default;
   if (!handler) throw new Error(`no handler captured for ${fnName}`);
 
   return async function invoke(body, { client, headers = {} } = {}) {
