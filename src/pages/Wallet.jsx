@@ -321,7 +321,9 @@ export default function WalletPage() {
               {transactions.map(tx => {
                 const cfg = txTypeConfig[tx.type] || unknownTxConfig(tx.type);
                 const Icon = cfg.icon;
-                const isPositive = ["earned", "transferred_in"].includes(tx.type);
+                // pilot_topup is a credit — it was missing here, so pilot
+                // credits rendered with a minus sign in the history.
+                const isPositive = ["earned", "transferred_in", "pilot_topup"].includes(tx.type);
                 return (
                   <div key={tx.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 hover:border-border/80 transition-colors">
                     <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center flex-shrink-0`}>
