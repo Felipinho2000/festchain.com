@@ -37,11 +37,32 @@ Deno.serve(async (req) => {
           break;
         }
 
-        // Idempotency: check first ticket — if already active, skip
+        // Idempotency, and the late-payment case.
+        //
+        // This used to skip unless the ticket was exactly 'pending', which was
+        // fine while the ONLY thing that could move it off pending was a
+        // previous delivery of this same event. Seat holds now expire after 30
+        // minutes (see shared/ticketHolds.ts), and Checkout Sessions created
+        // before that change still live for 24h — so a genuine payment can
+        // now arrive against a ticket we already released. Skipping it would
+        // take the money and leave the buyer with nothing at the door: the
+        // exact ghost-ticket failure this whole design exists to prevent.
+        //
+        // Rule: Stripe saying "paid" outranks our hold bookkeeping. Activate,
+        // and shout about it so the organizer can reconcile capacity.
         let firstTicket = null;
         try { firstTicket = await base44.asServiceRole.entities.Ticket.get(ticketIds[0]); } catch (e) { console.error('stripeWebhook: idempotency check failed for ticket', ticketIds[0], e.message); }
-        if (!firstTicket || firstTicket.status !== 'pending') {
+        if (!firstTicket) break;
+        if (['active', 'used', 'refunded', 'transferred'].includes(firstTicket.status)) {
+          // Already processed (redelivery) or deliberately moved on. No-op.
           break;
+        }
+        if (firstTicket.status === 'expired') {
+          console.error(
+            'stripeWebhook: LATE PAYMENT on a released hold — activating anyway so the buyer is not stranded. ' +
+            'Capacity may now exceed total_capacity for event ' + eventId + '; session ' + session.id +
+            '; tickets ' + ticketIds.join(',')
+          );
         }
 
         // Determine payment method from payment intent + extract Stripe processing fee
