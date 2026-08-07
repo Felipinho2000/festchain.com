@@ -211,6 +211,31 @@ async function gate2() {
     check('Gate 2', 'refunded ticket cannot enter', r.json?.status === 'invalid');
   }
 
+  // --- stale holds must not strand capacity (regression for the orphan
+  //     pending rows found in live data on 2026-08-07) ---
+  {
+    const { store } = baseWorld();
+    seedEvent(store, { total_capacity: 2, ticket_phases: [] });
+    const old = new Date(Date.now() - 4 * 86400000).toISOString();
+    store.t('Ticket').push({ id: 'tk_orphan1', event_id: 'ev_1', status: 'pending', created_by_id: 'u_ghost', created_date: old, qr_code: 'FC-O1' });
+    store.t('Ticket').push({ id: 'tk_orphan2', event_id: 'ev_1', status: 'pending', created_by_id: 'u_ghost', created_date: old, qr_code: 'FC-O2' });
+    store.t('FestCoinTransaction').push({ id: 'tx_orphan', created_by_id: 'u_ghost', reference_id: 'tk_orphan1', type: 'earned', amount: 50, status: 'pending' });
+    const r = await buy(store, USERS.buyer);
+    check('Gate 2', 'a 4-day-old abandoned hold does NOT block a new sale', r.json?.status === 'success', r.json?.message);
+    check('Gate 2', 'stale holds are swept to expired', store.all('Ticket').filter((t) => t.id.startsWith('tk_orphan')).every((t) => t.status === 'expired'));
+    check('Gate 2', 'sweeping cancels the orphaned reward row', store.all('FestCoinTransaction').find((t) => t.id === 'tx_orphan').status === 'cancelled');
+    check('Gate 2', 'checkout session carries a bounded expires_at', typeof r.json?.session_id === 'string');
+  }
+
+  // --- a FRESH hold must still block, or oversell returns ---
+  {
+    const { store } = baseWorld();
+    seedEvent(store, { total_capacity: 1, ticket_phases: [] });
+    store.t('Ticket').push({ id: 'tk_fresh', event_id: 'ev_1', status: 'pending', created_by_id: 'u_ghost', created_date: new Date().toISOString(), qr_code: 'FC-F' });
+    const r = await buy(store, USERS.buyer);
+    check('Gate 2', 'a live in-flight checkout still holds its seat', r.json?.status === 'error' && /sold out/i.test(r.json.message || ''), r.json?.message);
+  }
+
   // --- sold-out event ---
   {
     const { store } = baseWorld();
