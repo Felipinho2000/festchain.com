@@ -39,8 +39,19 @@ const txTypeConfig = {
   earned:         { icon: ArrowDownLeft, color: "text-success", bg: "bg-success/15", label: "Recompensa" },
   spent:          { icon: ArrowUpRight,  color: "text-destructive",  bg: "bg-destructive/10",  label: "Gasto" },
   transferred_in: { icon: ArrowDownLeft, color: "text-blue-400",   bg: "bg-blue-900/20",   label: "Recebido" },
-  transferred_out:{ icon: ArrowUpRight,  color: "text-warning",    bg: "bg-warning/10",    label: "Enviado" }
+  transferred_out:{ icon: ArrowUpRight,  color: "text-warning",    bg: "bg-warning/10",    label: "Enviado" },
+  pilot_topup:    { icon: ArrowDownLeft, color: "text-success", bg: "bg-success/15", label: "Créditos piloto" }
 };
+
+// An unrecognised transaction type must never borrow the styling of a credit —
+// a future debit type would render green with a down-arrow and read as money
+// received. Fall back to something visibly neutral instead.
+const unknownTxConfig = (type) => ({
+  icon: ArrowUpRight,
+  color: "text-muted-foreground",
+  bg: "bg-muted",
+  label: type || "Transação"
+});
 
 function TicketCard({ ticket }) {
   const [showQR, setShowQR] = useState(false);
@@ -128,6 +139,7 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [showTopup, setShowTopup] = useState(false);
   const [ftcRate, setFtcRate] = useState(DEFAULT_FTC_TO_BRL_RATE);
+  const [serverBalance, setServerBalance] = useState(null);
 
   const loadWallet = () => {
     if (!currentUser?.id) return;
@@ -135,11 +147,17 @@ export default function WalletPage() {
     Promise.all([
       base44.entities.Ticket.filter({ created_by_id: currentUser.id }, "-created_date", 50).catch(() => []),
       base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser.id }, "-created_date", 100).catch(() => []),
-      base44.entities.FestChainConfig.filter({ label: "global" }, "-created_date", 1).catch(() => [])
-    ]).then(([tix, txs, configs]) => {
+      base44.entities.FestChainConfig.filter({ label: "global" }, "-created_date", 1).catch(() => []),
+      // The transaction list above is a paginated view for display. The BALANCE
+      // must come from the server, which reads the whole ledger — summing the
+      // visible page silently under- or over-states the wallet as soon as a
+      // guest has more than 100 transactions.
+      base44.functions.invoke("getFtcBalance", {}).then(r => r?.data).catch(() => null)
+    ]).then(([tix, txs, configs, bal]) => {
       setTickets(tix);
       setTransactions(txs);
       if (configs && configs.length > 0) setFtcRate(configs[0].ftc_to_brl_rate || DEFAULT_FTC_TO_BRL_RATE);
+      setServerBalance(bal && bal.status === "success" && typeof bal.balance === "number" ? bal.balance : null);
     }).finally(() => setLoading(false));
   };
 
@@ -158,11 +176,14 @@ export default function WalletPage() {
   }, [currentUser?.id]);
 
   const validTx = transactions.filter(t => t.status === "confirmed");
-  const balance = validTx.reduce((s, t) => {
+  const pageBalance = validTx.reduce((s, t) => {
     if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
     if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
     return s;
   }, 0);
+  // Server-authoritative balance; the page sum is only a fallback for the brief
+  // window before the balance call returns (or if it fails).
+  const balance = serverBalance !== null ? serverBalance : pageBalance;
   const totalEarned = validTx.filter(t => ["earned", "transferred_in", "pilot_topup"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
   const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
 
@@ -298,7 +319,7 @@ export default function WalletPage() {
           ) : (
             <div className="space-y-2">
               {transactions.map(tx => {
-                const cfg = txTypeConfig[tx.type] || txTypeConfig.earned;
+                const cfg = txTypeConfig[tx.type] || unknownTxConfig(tx.type);
                 const Icon = cfg.icon;
                 const isPositive = ["earned", "transferred_in"].includes(tx.type);
                 return (
