@@ -249,13 +249,34 @@ export default function EventEditor() {
       ftc_pilot_mode: form.ftc_pilot_mode,
       refund_policy: form.refund_policy,
     };
+    // Events are written exclusively through the saveEvent backend function.
+    // Direct Event.create/update from the browser is blocked by RLS now: the
+    // server is what checks `approved_organizer`, ownership, capacity-vs-sold
+    // and the post-sale refund-policy freeze. Never call the entity directly.
+    const { status, ...editable } = payload;
     try {
+      const res = await base44.functions.invoke("saveEvent", {
+        action: isEdit ? "update" : "create",
+        event_id: isEdit ? id : undefined,
+        status,
+        payload: editable,
+      });
+      const data = res?.data || {};
+      if (data.status !== "success") {
+        throw new Error(data.message || "Não foi possível salvar o evento.");
+      }
       if (isEdit) {
-        await base44.entities.Event.update(id, payload);
-        toast({ title: "Evento atualizado" });
+        toast({
+          title: "Evento atualizado",
+          description: data.refund_policy_locked
+            ? "A política de reembolso ficou travada porque já há ingressos vendidos."
+            : undefined,
+        });
       } else {
-        await base44.entities.Event.create(payload);
-        toast({ title: "Evento criado!", description: "Seu evento está no ar." });
+        toast({
+          title: "Evento criado!",
+          description: data.event_status === "draft" ? "Salvo como rascunho." : "Seu evento está no ar.",
+        });
       }
       navigate("/dashboard");
     } catch (e) {
