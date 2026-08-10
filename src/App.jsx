@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import OrganizerRoute from '@/components/OrganizerRoute';
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 
 // Auth pages
@@ -98,23 +99,29 @@ const AuthenticatedApp = () => {
           <Route path="/app" element={<Home />} />
           <Route path="/tickets/:id" element={<TicketDetail />} />
           <Route path="/wallet" element={<WalletPage />} />
-          <Route path="/festcoin" element={<FestCoin />} />
+          {/* /festcoin had a duplicate route below it that could never match,
+              so the intended consolidation into /wallet never happened and a
+              second, page-limited balance view stayed reachable. */}
           <Route path="/festcoin" element={<Navigate to="/wallet" replace />} />
           <Route path="/tickets" element={<Navigate to="/wallet" replace />} />
           <Route path="/buy-ftc" element={<BuyFTC />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/events/new" element={<EventEditor />} />
-          <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
-          <Route path="/scan" element={<Scan />} />
           <Route path="/social" element={<Social />} />
-          <Route path="/pilot-setup" element={<PilotSetup />} />
-          <Route path="/organizer/financeiro" element={<OrganizerFinanceiro />} />
-          <Route path="/organizer/convidados" element={<Convidados />} />
-          <Route path="/organizer/recompensas" element={<OrganizerRecompensas />} />
-          <Route path="/organizer/validar-recompensa" element={<ValidarRecompensa />} />
-          <Route path="/organizer/reembolsos" element={<OrganizerReembolsos />} />
-          <Route path="/organizer/ajuda" element={<OrganizerAjuda />} />
+
+          {/* Organizer workspace — approved organizers and admins only. */}
+          <Route element={<OrganizerRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/events/new" element={<EventEditor />} />
+            <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
+            <Route path="/scan" element={<Scan />} />
+            <Route path="/pilot-setup" element={<PilotSetup />} />
+            <Route path="/organizer/financeiro" element={<OrganizerFinanceiro />} />
+            <Route path="/organizer/convidados" element={<Convidados />} />
+            <Route path="/organizer/recompensas" element={<OrganizerRecompensas />} />
+            <Route path="/organizer/validar-recompensa" element={<ValidarRecompensa />} />
+            <Route path="/organizer/reembolsos" element={<OrganizerReembolsos />} />
+            <Route path="/organizer/ajuda" element={<OrganizerAjuda />} />
+          </Route>
         </Route>
       </Route>
 
