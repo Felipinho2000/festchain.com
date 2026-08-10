@@ -171,7 +171,22 @@ Deno.serve(async (req) => {
     return Response.json({
       status: 'valid',
       message: 'Entry approved',
-      ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location, is_complimentary: ticket.is_complimentary || false, comp_category: ticket.comp_category || null },
+      ticket: {
+        event_title: ticket.event_title,
+        event_date: ticket.event_date,
+        event_location: ticket.event_location,
+        is_complimentary: ticket.is_complimentary || false,
+        comp_category: ticket.comp_category || null,
+        // Half-price (meia-entrada) is self-declared by the buyer at checkout —
+        // there is no eligibility evidence collected online, which is normal in
+        // Brazil precisely BECAUSE the document is checked at the door. The door
+        // could not check it: this response never said which tier the ticket was.
+        // Surface it so staff know when to ask for a student/senior ID.
+        ticket_tier: ticket.ticket_tier || 'inteira',
+        requires_id_check: !!ticket.ticket_tier && ticket.ticket_tier !== 'inteira',
+        buyer_name: ticket.buyer_name || null,
+        buyer_document_last4: (ticket.buyer_cpf || '').slice(-4) || null,
+      },
       attendee,
       scanned_at: now
     });
