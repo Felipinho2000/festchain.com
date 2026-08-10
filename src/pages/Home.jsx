@@ -49,7 +49,7 @@ export default function Home() {
   const restEvents = events.slice(1);
 
   useEffect(() => {
-    base44.entities.Event.filter({ status: "published" }, "-date", 5)
+    base44.entities.Event.filter({ status: "published", visibility: "public" }, "-date", 5)
       .then(setEvents)
       .catch(() => {})
       .finally(() => setLoading(false));
