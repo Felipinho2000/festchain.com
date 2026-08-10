@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { getFtcBalance, getFtcBalanceIncludingPendingDebits } from '../../shared/ftcLedger.ts';
 
 // Redeem a RewardItem using confirmed FestCoin balance.
 //
@@ -102,15 +103,21 @@ Deno.serve(async (req) => {
     if (ftcCost <= 0) return Response.json({ error: 'Invalid reward cost' }, { status: 400 });
 
     // ── Verify confirmed FTC balance >= ftcCost ──
-    const userTx = await base44.asServiceRole.entities.FestCoinTransaction.filter(
-      { created_by_id: String(user.id) }, "-created_date", 500
-    );
-    const confirmedTx = userTx.filter(function (t) { return t.status === "confirmed"; });
-    const balance = confirmedTx.reduce(function (s, t) {
-      if (["earned", "transferred_in", "pilot_topup"].includes(t.type)) return s + (t.amount || 0);
-      if (["spent", "transferred_out"].includes(t.type)) return s - (t.amount || 0);
-      return s;
-    }, 0);
+    // This used to re-sum the ledger inline from the newest 500 rows. That is
+    // the exact bug shared/ftcLedger.ts exists to prevent: past 500
+    // transactions the oldest rows drop out of the sum, and since early rows
+    // skew toward debits the computed balance comes out HIGHER than reality —
+    // letting a heavy user redeem against coins they already spent. The shared
+    // helper reads to a known ceiling and reports when it could not see the
+    // whole ledger, so we can refuse instead of guessing.
+    const { balance, complete: ledgerComplete } = await getFtcBalance(base44, user.id);
+    if (!ledgerComplete) {
+      console.error('redeemReward: FTC ledger read incomplete for user', String(user.id));
+      return Response.json({
+        error: 'ledger_unavailable',
+        message: 'Não foi possível verificar seu saldo agora. Tente novamente em instantes.',
+      }, { status: 503 });
+    }
     if (balance < ftcCost) {
       return Response.json({
         error: 'insufficient_balance',
@@ -221,6 +228,29 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.FestCoinTransaction.update(tx.id, { status: 'cancelled' });
       await base44.asServiceRole.entities.RewardRedemption.update(redemption.id, { status: 'cancelled' });
       return Response.json({ error: 'out_of_stock', message: 'This reward just sold out.' }, { status: 409 });
+    }
+
+    // ── Final guard before confirming: count OTHER pending debits ──
+    // The balance above was read before this request created its own pending
+    // debit. Two redemptions fired together — a double-click produces two
+    // DIFFERENT idempotency keys, because the client builds them from
+    // Date.now(), so the idempotency check above does not fire — would
+    // otherwise both read the same stale balance and both confirm, taking the
+    // wallet negative and handing out two rewards. Whoever sees the combined
+    // total go below zero rolls back.
+    const { balance: provisional } = await getFtcBalanceIncludingPendingDebits(base44, user.id);
+    if (provisional < 0) {
+      await base44.asServiceRole.entities.FestCoinTransaction.update(tx.id, { status: 'cancelled' }).catch(() => {});
+      await base44.asServiceRole.entities.RewardRedemption.update(redemption.id, { status: 'cancelled' }).catch(() => {});
+      if (hasStock) {
+        await base44.asServiceRole.entities.RewardItem.updateMany(
+          { id: reward_item_id }, { $inc: { stock_remaining: 1 } }
+        ).catch(() => {});
+      }
+      return Response.json({
+        error: 'concurrent_redemption',
+        message: 'Outro resgate está usando esses FestCoins. Confira seu saldo e tente de novo.',
+      }, { status: 409 });
     }
 
     // ── Confirm the transaction and redemption (server-side only) ──
