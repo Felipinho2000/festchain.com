@@ -45,7 +45,7 @@ export default function BuyFTC() {
           </div>
           <div>
             <p className="text-foreground font-semibold mb-0.5">Onde você usa</p>
-            <p className="text-muted-foreground text-sm">A compra de créditos tá desativada no piloto. O uso dentro dos rolês chega em breve.</p>
+            <p className="text-muted-foreground text-sm">No piloto, adicionar crédito é simulado (sem cobrança real) e fica disponível na sua carteira — não é uma compra com dinheiro real. Use o crédito em bebidas, produtos e perks nos rolês participantes.</p>
           </div>
         </div>
       </div>
@@ -54,8 +54,11 @@ export default function BuyFTC() {
         <span className="text-primary font-semibold">Piloto privado.</span> As recompensas FestChain são créditos de fidelidade dentro do app. Veja o <Link to="/legal" className="text-primary hover:underline">aviso do piloto</Link>.
       </div>
 
+      <Link to="/wallet">
+        <Button className="bg-primary hover:bg-primary/90 text-white shadow-glow">Abrir carteira</Button>
+      </Link>
       <Link to="/events">
-        <Button className="bg-primary hover:bg-primary/90 text-white shadow-glow">Ver eventos</Button>
+        <Button variant="outline">Ver eventos</Button>
       </Link>
     </div>
   );

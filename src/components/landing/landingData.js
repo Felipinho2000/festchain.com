@@ -15,9 +15,9 @@ export const COPY = {
       sub: "A FestChain é a plataforma de ingressos para casas, festas e coletivos. Checkout rápido, portaria que não trava nem sem internet, e crédito que traz a galera de volta na próxima.",
       ctaPrimary: "Quero levar minha festa",
       ctaSecondary: "Ver como funciona",
-      note: "8% por ingresso · Sem mensalidade · Repasse em até 2 dias úteis",
+      note: "8% por ingresso · Sem mensalidade · Repasse manual via Pix em até 2 dias úteis",
     },
-    strip: ["8% por ingresso vendido", "Sem mensalidade", "Portaria funciona offline", "Repasse em até 2 dias úteis"],
+    strip: ["8% por ingresso vendido", "Sem mensalidade", "Portaria funciona offline", "Repasse manual via Pix em até 2 dias úteis"],
     wedge: {
       kicker: "Por que trocam de plataforma",
       title: "Feito pra como a night vende de verdade.",
@@ -51,7 +51,7 @@ export const COPY = {
       items: [
         { q: "Vocês são novos. Por que eu confiaria a bilheteria da minha festa?", a: "Somos. Por isso a primeira festa é acompanhada de perto — eu estou junto no dia, na portaria, do primeiro ingresso ao último. Se algo der errado, você fala comigo, não com um chamado de suporte." },
         { q: "E se travar na entrada?", a: "A lista de quem comprou fica salva no celular do seu staff antes da festa começar. Se a internet cair, a portaria continua lendo QR normalmente e sincroniza sozinha quando a conexão volta." },
-        { q: "Quando eu recebo?", a: "Até 2 dias úteis depois do evento, via Pix, com o extrato do valor líquido. Você acompanha a data exata no painel desde o dia que publica o evento." },
+        { q: "Quando eu recebo?", a: "Durante o piloto, o repasse é feito manualmente pela nossa equipe via Pix, em até 2 dias úteis depois do evento, com o extrato do valor líquido. Você acompanha a data exata no painel desde o dia que publica o evento." },
       ],
     },
     pricing: {
@@ -86,7 +86,7 @@ export const COPY = {
     },
     footer: {
       tagline: "Plataforma de ingressos para a vida noturna. Feito no Brasil, começando por São Paulo.",
-      rights: "Ticketing seguro · Proteção contra fraude · Repasse em até 2 dias úteis",
+      rights: "Ticketing seguro · Proteção contra fraude · Repasse manual via Pix em até 2 dias úteis",
     },
     contact: {
       kicker: "Comece agora",
@@ -131,9 +131,9 @@ export const COPY = {
       sub: "FestChain is the ticketing platform for clubs, parties and collectives. Fast checkout, a door that doesn't stall even without internet, and credit that brings people back next time.",
       ctaPrimary: "Bring your party",
       ctaSecondary: "See how it works",
-      note: "8% per ticket · No monthly fee · Payout within 2 business days",
+      note: "8% per ticket · No monthly fee · Manual Pix payout within 2 business days",
     },
-    strip: ["8% per ticket sold", "No monthly fee", "Door works offline", "Payout within 2 business days"],
+    strip: ["8% per ticket sold", "No monthly fee", "Door works offline", "Manual Pix payout within 2 business days"],
     wedge: {
       kicker: "Why they switch",
       title: "Built for how nightlife actually sells.",
@@ -167,7 +167,7 @@ export const COPY = {
       items: [
         { q: "You're new. Why would I trust you with my party's box office?", a: "We are. That's why the first party is handled close up — I'm there on the day, at the door, from the first ticket to the last. If something goes wrong, you talk to me, not a support ticket." },
         { q: "What if the door stalls?", a: "The list of who bought is saved on your staff's phone before the party starts. If the internet drops, the door keeps scanning QR normally and syncs on its own when the connection comes back." },
-        { q: "When do I get paid?", a: "Within 2 business days after the event, via Pix, with a statement of the net amount. You can track the exact date in your dashboard from the day you publish the event." },
+        { q: "When do I get paid?", a: "During the pilot, payouts are sent manually by our team via Pix, within 2 business days after the event, with a statement of the net amount. You can track the exact date in your dashboard from the day you publish the event." },
       ],
     },
     pricing: {
@@ -202,7 +202,7 @@ export const COPY = {
     },
     footer: {
       tagline: "Ticketing platform for nightlife. Built in Brazil, starting with São Paulo.",
-      rights: "Secure ticketing · Fraud protection · Payout within 2 business days",
+      rights: "Secure ticketing · Fraud protection · Manual Pix payout within 2 business days",
     },
     contact: {
       kicker: "Get started",

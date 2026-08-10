@@ -9,7 +9,7 @@ const FAQ_PT = [
   },
   {
     q: "Quando eu recebo o dinheiro das vendas?",
-    a: "Até 2 dias úteis depois do evento, via Pix, com o extrato do valor líquido. A data exata aparece no seu painel desde o dia que você publica o evento."
+    a: "Durante o piloto, o repasse é feito manualmente pela nossa equipe via Pix, em até 2 dias úteis depois do evento, com o extrato do valor líquido. A data exata aparece no seu painel desde o dia que você publica o evento."
   },
   {
     q: "Meus clientes podem pedir reembolso?",
@@ -44,7 +44,7 @@ const FAQ_EN = [
   },
   {
     q: "When do I receive the sales money?",
-    a: "Within 2 business days after the event, via Pix, with a statement of the net amount. The exact date shows in your dashboard from the day you publish the event."
+    a: "During the pilot, payouts are sent manually by our team via Pix, within 2 business days after the event, with a statement of the net amount. The exact date shows in your dashboard from the day you publish the event."
   },
   {
     q: "Can my customers request a refund?",

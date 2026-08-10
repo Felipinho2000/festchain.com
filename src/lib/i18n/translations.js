@@ -543,7 +543,7 @@ export const translations = {
       pilotPara: [
         "FestChain is currently in a private pilot. Access is intended for testing with organizers and attendees.",
         "FestCoin (FTC) is an in-app loyalty / test credit only. It has no cash value, is not an investment, is not a security, is not a cryptocurrency, and is not guaranteed to have any future value. It cannot be withdrawn, sold, or traded.",
-        "During the pilot there is no public token sale, no staking, no yield, no NFT marketplace, no resale market, and no real payment processing. Tickets are check-in credentials verified by secure QR — they are not blockchain/NFT assets.",
+        "Ticket purchases and refunds are real and processed via a licensed payment provider (Stripe). FestCoin (FTC) credits, however, remain simulated pilot credits with no cash value — they cannot be bought, sold, or withdrawn. There is no public token sale, no staking, no yield, and no NFT marketplace. Tickets are check-in credentials verified by secure QR — they are not blockchain/NFT assets.",
         "To request data removal, account changes, or support, contact the project team. Refund and cancellation handling is manual during the pilot.",
       ],
       termsPara: [
@@ -560,7 +560,7 @@ export const translations = {
         "Pilot data may be reviewed by the FestChain team for support and quality purposes.",
       ],
       refundPara: [
-        "During the private pilot, no real payments are processed, so there are no automatic refunds to process.",
+        "Ticket purchases and refunds are real and processed via a licensed payment provider (Stripe). You can request a refund through your ticket in the wallet; the organizer approves or declines it per the event's refund policy.",
         "If you believe a pilot ticket or credit was issued in error, contact the project team. Refund and cancellation handling is manual during the pilot.",
         "FestCoin credits carry no cash value and are therefore not eligible for monetary refund.",
       ],
@@ -637,7 +637,7 @@ export const translations = {
       timelineSold: "Ticket sold",
       timelineEvent: "Event happens",
       timelineWindow: "Settlement window",
-      timelinePayout: "Pix payout",
+      timelinePayout: "Manual Pix payout",
       expectedPayoutDate: "Expected payout date",
       payoutDone: "Payout completed on {date}",
       noEvents: "No published events yet",
@@ -653,6 +653,7 @@ export const translations = {
       modeDirect: "Send direct",
       modeCodes: "Generate codes",
       modeDirectDesc: "Send named tickets to specific people",
+      modeDirectNoAccount: "If a guest doesn't have a FestChain account yet, share their ticket link/QR with them directly — it won't appear in their wallet automatically.",
       modeCodesDesc: "Generate claim codes to share via WhatsApp",
       category: "Category",
       tier: "Tier",
@@ -1343,7 +1344,7 @@ export const translations = {
       pilotPara: [
         "O FestChain está em piloto privado. O acesso é destinado a testes com organizadores e participantes.",
         "As recompensas FestChain (FTC) são créditos de fidelidade no app. Não têm valor em dinheiro, não são investimento, não são título, não são criptomoeda e não têm valor futuro garantido. Não podem ser sacadas, vendidas ou negociadas.",
-        "Durante o piloto não há venda pública de tokens, nem staking, nem rendimentos, nem marketplace de NFTs, nem mercado de revenda e nenhum processamento de pagamentos reais. Os ingressos são credenciais de check-in validadas por QR seguro — não são ativos blockchain/NFT.",
+        "As compras e os reembolsos de ingressos são reais e processados via um provedor de pagamento licenciado (Stripe). Já os créditos FestChain (FTC) permanecem créditos simulados do piloto, sem valor em dinheiro — não podem ser comprados, vendidos ou sacados. Não há venda pública de tokens, staking, rendimentos nem marketplace de NFTs. Os ingressos são credenciais de check-in validadas por QR seguro — não são ativos blockchain/NFT.",
         "Para solicitar remoção de dados, alterações de conta ou suporte, contate o time do projeto. O tratamento de reembolso e cancelamento é manual durante o piloto.",
       ],
       termsPara: [
@@ -1360,7 +1361,7 @@ export const translations = {
         "Os dados do piloto podem ser revisados pela equipe FestChain para fins de suporte e qualidade.",
       ],
       refundPara: [
-        "Durante o piloto privado, nenhum pagamento real é processado, portanto não há reembolsos automáticos a processar.",
+        "As compras e os reembolsos de ingressos são reais e processados via Stripe. Você pode solicitar o reembolso pelo ingresso na carteira; o organizador aprova ou recusa conforme a política de reembolso do evento.",
         "Se você acredita que um ingresso ou crédito do piloto foi emitido por erro, contate o time do projeto. O tratamento de reembolso e cancelamento é manual durante o piloto.",
         "As recompensas FestChain não têm valor em dinheiro e, portanto, não são elegíveis para reembolso monetário.",
       ],
@@ -1437,7 +1438,7 @@ export const translations = {
       timelineSold: "Ingresso vendido",
       timelineEvent: "Evento acontece",
       timelineWindow: "Janela de acerto",
-      timelinePayout: "Repasse via Pix",
+      timelinePayout: "Repasse manual via Pix",
       expectedPayoutDate: "Data prevista do repasse",
       payoutDone: "Repasse concluído em {date}",
       noEvents: "Nenhum evento publicado ainda",
@@ -1453,6 +1454,7 @@ export const translations = {
       modeDirect: "Enviar direto",
       modeCodes: "Gerar códigos",
       modeDirectDesc: "Enviar ingressos nominados para pessoas específicas",
+      modeDirectNoAccount: "Se o convidado ainda não tem conta na FestChain, compartilhe o link/QR do ingresso direto com ele — não aparece automaticamente na carteira.",
       modeCodesDesc: "Gerar códigos para compartilhar via WhatsApp",
       category: "Categoria",
       tier: "Tipo",

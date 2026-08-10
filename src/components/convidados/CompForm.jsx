@@ -100,6 +100,9 @@ export default function CompForm({ event, onIssued }) {
       <p className="text-xs text-muted-foreground -mt-2">
         {mode === "direct" ? t("convidados.modeDirectDesc") : t("convidados.modeCodesDesc")}
       </p>
+      {mode === "direct" && (
+        <p className="text-xs text-warning -mt-1">{t("convidados.modeDirectNoAccount")}</p>
+      )}
 
       {/* Common fields */}
       <div className="grid grid-cols-2 gap-3">

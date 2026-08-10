@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, CheckCircle } from "lucide-react";
 
-export default function EventMenuPanel({ eventId, userBalance, onRedeemed }) {
+export default function EventMenuPanel({ eventId, userBalance, onRedeemed, ftcConversionRate = 1 }) {
   const { currentUser } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -80,7 +80,18 @@ export default function EventMenuPanel({ eventId, userBalance, onRedeemed }) {
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-white text-sm">{item.name}</p>
                 {item.description && <p className="text-xs text-[#666] truncate">{item.description}</p>}
-                <p className="text-xs text-primary font-bold mt-0.5">{item.price_ftc} FTC</p>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  {item.price_brl > 0 && <span className="text-xs text-muted-foreground">R${item.price_brl?.toFixed(2)}</span>}
+                  <span className="text-xs text-primary font-bold">{item.price_ftc} FTC</span>
+                </div>
+                {(() => {
+                  const ftcBrl = (item.price_ftc || 0) * ftcConversionRate;
+                  const savings = (item.price_brl || 0) - ftcBrl;
+                  if (item.price_brl > 0 && savings > 0.5) {
+                    return <p className="text-[10px] text-emerald-400 mt-0.5">Economize R${savings.toFixed(2)} com FestCoin</p>;
+                  }
+                  return null;
+                })()}
               </div>
               <div className="flex-shrink-0">
                 {myRdp ? (

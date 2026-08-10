@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/events/EventCard";
+import { useAuth } from "@/lib/AuthContext";
 import moment from "moment";
 
 const pillars = [
@@ -42,6 +43,8 @@ const genreLabels = {
 };
 
 export default function Home() {
+  const { currentUser } = useAuth();
+  const canOrganize = currentUser?.role === 'admin' || currentUser?.approved_organizer === true;
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -229,6 +232,7 @@ export default function Home() {
         </section>
 
         {/* ── FOR ORGANIZERS ── */}
+        {canOrganize && (
         <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-card border border-border rounded-3xl p-7 lg:p-12">
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/8 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3 pointer-events-none" />
           <div className="relative flex flex-col lg:flex-row gap-8 items-start">
@@ -257,6 +261,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        )}
       </div>
     </div>
   );

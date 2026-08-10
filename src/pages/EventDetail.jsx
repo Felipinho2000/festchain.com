@@ -304,7 +304,7 @@ export default function EventDetail() {
                 <button onClick={() => setShowMenu(m => !m)} className="text-xs text-primary hover:underline">{showMenu ? "Ocultar" : "Ver"}</button>
               </div>
               {showMenu ? (
-                <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} />
+                <EventMenuPanel eventId={id} userBalance={userBalance} onRedeemed={(newBal) => setUserBalance(newBal)} ftcConversionRate={event.ftc_conversion_rate || 1} />
               ) : (
                 <p className="text-xs text-muted-foreground">Usa seu saldo pra resgatar bebida, merch e perks VIP nesse rolê.</p>
               )}

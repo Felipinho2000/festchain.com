@@ -52,7 +52,9 @@ export default function InventoryManager({ events }) {
 
   const handleSave = async () => {
     setSaving(true);
-    const price_ftc = Math.round(parseFloat(form.price_brl || 0) / 0.5 / 0.9); // 10% FTC discount
+    const ftcRate = selectedEvent?.ftc_conversion_rate || 1;
+    const ftcDiscount = (selectedEvent?.ftc_discount_percent || 0) / 100;
+    const price_ftc = Math.round((parseFloat(form.price_brl || 0) / ftcRate) * (1 - ftcDiscount));
     const data = {
       event_id: selectedEventId,
       event_title: selectedEvent?.title || "",
@@ -151,7 +153,7 @@ export default function InventoryManager({ events }) {
                     {item.is_available ? "Ativo" : "Oculto"}
                   </Badge>
                 </div>
-                <p className="text-xs text-[#666]">{CATEGORY_LABELS[item.category] || item.category} · R${item.price_brl?.toFixed(2)}{item.stock ? ` · ${item.stock} em estoque` : ""}</p>
+                <p className="text-xs text-[#666]">{CATEGORY_LABELS[item.category] || item.category} · R${item.price_brl?.toFixed(2)} · {item.price_ftc} FTC{item.stock ? ` · ${item.stock} em estoque` : ""}</p>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button onClick={() => toggleAvailability(item)} className="p-2 text-[#888] hover:text-primary rounded-lg hover:bg-[#1f1f1f] transition-colors">
@@ -203,6 +205,11 @@ export default function InventoryManager({ events }) {
               <div>
                 <Label className="text-xs">Preço (R$)</Label>
                 <Input type="number" value={form.price_brl} onChange={e => setForm(p => ({ ...p, price_brl: e.target.value }))} className="rounded-xl mt-1" placeholder="18.00" />
+                {form.price_brl && (
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    ≈ {Math.round((parseFloat(form.price_brl || 0) / (selectedEvent?.ftc_conversion_rate || 1)) * (1 - (selectedEvent?.ftc_discount_percent || 0) / 100))} FTC{selectedEvent?.ftc_discount_percent > 0 ? ` (com ${selectedEvent.ftc_discount_percent}% de desconto FTC)` : ""}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">

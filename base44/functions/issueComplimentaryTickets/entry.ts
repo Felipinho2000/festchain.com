@@ -158,6 +158,30 @@ Deno.serve(async (req) => {
 
     const createdTickets = await base44.asServiceRole.entities.Ticket.bulkCreate(ticketsToCreate);
 
+    // In "direct" mode, reassign created_by_id to the real recipient when they
+    // have a registered account. bulkCreate stamps the service identity, but
+    // MyTickets/getTicketDetails gate on created_by_id === user.id, so without
+    // this a named comp/VIP recipient can never see their own ticket in their
+    // wallet. Service-role UPDATE honors an explicit created_by_id (CREATE does
+    // not). If no account matches, the ticket stays service-owned and the
+    // organizer must share the QR/link directly (see CompForm copy).
+    if (hasRecipients) {
+      for (let i = 0; i < createdTickets.length && i < recipients.length; i++) {
+        const email = (recipients[i].email || '').trim().toLowerCase();
+        if (!email) continue;
+        try {
+          const matches = await base44.asServiceRole.entities.User.filter({ email });
+          if (matches.length === 1) {
+            await base44.asServiceRole.entities.Ticket.update(createdTickets[i].id, {
+              created_by_id: matches[0].id,
+            });
+          }
+        } catch (e) {
+          console.error('issueComplimentaryTickets: failed to reassign created_by_id for', email, e.message);
+        }
+      }
+    }
+
     // Increment event tickets_sold atomically — comps consume real capacity.
     // $inc avoids the read-modify-write race that loses sales under concurrency.
     await base44.asServiceRole.entities.Event.updateMany(

@@ -26,18 +26,19 @@ const navItems = [
 export default function AppLayout() {
   const location = useLocation();
   const { currentUser, isAuthenticated } = useAuth();
-  const isOrganizer = !!currentUser;
+  const canOrganize = currentUser?.role === 'admin' || currentUser?.approved_organizer === true;
 
   const initials = currentUser?.full_name
     ? currentUser.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
     : "FC";
 
   const visibleItems = navItems.filter(i =>
-    (!i.staffOnly || isOrganizer) &&
+    i.path !== "/social" &&
+    (!i.staffOnly || canOrganize) &&
     (!i.authOnly || isAuthenticated) &&
     (!i.guestOnly || !isAuthenticated)
   );
-  const mobileNavItems = visibleItems.filter(i => i.path !== "/social");
+  const mobileNavItems = visibleItems;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -71,7 +72,7 @@ export default function AppLayout() {
         </nav>
 
         <div className="border-t border-sidebar-border pt-4 mt-2 space-y-1">
-          {isOrganizer && (
+          {canOrganize && (
             <>
               <Link to="/organizer/reembolsos" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-all">
                 <RefreshCw className="w-[18px] h-[18px]" strokeWidth={1.75} />
