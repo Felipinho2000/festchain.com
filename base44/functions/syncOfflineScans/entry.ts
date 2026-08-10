@@ -45,7 +45,24 @@ export default async function(req) {
       );
       if (existing.length > 0) { alreadyKnown++; continue; }
 
-      const ticket = await base44.asServiceRole.entities.Ticket.get(ticket_id);
+      const ticket = await base44.asServiceRole.entities.Ticket.get(ticket_id).catch(() => null);
+
+      // SECURITY: the caller is authorized against `event_id` at the top of this
+      // handler, but the tickets they submit were never checked against it. An
+      // organizer could post another organizer's ticket ids under their OWN
+      // event and burn them to 'used' — those guests are then refused at the
+      // real door. A ticket that does not belong to this event is recorded as a
+      // conflict for review and never written.
+      if (ticket && String(ticket.event_id) !== String(event_id)) {
+        await base44.asServiceRole.entities.DoorScan.create({
+          event_id, event_title: eventTitle, organizer_id: organizerId,
+          ticket_id, device_id, staff_user_id, staff_user_name: user.full_name,
+          scanned_at, synced_at: syncedAt, sync_status: 'conflito_duplicado',
+          idempotency_key: idempotencyKey,
+        });
+        conflicts++;
+        continue;
+      }
 
       if (!ticket) {
         // Ticket not found — record as conflict for review.
