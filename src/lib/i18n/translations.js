@@ -23,7 +23,7 @@ export const translations = {
     beta: {
       badge: "Early Pilot",
       disclaimer:
-        "FestChain is in an early pilot phase. Tickets and FTC credits are for pilot testing only. No real payments, token purchases, or financial value are enabled.",
+        "FestChain is in a private pilot. Ticket purchases and refunds are real and processed via Stripe. FestCoin (FTC) credits are pilot credits with no cash value — they cannot be bought, sold, or withdrawn.",
     },
     ftc: {
       topupTitle: "Get FTC Test Credits",
@@ -95,7 +95,7 @@ export const translations = {
       orgCashbackHint: "Credit gives guests FTC credits after an eligible purchase.",
       orgCashbackPercent: "Credit percentage (%)",
       orgCashbackOnFtc: "Apply credit to FTC purchases",
-      orgPilotMode: "Pilot mode (no real payments)",
+      orgPilotMode: "Pilot mode (simulated FTC credits)",
       reportTitle: "FestCoin Summary",
       reportTopups: "FTC Top-ups",
       reportSpent: "FTC Spent",
@@ -131,8 +131,8 @@ export const translations = {
     },
     menu: {
       title: "Event Menu · Pilot",
-      disclaimer: "This is a pilot redemption feature. No real payment is processed.",
-      disclaimerPt: "Este é um recurso de resgate do piloto. Nenhum pagamento real é processado.",
+      disclaimer: "Redeem with FestCoin credits. Credits have no cash value.",
+      disclaimerPt: "Resgate com créditos FestCoin. Os créditos não têm valor em dinheiro.",
       redeemBtn: "Redeem with FTC",
       redeeming: "Redeeming…",
       insufficientBalance: "Insufficient FTC balance",
@@ -233,7 +233,7 @@ export const translations = {
           {
             label: "Phase 3 — Payments & Ticket Economy",
             status: "planned",
-            items: "Real payment integrations, safer ticket transfers, resale controls, refunds, and stronger organizer revenue tools.",
+            items: "Safer ticket transfers, resale controls, and stronger organizer revenue tools.",
           },
           {
             label: "Phase 4 — Social Layer",
@@ -256,7 +256,7 @@ export const translations = {
         kicker: "Coming later",
         title: "On the roadmap — not live yet",
         subtitle: "Keeping the pilot focused. These arrive once the core is proven.",
-        items: ["Real payments (Pix / card)", "NFT tickets", "Resale / transfer", "Full venue ordering", "Social profiles", "FestCard"],
+        items: ["NFT tickets", "Resale / transfer", "Full venue ordering", "Social profiles", "FestCard"],
       },
       disclaimer: {
         title: "Early Pilot Disclaimer",
@@ -374,7 +374,7 @@ export const translations = {
           "Sponsored brand activations — brands can reward guests with FTC for participating in activations.",
           "Future staking and governance features — holding FTC may unlock platform participation in future phases.",
         ],
-        disclaimer: "⚠ Important: FestCoin is a pilot/test utility credit in its current phase. It has no cash value, no investment value, and no guaranteed future value. No real financial transactions are enabled. All FTC in the current pilot is for testing purposes only.",
+        disclaimer: "⚠ Important: FestCoin is a pilot/test utility credit in its current phase. It has no cash value, no investment value, and no guaranteed future value. It cannot be bought, sold, or withdrawn. All FTC in the current pilot is for testing purposes only.",
       },
       mvp: {
         kicker: "05 · MVP Phase",
@@ -580,7 +580,7 @@ export const translations = {
       hide: "Hide",
       menuHint: "Use your FestCoin balance to redeem drinks, merch, and VIP perks at this event.",
       comingSoon: "Coming soon",
-      secureQrHint: "Secure QR ticket · payment handled manually during pilot.",
+      secureQrHint: "Secure QR ticket · pay with Pix or card.",
       phaseHint: "Price reflects the current ticket phase and updates automatically as phases open and sell out.",
       soldOut: "Sold Out",
       ticketsComingSoon: "Tickets Coming Soon",
@@ -825,7 +825,7 @@ export const translations = {
     beta: {
       badge: "Piloto Inicial",
       disclaimer:
-        "O FestChain está em fase de piloto inicial. Os ingressos e créditos FTC são apenas para testes do piloto. Nenhum pagamento real, compra de tokens ou valor financeiro está habilitado.",
+        "O FestChain está em piloto privado. As compras e os reembolsos de ingressos são reais e processados via Stripe. Os créditos FestChain (FTC) são créditos do piloto, sem valor em dinheiro — não podem ser comprados, vendidos ou sacados.",
     },
     ftc: {
       topupTitle: "Adicionar saldo",
@@ -897,7 +897,7 @@ export const translations = {
       orgCashbackHint: "Ganha créditos FTC na carteira após uma compra elegível.",
       orgCashbackPercent: "Percentual de crédito (%)",
       orgCashbackOnFtc: "Aplicar crédito a compras em FTC",
-      orgPilotMode: "Modo piloto (sem pagamentos reais)",
+      orgPilotMode: "Modo piloto (créditos FTC simulados)",
       reportTitle: "Resumo de recompensas",
       reportTopups: "Recargas FTC",
       reportSpent: "FTC Gasto",
@@ -933,7 +933,7 @@ export const translations = {
     },
     menu: {
       title: "Menu do Evento · Piloto",
-      disclaimer: "Este é um recurso de resgate do piloto. Nenhum pagamento real é processado.",
+      disclaimer: "Resgate com créditos FestCoin. Os créditos não têm valor em dinheiro.",
       redeemBtn: "Resgatar com FTC",
       redeeming: "Resgatando…",
       insufficientBalance: "Saldo FTC insuficiente",
@@ -1034,7 +1034,7 @@ export const translations = {
           {
             label: "Fase 3 — Pagamentos e Economia de Ingressos",
             status: "planned",
-            items: "Integrações com pagamentos reais, transferências de ingressos mais seguras, controles de revenda, reembolsos e ferramentas melhores de receita para organizadores.",
+            items: "Transferências de ingressos mais seguras, controles de revenda e ferramentas melhores de receita para organizadores.",
           },
           {
             label: "Fase 4 — Camada Social",
@@ -1057,7 +1057,7 @@ export const translations = {
         kicker: "Em breve",
         title: "No roadmap — ainda não disponível",
         subtitle: "Mantendo o piloto focado. Isso chega quando o núcleo estiver provado.",
-        items: ["Pagamentos reais (Pix / cartão)", "Ingressos NFT", "Revenda / transferência", "Pedidos completos no local", "Perfis sociais", "FestCard"],
+        items: ["Ingressos NFT", "Revenda / transferência", "Pedidos completos no local", "Perfis sociais", "FestCard"],
       },
       disclaimer: {
         title: "Aviso do Piloto Inicial",
@@ -1175,7 +1175,7 @@ export const translations = {
           "Ativações de marcas patrocinadas — marcas podem recompensar convidados com FTC por participarem de ativações.",
           "Recursos futuros de staking e governança — manter FTC pode desbloquear participação na plataforma em fases futuras.",
         ],
-        disclaimer: "⚠ Importante: FestCoin é um crédito utilitário piloto/teste em sua fase atual. Não tem valor em dinheiro, valor de investimento nem valor futuro garantido. Nenhuma transação financeira real está habilitada. Todo FTC no piloto atual é apenas para fins de teste.",
+        disclaimer: "⚠ Importante: FestCoin é um crédito utilitário piloto/teste em sua fase atual. Não tem valor em dinheiro, valor de investimento nem valor futuro garantido. Não pode ser comprado, vendido ou sacado. Todo FTC no piloto atual é apenas para fins de teste.",
       },
       mvp: {
         kicker: "05 · Fase MVP",
