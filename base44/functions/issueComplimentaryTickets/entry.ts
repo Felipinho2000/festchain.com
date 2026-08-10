@@ -39,6 +39,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Quantity must be at least 1' }, { status: 400 });
     }
 
+    // SECURITY: ownership is verified BEFORE the idempotency lookup.
+    //
+    // The replay branch below returns the batch record, which carries
+    // `claim_codes` — the literal QR values validateTicket admits on. The client
+    // builds the key as `comp-${event_id}-${Date.now()}` and event_id is public,
+    // so running the lookup first let any signed-in user brute-force a
+    // millisecond window and be handed a whole batch of working entry codes,
+    // never reaching the ownership check that used to sit underneath it.
+    const isAdmin = user.role === 'admin';
+    let event = null;
+    try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
+    if (!event) return Response.json({ error: 'Event not found' }, { status: 404 });
+
+    if (!isAdmin && String(event.created_by_id) !== String(user.id)) {
+      return Response.json({ error: 'Not authorized for this event' }, { status: 403 });
+    }
+
     // Idempotency check — return prior result on repeat
     const existingBatches = await base44.asServiceRole.entities.ComplimentaryBatch.filter({ idempotency_key });
     if (existingBatches.length > 0) {
@@ -49,16 +66,6 @@ Deno.serve(async (req) => {
         requestedQty
       );
       return Response.json({ success: true, batch, tickets, idempotent: true });
-    }
-
-    // Verify event ownership
-    const isAdmin = user.role === 'admin';
-    let event = null;
-    try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
-    if (!event) return Response.json({ error: 'Event not found' }, { status: 404 });
-
-    if (!isAdmin && String(event.created_by_id) !== String(user.id)) {
-      return Response.json({ error: 'Not authorized for this event' }, { status: 403 });
     }
 
     // Capacity check — comps consume real capacity, never oversell
