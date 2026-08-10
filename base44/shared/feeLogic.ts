@@ -133,8 +133,28 @@ export function getEventPayoutStatus(event: any, payout: any): string {
 // Recalculate payout figures from Ticket rows — idempotent, never trusts aggregates
 // ---------------------------------------------------------------------------
 
+// Ceiling on tickets read for one payout calculation. Above this we refuse to
+// produce a number rather than produce a wrong one.
+export const PAYOUT_TICKET_READ_CEILING = 5000;
+
 export async function recalculatePayoutForEvent(base44: any, event: any): Promise<any> {
-  const tickets = await base44.asServiceRole.entities.Ticket.filter({ event_id: event.id });
+  // This read used to be limitless. Per the rule documented in
+  // shared/ftcLedger.ts, a filter with no explicit limit is silently truncated
+  // at the backing page size — which meant the payout basis for a large event
+  // was computed from only the first page of its tickets. markPayoutPaid calls
+  // this immediately before stamping status:'paid', so the organizer would have
+  // been underpaid and the record would say settled. Read explicitly, and if we
+  // hit the ceiling, throw: an unpayable event is recoverable, a silently
+  // underpaid one is not.
+  const tickets = await base44.asServiceRole.entities.Ticket.filter(
+    { event_id: event.id }, 'created_date', PAYOUT_TICKET_READ_CEILING
+  ) || [];
+  if (tickets.length >= PAYOUT_TICKET_READ_CEILING) {
+    throw new Error(
+      `payout_basis_incomplete: event ${event.id} has at least ${PAYOUT_TICKET_READ_CEILING} tickets; ` +
+      'refusing to compute a payout from a truncated read. Paginate this calculation before settling.'
+    );
+  }
 
   let grossSalesCents = 0;
   let platformFeeCents = 0;
