@@ -421,7 +421,66 @@ one QR simultaneously) is the single test that cannot be replaced by code.
 
 ---
 
-## 24. Working rule for future AI sessions
+## 24. Full re-audit — 2026-08-10
+
+Whole-codebase sweep covering the surface the first two rounds never read: 16 backend functions,
+all 22 entity RLS rules, and 29 frontend pages/components. New regression suite:
+`node pilot-verification/gates-audit3.mjs` — 19/19. Prior suite still 121/123.
+
+### Fixed (all verified by the new suite)
+1. **P0 `syncOfflineScans` cross-event ticket burn.** The caller was authorized against `event_id`,
+   but submitted ticket ids were never checked against it — organizer A could POST organizer B's
+   ticket ids under their own event and burn them to `used`, so B's guests were refused at B's door.
+   Mismatched tickets are now logged as conflicts and never written.
+2. **P0 `feeLogic.recalculatePayoutForEvent` truncated payout basis.** The ticket read was limitless
+   and therefore silently page-truncated; `markPayoutPaid` settles on that number. An 800-ticket
+   event would have been underpaid ~87% and stamped `paid`. Now reads to an explicit ceiling and
+   throws rather than settle a partial basis.
+3. **P0 `redeemReward` double-spend + inline ledger.** Re-summed the newest 500 rows instead of
+   using `shared/ftcLedger.ts`, and confirmed without re-checking. The client builds the
+   idempotency key from `Date.now()`, so a double-click produces two different keys and the
+   idempotency guard never fires. Now uses the shared helper, refuses on an incomplete ledger, and
+   re-checks pending debits before confirming (with stock rollback).
+4. **P0 `issueComplimentaryTickets` claim-code leak.** The idempotency replay returned the batch
+   including `claim_codes` (literal admissible QR values) *before* the ownership check, against a
+   guessable `comp-${event_id}-${Date.now()}` key. Ownership now runs first.
+5. **P1 every `/organizer/*` route was gated on authentication only.** The Aug 7 round fixed
+   `/dashboard` and missed the seven sibling routes; each page re-checked identity, not permission.
+   New `src/components/OrganizerRoute.jsx` wraps them all. Also removed the dead duplicate
+   `/festcoin` route that kept a page-limited balance view reachable.
+6. **P1 door could not see meia-entrada.** Half-price is self-declared at checkout with no online
+   eligibility evidence — which is fine in Brazil only because the document is checked at the door,
+   and `validateTicket` never told the door which tier it was. Now returns `ticket_tier`,
+   `requires_id_check`, buyer name and document last-4.
+7. **P1 `Home.jsx` featured events.** Missing `visibility: 'public'`, so a private event could
+   render as the hero and organizer emails rode in the payload.
+
+### Corrected finding — read this before acting on an RLS report
+Four entities (`RewardRedemption`, `EventRedemption`, `VenueOrder`, `RefundRequest`) key
+authorization on `organizer_id`, which the client writes, and do not pin `status`/amount on create.
+A subagent classified these as P0 self-service free rewards. **The exploit chain terminates**: the
+read rule is keyed on the same client-written field, so a forged row naming the attacker as
+organizer is invisible to the real organizer's validation screen (`ValidarRecompensa`,
+`RedemptionManager`), and no staff surface will ever honour it. Real defects, genuine hygiene debt,
+but not live money holes. Fixing them properly means routing those writes through functions and
+making entity update admin-only — worth doing after the pilot, not days before it.
+
+### Known-open, unchanged
+- `createCheckoutSession` check-then-create oversell (bounded by simultaneous clicks; mitigate with
+  a capacity buffer).
+- `Moment` has `read: {}` while shipping an `is_anonymous` flag — all 7 live rows return the real
+  `created_by` email. The anonymity promise is not kept. Needs a server-side reader, or drop the
+  claim from the UI.
+- Payout SLA "repasse em até 2 dias úteis" is published in seven places with no payout rail behind
+  it. Business decision, not a code fix.
+- `Legal.jsx` states no real payments are processed. True today (Stripe is in test mode); becomes
+  false the moment live mode is enabled. Gate the mode switch on updating that copy.
+- Comp tickets are created via `asServiceRole` and therefore owned by a service identity;
+  recipients cannot see them in their own wallet.
+
+---
+
+## 25. Working rule for future AI sessions
 
 1. Read `aboutFestChain.md` first, then `MVP_SCOPE.md`, then this file.
 2. Verify current code before treating a historical item as still open.
