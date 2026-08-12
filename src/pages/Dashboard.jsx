@@ -88,6 +88,8 @@ export default function Dashboard() {
   const [events, setEvents] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [venueItemCount, setVenueItemCount] = useState(0);
+  const [venueItemsLoaded, setVenueItemsLoaded] = useState(false);
   const { currentUser } = useAuth();
   const { toast } = useToast();
 
@@ -104,6 +106,22 @@ export default function Dashboard() {
   };
 
   useEffect(() => { loadData(); }, [currentUser]);
+
+  // The readiness card focuses on ONE event — the soonest non-cancelled one
+  // that hasn't happened yet — rather than trying to summarize every event
+  // the organizer has ever created.
+  const focalEvent = [...events]
+    .filter((e) => e.status !== "cancelled" && e.date && new Date(e.date) >= new Date())
+    .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+  useEffect(() => {
+    if (!focalEvent?.id) { setVenueItemsLoaded(false); return; }
+    setVenueItemsLoaded(false);
+    base44.entities.VenueMenuItem.filter({ event_id: focalEvent.id, is_available: true })
+      .then((items) => setVenueItemCount((items || []).length))
+      .catch(() => setVenueItemCount(0))
+      .finally(() => setVenueItemsLoaded(true));
+  }, [focalEvent?.id]);
 
   // This gate used to be `!!currentUser`, i.e. every signed-in account saw the
   // organizer workspace and could reach the event editor. Match the same rule
@@ -201,6 +219,15 @@ export default function Dashboard() {
           </Button>
         </Link>
       </div>
+
+      {focalEvent && (
+        <ReadinessCard
+          event={focalEvent}
+          eventTickets={realTickets.filter((t) => t.event_id === focalEvent.id)}
+          venueItemCount={venueItemCount}
+          venueItemsLoaded={venueItemsLoaded}
+        />
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
