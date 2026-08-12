@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
+import { canScanEvent } from '../../shared/eventAuth.ts';
 
 // Returns a signed, offline-capable manifest of every valid ticket for an event.
 // Ticket codes are HMAC-hashed with a per-manifest key — raw codes never leave
@@ -14,10 +15,13 @@ export default async function(req) {
     const { event_id } = body;
     if (!event_id) return Response.json({ error: 'event_id required' }, { status: 400 });
 
-    // Ownership check — only the event owner (or admin) can pull the full manifest.
-    const event = await base44.entities.Event.get(event_id);
+    // Authorization check — the event owner, an admin, or an explicitly-added
+    // per-event scanner can pull the full manifest. Fetched service-role so a
+    // scanner (not the owner) reading a *private* event isn't blocked by RLS
+    // before this check even runs.
+    const event = await base44.asServiceRole.entities.Event.get(event_id).catch(() => null);
     if (!event) return Response.json({ error: 'Event not found' }, { status: 404 });
-    if (event.created_by_id !== user.id && user.role !== 'admin')
+    if (!canScanEvent(event, user))
       return Response.json({ error: 'Not authorized for this event' }, { status: 403 });
 
     // Fetch all valid (active or used) tickets for this event.
