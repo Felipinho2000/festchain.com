@@ -58,6 +58,13 @@
       "type": "number",
       "default": 0
     },
+    "scanner_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User ids explicitly granted door-scanner access for this event, in addition to the owner and admins. Managed via manageEventScanner, not directly editable through saveEvent."
+    },
     "status": {
       "type": "string",
       "enum": [
