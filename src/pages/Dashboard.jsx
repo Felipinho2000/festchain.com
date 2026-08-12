@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import {
   Plus, Calendar, TrendingUp,
   Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine, Users,
-  Gift, Package, RefreshCw, HelpCircle, FileText
+  Gift, Package, RefreshCw, HelpCircle, FileText, CheckCircle2, Circle, ArrowRight
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
