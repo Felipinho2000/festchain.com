@@ -1,7 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { canScanEvent } from '../../shared/eventAuth.ts';
 
 // Hardened ticket check-in for the private MVP pilot.
-// Only admin or the specific event creator/owner can validate tickets.
+// Admin, the event creator/owner, or an explicitly-added per-event scanner
+// (see manageEventScanner) can validate tickets.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -15,17 +17,15 @@ Deno.serve(async (req) => {
     if (!qr_code) return Response.json({ status: 'invalid', message: 'No QR code provided' });
     if (!event_id) return Response.json({ status: 'invalid', message: 'Select an event before scanning' });
 
-    const isAdmin = user.role === 'admin';
-
-    // Load event and verify scanner owns it (or is admin)
+    // Load event and verify the caller is allowed to scan for it
     let event = null;
     try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
     if (!event) return Response.json({ status: 'invalid', message: 'Event not found' });
 
-    const isEventOwner = String(event.created_by_id) === String(user.id);
-
-    // SECURITY: only admin or the event creator can scan — not any approved organizer globally
-    if (!isAdmin && !isEventOwner) {
+    // SECURITY: admin, the event creator, or an explicitly-added per-event
+    // scanner — not any approved organizer globally, and not a role guessed
+    // from the client.
+    if (!canScanEvent(event, user)) {
       return Response.json({ status: 'unauthorized', message: 'You are not authorized to scan for this event' }, { status: 403 });
     }
 
