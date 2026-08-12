@@ -56,7 +56,7 @@ const defaultPhases = () => {
 const emptyForm = {
   title: "", description: "", genre: "techno", date: "", end_date: "",
   location_name: "", location_address: "", image_url: "",
-  ticket_price: "40", festcoin_reward: "50", total_capacity: "200",
+  ticket_price: "40", vip_price: "", backstage_price: "", festcoin_reward: "50", total_capacity: "200",
   status: "published", visibility: "public",
   ticket_phases: defaultPhases(),
   lineup: [],
@@ -134,6 +134,8 @@ export default function EventEditor() {
           location_name: ev.location_name || "", location_address: ev.location_address || "",
           image_url: ev.image_url || "",
           ticket_price: ev.ticket_price?.toString() || "40",
+          vip_price: ev.vip_price != null ? ev.vip_price.toString() : "",
+          backstage_price: ev.backstage_price != null ? ev.backstage_price.toString() : "",
           festcoin_reward: ev.festcoin_reward?.toString() || "50",
           total_capacity: ev.total_capacity?.toString() || "200",
           status: ev.status || "published", visibility: ev.visibility || "public",
@@ -222,6 +224,12 @@ export default function EventEditor() {
       location_address: form.location_address,
       image_url: form.image_url,
       ticket_price: parseFloat(form.ticket_price) || 0,
+      // null (not 0) means "this event doesn't sell this tier" — an organizer
+      // clearing the field is how a VIP/Backstage tier gets removed, not how
+      // it becomes free. createCheckoutSession already refuses ticket_type
+      // requests where both the phase and event price are null/undefined.
+      vip_price: form.vip_price.trim() === "" ? null : (parseFloat(form.vip_price) || 0),
+      backstage_price: form.backstage_price.trim() === "" ? null : (parseFloat(form.backstage_price) || 0),
       festcoin_reward: parseInt(form.festcoin_reward) || 50,
       total_capacity: parseInt(form.total_capacity) || 100,
       status: form.status,
@@ -350,6 +358,15 @@ export default function EventEditor() {
             </p>
           </Field>
         </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Preço VIP (R$)">
+            <Input type="number" value={form.vip_price} onChange={e => set("vip_price", e.target.value)} className="rounded-xl" placeholder="Deixe em branco pra não vender VIP" />
+          </Field>
+          <Field label="Preço Backstage (R$)">
+            <Input type="number" value={form.backstage_price} onChange={e => set("backstage_price", e.target.value)} className="rounded-xl" placeholder="Deixe em branco pra não vender Backstage" />
+          </Field>
+        </div>
+        <p className="text-[10px] text-muted-foreground -mt-1">VIP e Backstage são opcionais — em branco, o evento simplesmente não oferece esse ingresso. Não dá pra vender uma tier sem preço.</p>
         <Field label="Banner / imagem do evento">
           <div className="flex items-center gap-3">
             <label className="cursor-pointer flex items-center gap-2 bg-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground hover:border-primary transition-colors">
