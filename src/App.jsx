@@ -108,12 +108,19 @@ const AuthenticatedApp = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/social" element={<Social />} />
 
+          {/* Scanner: signed-in only, not organizer-gated. Authorization is
+              per-event and server-side (owner, admin, or an explicitly-added
+              scanner — see getScannableEvents/validateTicket), so a staff
+              member's own login can reach this page even if they are not an
+              approved organizer. The page itself shows nothing scannable if
+              they have no events. */}
+          <Route path="/scan" element={<Scan />} />
+
           {/* Organizer workspace — approved organizers and admins only. */}
           <Route element={<OrganizerRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/events/new" element={<EventEditor />} />
             <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
-            <Route path="/scan" element={<Scan />} />
             <Route path="/pilot-setup" element={<PilotSetup />} />
             <Route path="/organizer/financeiro" element={<OrganizerFinanceiro />} />
             <Route path="/organizer/convidados" element={<Convidados />} />
