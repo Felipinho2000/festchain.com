@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
   Ticket, QrCode, Calendar, MapPin, Check, Music, ChevronRight,
-  ArrowUpRight, ArrowDownLeft, Gift, Wallet as WalletIcon, Zap
+  ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, Zap
 } from "lucide-react";
 import PilotTopupCard from "@/components/wallet/PilotTopupCard";
 import RewardCatalogue from "@/components/wallet/RewardCatalogue";
@@ -131,6 +131,43 @@ function TicketCard({ ticket }) {
   );
 }
 
+// The door moment — someone walking up to a venue — should be one tap from
+// app-open, not a scroll past the balance card plus a click to reveal the QR
+// inside a ticket row. This surfaces the single nearest upcoming ticket with
+// its QR already visible.
+function NextTicketHero({ ticket }) {
+  const cachedQR = (() => {
+    try { return JSON.parse(localStorage.getItem("fc_tickets") || "{}")[ticket.id]?.qr_code; } catch (_) { return null; }
+  })();
+  const qrCode = ticket.qr_code || cachedQR;
+
+  return (
+    <Link
+      to={`/tickets/${ticket.id}`}
+      className="block bg-gradient-to-br from-primary/10 via-card to-card border border-primary/30 rounded-3xl p-5 lg:p-6 shadow-card hover:border-primary/50 transition-colors"
+    >
+      <div className="flex items-center gap-4">
+        <div className="bg-white p-2 rounded-xl flex-shrink-0">
+          <Qr value={qrCode} size={88} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Seu próximo ingresso</p>
+          <h3 className="font-heading font-semibold text-foreground text-base truncate mb-1">{ticket.event_title}</h3>
+          {ticket.event_date && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <Calendar className="w-3 h-3" strokeWidth={1.5} />
+              {moment(ticket.event_date).format("D MMM, YYYY · HH:mm")}
+            </p>
+          )}
+          <p className="text-primary text-xs font-semibold mt-2 flex items-center gap-1">
+            Tela cheia pra entrada <ChevronRight className="w-3.5 h-3.5" />
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function WalletPage() {
   const { currentUser } = useAuth();
   const { t } = useLanguage();
@@ -227,6 +264,11 @@ export default function WalletPage() {
           base44.entities.FestCoinTransaction.filter({ created_by_id: currentUser?.id }, "-created_date", 100)
             .then(setTransactions).catch(() => {});
         }} />
+      )}
+
+      {/* Next ticket — the door moment shouldn't be a scroll-then-tap away */}
+      {!loading && upcomingTickets.length > 0 && (
+        <NextTicketHero ticket={upcomingTickets[0]} />
       )}
 
       {/* Balance summary card */}
@@ -346,7 +388,7 @@ export default function WalletPage() {
         {/* Rewards Tab */}
         <TabsContent value="rewards" className="space-y-4">
           <RewardCatalogue balance={balance} t={t} />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-soft">
               <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Ticket className="w-5 h-5 text-primary" strokeWidth={1.5} />
@@ -361,38 +403,12 @@ export default function WalletPage() {
               <p className="font-bold text-foreground text-2xl">{totalEarned.toLocaleString()}</p>
               <p className="text-xs text-muted-foreground mt-0.5">Recompensas recebidas</p>
             </div>
-            <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-soft">
-              <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Gift className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              </div>
-              <p className="font-bold text-foreground text-2xl">{tickets.length >= 10 ? "VIP" : tickets.length >= 5 ? "Regular" : "Novo"}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Seu nível</p>
-            </div>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-4 shadow-soft">
-            <p className="text-sm font-semibold text-foreground">Seu progresso</p>
-            {[
-              { label: "Regular — 5 eventos", target: 5 },
-              { label: "VIP — 10 eventos", target: 10 },
-              { label: "Elite — 20 eventos", target: 20 },
-            ].map((tier, i) => {
-              const pct = Math.min(100, Math.round((tickets.length / tier.target) * 100));
-              const done = tickets.length >= tier.target;
-              return (
-                <div key={i}>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className={done ? "text-success" : "text-muted-foreground"}>{tier.label}</span>
-                    <span className={done ? "text-success font-bold" : "text-muted-foreground/60"}>
-                      {done ? "✓ Desbloqueado" : `${tickets.length}/${tier.target}`}
-                    </span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className={`h-full ${done ? "bg-success" : "bg-primary"} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          {/* Removed: a "Seu nível" (Novo/Regular/VIP/Elite) badge and progress
+              bars computed purely from tickets.length, with no backend, no real
+              perks, and no badge issuance behind them. Promising a loyalty tier
+              that doesn't actually exist is a trust hazard, not a feature — cut
+              rather than dressed up, until there's a real program behind it. */}
         </TabsContent>
       </Tabs>
     </div>
