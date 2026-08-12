@@ -55,6 +55,14 @@ export default [
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      // Was registered as a plugin but never actually turned on, which made
+      // every deliberate `// eslint-disable-line react-hooks/exhaustive-deps`
+      // in the codebase (useDoorScanner.js) itself an error: you can't
+      // disable a rule the config never defined. "warn" (not "error") because
+      // this rule has legitimate false positives — stable useCallback refs,
+      // mount-only effects reading a ref's .current — that get suppressed
+      // deliberately rather than satisfied by literally listing every dep.
+      "react-hooks/exhaustive-deps": "warn",
     },
   },
 ];
