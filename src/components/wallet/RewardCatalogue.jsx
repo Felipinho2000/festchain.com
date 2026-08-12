@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Gift, Loader2, CheckCircle2, Zap, Lock } from "lucide-react";
+import { Gift, Loader2, CheckCircle2 } from "lucide-react";
 import { ftcToBrlString, DEFAULT_FTC_TO_BRL_RATE } from "@/lib/rewardConfig";
 
 export default function RewardCatalogue({ balance, t }) {

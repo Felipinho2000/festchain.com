@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, CheckCircle2, RefreshCw, Clock, Smartphone } from "lucide-react";
+import { AlertTriangle, CheckCircle2, RefreshCw, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import moment from "moment";

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {
-  ShieldCheck, QrCode, Lock, Eye, Camera, Coins, Users, ArrowLeft, Zap,
+  ShieldCheck, QrCode, Lock, Eye, Camera, Coins, Users, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/shared/Logo";

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { Zap, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import TopupPanel from "@/components/festcoin/TopupPanel";
 import TransactionList from "@/components/festcoin/TransactionList";
 import FestCoinInfo from "@/components/festcoin/FestCoinInfo";

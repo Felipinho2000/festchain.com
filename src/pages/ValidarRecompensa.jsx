@@ -4,7 +4,6 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { ArrowLeft, Search, CheckCircle2, Loader2, XCircle, Package } from "lucide-react";
-import { DEFAULT_FTC_TO_BRL_RATE } from "@/lib/rewardConfig";
 
 export default function ValidarRecompensa() {
   const { currentUser } = useAuth();

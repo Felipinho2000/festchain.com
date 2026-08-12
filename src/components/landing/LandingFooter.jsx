@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Mail, MapPin, MessageCircle } from "lucide-react";
 import Logo from "@/components/shared/Logo";
 import { COPY, getWaHref } from "./landingData";
 import { useLanguage } from "@/lib/i18n/LanguageContext";

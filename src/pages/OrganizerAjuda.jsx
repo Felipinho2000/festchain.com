@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   ArrowLeft, HelpCircle, Percent, CalendarClock, RefreshCw, ScanLine,
-  WifiOff, ArrowLeftRight, Users, Gift, Coins, Package, ExternalLink,
+  WifiOff, ArrowLeftRight, Users, Gift, Coins, Package,
 } from "lucide-react";
 import moment from "moment";
 

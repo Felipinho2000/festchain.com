@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import Logo from "@/components/shared/Logo";
 import {
   ArrowLeft, Percent, Users, RefreshCw, CalendarClock, Calculator,
-  ShieldCheck, Check, X,
+  ShieldCheck, X,
 } from "lucide-react";
 
 const CONTENT = {
