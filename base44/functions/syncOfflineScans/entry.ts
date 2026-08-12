@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { canScanEvent } from '../../shared/eventAuth.ts';
 
 // Applies queued offline scans in scanned_at order. If a ticket was already
 // marked used online with an EARLIER timestamp, the offline scan is recorded
@@ -16,10 +17,12 @@ export default async function(req) {
     if (!event_id) return Response.json({ error: 'event_id required' }, { status: 400 });
     if (!Array.isArray(scans)) return Response.json({ error: 'scans[] required' }, { status: 400 });
 
-    // Ownership check
-    const event = await base44.entities.Event.get(event_id);
+    // Authorization check — owner, admin, or an explicitly-added per-event
+    // scanner. Fetched service-role so a scanner reading a private event
+    // isn't blocked by RLS before this check runs.
+    const event = await base44.asServiceRole.entities.Event.get(event_id).catch(() => null);
     if (!event) return Response.json({ error: 'Event not found' }, { status: 404 });
-    if (event.created_by_id !== user.id && user.role !== 'admin')
+    if (!canScanEvent(event, user))
       return Response.json({ error: 'Not authorized for this event' }, { status: 403 });
 
     const organizerId = event.created_by_id;
