@@ -28,6 +28,62 @@ const statusColors = {
 
 const tabClass = "rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white";
 
+// "Is my door ready?" at a glance, for the single soonest upcoming event.
+// Every item is either a real signal from data already on screen (or one
+// cheap extra fetch), or explicitly labeled as a manual action to take on
+// the actual scanning device — never a fake checkmark. Two things genuinely
+// can't be known from this page: whether the offline manifest was pulled on
+// the phone that will scan, and whether that phone's camera flow was
+// test-fired. Both are device-local state, so they render as action prompts.
+function ReadinessCard({ event, eventTickets, venueItemCount, venueItemsLoaded }) {
+  const hasActiveSale = eventTickets.some((t) => t.status === "active");
+  const hasCheckedIn = eventTickets.some((t) => t.checked_in);
+  const ftcOk = !event.ftc_enabled || (event.festcoin_reward || 0) > 0;
+
+  const autoChecks = [
+    { label: "Evento publicado", ok: event.status === "published" || event.status === "live" },
+    { label: "Ingressos ativos vendidos", ok: hasActiveSale },
+    {
+      label: venueItemsLoaded ? `Cardápio com item ativo (${venueItemCount})` : "Cardápio com item ativo",
+      ok: venueItemsLoaded ? venueItemCount > 0 : null,
+    },
+    { label: event.ftc_enabled ? "Recompensa FTC configurada" : "FTC desativado — nada a revisar", ok: ftcOk },
+    { label: "Scanner já validou pelo menos 1 ingresso", ok: hasCheckedIn },
+  ];
+
+  const readyCount = autoChecks.filter((c) => c.ok === true).length;
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-heading font-semibold text-white flex items-center gap-2">Pronto pra hoje? <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">{event.title}</span></h3>
+          <p className="text-[#888] text-xs mt-0.5">{readyCount}/{autoChecks.length} verificados automaticamente · {moment(event.date).format("D MMM, HH:mm")}</p>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        {autoChecks.map((c, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm">
+            {c.ok === null ? (
+              <Circle className="w-4 h-4 text-[#555] flex-shrink-0" strokeWidth={1.75} />
+            ) : c.ok ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" strokeWidth={1.75} />
+            ) : (
+              <Circle className="w-4 h-4 text-[#555] flex-shrink-0" strokeWidth={1.75} />
+            )}
+            <span className={c.ok ? "text-white" : "text-[#888]"}>{c.label}</span>
+          </div>
+        ))}
+        {/* Manual — device-local, this page cannot verify either one */}
+        <Link to="/scan" className="flex items-center gap-2 text-sm text-primary hover:underline pt-1">
+          <ArrowRight className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+          <span>Testar o scanner e baixar a lista offline no celular que vai pra porta</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [events, setEvents] = useState([]);
   const [tickets, setTickets] = useState([]);
