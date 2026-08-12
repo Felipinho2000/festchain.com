@@ -74,14 +74,19 @@ export default function Dashboard() {
   const realTickets = tickets.filter(t => !isDemoTicket(t));
 
   const totalTicketsSold = events.reduce((s, e) => s + (e.tickets_sold || 0), 0);
-  const totalRevenue = realTickets.reduce((s, t) => s + (t.price_paid || 0), 0);
+  // Revenue and the sales chart must only count tickets that actually became a
+  // sale: 'active' (paid and not refunded). Counting 'pending' (checkout never
+  // completed) or 'refunded' tickets here silently inflates both the KPI card
+  // and the 7-day chart with money the organizer never received.
+  const paidTickets = realTickets.filter(t => t.status === "active");
+  const totalRevenue = paidTickets.reduce((s, t) => s + (t.price_paid || 0), 0);
   const checkedIn = realTickets.filter(t => t.checked_in).length;
 
   const chartData = [];
   for (let i = 6; i >= 0; i--) {
     const day = moment().subtract(i, "days").format("YYYY-MM-DD");
     const dayLabel = moment().subtract(i, "days").format("MMM D");
-    const count = realTickets.filter(t => moment(t.created_date).format("YYYY-MM-DD") === day).length;
+    const count = paidTickets.filter(t => moment(t.created_date).format("YYYY-MM-DD") === day).length;
     chartData.push({ name: dayLabel, tickets: count });
   }
 
