@@ -44,6 +44,14 @@
     "ticket_price": {
       "type": "number"
     },
+    "vip_price": {
+      "type": "number",
+      "description": "Base price for ticket_type='vip'. Leave unset to not offer a VIP tier for this event."
+    },
+    "backstage_price": {
+      "type": "number",
+      "description": "Base price for ticket_type='backstage'. Leave unset to not offer a Backstage tier for this event."
+    },
     "festcoin_price": {
       "type": "number"
     },
@@ -122,6 +130,14 @@
           },
           "festcoin_reward": {
             "type": "number"
+          },
+          "vip_price": {
+            "type": "number",
+            "description": "Optional per-phase override of the event's vip_price."
+          },
+          "backstage_price": {
+            "type": "number",
+            "description": "Optional per-phase override of the event's backstage_price."
           }
         }
       }
