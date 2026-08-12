@@ -33,7 +33,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 const EDITABLE_FIELDS = [
   'title', 'description', 'genre', 'date', 'end_date',
   'location_name', 'location_address', 'image_url',
-  'ticket_price', 'festcoin_price', 'festcoin_reward',
+  'ticket_price', 'vip_price', 'backstage_price', 'festcoin_price', 'festcoin_reward',
   'total_capacity', 'visibility', 'has_poap',
   'dj_lineup', 'ticket_phases', 'lineup', 'schedule',
   'organizer_name', 'currency_code',
@@ -42,6 +42,17 @@ const EDITABLE_FIELDS = [
   'ftc_cashback_on_ftc_purchase', 'ftc_pilot_mode',
   'refund_policy',
 ];
+
+// vip_price/backstage_price are OPTIONAL — unset (undefined/null/empty) means
+// "this event doesn't offer that tier," not "it's free." createCheckoutSession
+// already treats a missing tier price as "not available for this event," so
+// clearing the field in the editor is how an organizer removes a tier they
+// don't want to sell, per the club-by-club reality that not everyone runs
+// VIP/Backstage.
+function optionalPrice(v) {
+  if (v === undefined || v === null || v === '') return null;
+  return Math.max(0, num(v, 0));
+}
 
 const VALID_STATUS = ['draft', 'published', 'live', 'ended', 'cancelled'];
 const VALID_VISIBILITY = ['public', 'private'];
@@ -60,15 +71,22 @@ function clampPercent(v) {
 // price and the phase-inventory accounting in createCheckoutSession.
 function sanitizePhases(raw) {
   if (!Array.isArray(raw)) return undefined;
-  return raw.slice(0, 12).map((p, i) => ({
-    name: String(p && p.name ? p.name : `Phase ${i + 1}`).slice(0, 60),
-    price: Math.max(0, num(p && p.price, 0)),
-    quantity: Math.max(0, Math.floor(num(p && p.quantity, 0))),
-    sales_start: p && p.sales_start ? p.sales_start : undefined,
-    sales_end: p && p.sales_end ? p.sales_end : undefined,
-    active: !!(p && p.active),
-    festcoin_reward: Math.max(0, Math.floor(num(p && p.festcoin_reward, 0))),
-  }));
+  return raw.slice(0, 12).map((p, i) => {
+    const phase = {
+      name: String(p && p.name ? p.name : `Phase ${i + 1}`).slice(0, 60),
+      price: Math.max(0, num(p && p.price, 0)),
+      quantity: Math.max(0, Math.floor(num(p && p.quantity, 0))),
+      sales_start: p && p.sales_start ? p.sales_start : undefined,
+      sales_end: p && p.sales_end ? p.sales_end : undefined,
+      active: !!(p && p.active),
+      festcoin_reward: Math.max(0, Math.floor(num(p && p.festcoin_reward, 0))),
+    };
+    const vip = optionalPrice(p && p.vip_price);
+    const backstage = optionalPrice(p && p.backstage_price);
+    if (vip !== null) phase.vip_price = vip;
+    if (backstage !== null) phase.backstage_price = backstage;
+    return phase;
+  });
 }
 
 function sanitizePayload(payload) {
@@ -85,6 +103,8 @@ function sanitizePayload(payload) {
   if (out.organizer_name !== undefined) out.organizer_name = String(out.organizer_name).slice(0, 120);
   if (out.total_capacity !== undefined) out.total_capacity = Math.max(1, Math.floor(num(out.total_capacity, 1)));
   if (out.ticket_price !== undefined) out.ticket_price = Math.max(0, num(out.ticket_price, 0));
+  if (out.vip_price !== undefined) out.vip_price = optionalPrice(out.vip_price);
+  if (out.backstage_price !== undefined) out.backstage_price = optionalPrice(out.backstage_price);
   if (out.festcoin_reward !== undefined) out.festcoin_reward = Math.max(0, Math.floor(num(out.festcoin_reward, 0)));
   if (out.ftc_conversion_rate !== undefined) out.ftc_conversion_rate = Math.max(0.0001, num(out.ftc_conversion_rate, 1));
   if (out.ftc_discount_percent !== undefined) out.ftc_discount_percent = clampPercent(out.ftc_discount_percent);
