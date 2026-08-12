@@ -23,6 +23,8 @@ const TIERS = [
   { key: "meia_idoso", label: "Meia-idoso", desc: "50% off · +60 anos" },
 ];
 
+const TICKET_TYPE_LABELS = { general: "Geral", vip: "VIP", backstage: "Backstage" };
+
 function formatCPF(value) {
   const d = value.replace(/\D/g, "").slice(0, 11);
   return d
@@ -43,11 +45,24 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
   const { isAuthenticated, navigateToLogin } = useAuth();
   const [step, setStep] = useState(1);
   const [tier, setTier] = useState("inteira");
+  const [ticketType, setTicketType] = useState("general");
   const [quantity, setQuantity] = useState(1);
   const [form, setForm] = useState({ name: "", cpf: "", email: "", phone: "" });
   const [submitting, setSubmitting] = useState(false);
 
-  const basePrice = displayPrice || 0;
+  // A tier is only offered if it has a real price on the active phase or the
+  // event itself — an organizer who never set vip_price/backstage_price
+  // doesn't sell that tier, so it never appears as a choice. Matches
+  // createCheckoutSession's own null check on the same fields.
+  const tierPrice = (type) => {
+    if (type === "general") return displayPrice || 0;
+    const fromPhase = phase && phase[`${type}_price`];
+    const fromEvent = event && event[`${type}_price`];
+    return fromPhase != null ? fromPhase : fromEvent;
+  };
+  const availableTypes = ["general", "vip", "backstage"].filter((type) => tierPrice(type) != null);
+
+  const basePrice = tierPrice(ticketType) || 0;
   const unitPrice = tier === "inteira" ? basePrice : Math.round(basePrice * 50) / 100;
   const total = unitPrice * quantity;
   const reward = event?.festcoin_reward || 0;
@@ -55,6 +70,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
   const reset = () => {
     setStep(1);
     setTier("inteira");
+    setTicketType("general");
     setQuantity(1);
     setForm({ name: "", cpf: "", email: "", phone: "" });
   };
@@ -75,7 +91,7 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
     try {
       const res = await base44.functions.invoke("createCheckoutSession", {
         event_id: event.id,
-        ticket_type: "general",
+        ticket_type: ticketType,
         ticket_tier: tier,
         quantity,
         buyer_name: form.name,
@@ -122,6 +138,23 @@ export default function CheckoutDialog({ event, phase, displayPrice, open, onOpe
               <div className="bg-primary/10 border border-primary/20 rounded-xl px-3 py-2 text-xs flex items-center justify-between">
                 <span className="text-primary font-semibold">{phase.name}</span>
                 {phase.price != null && <span className="text-foreground font-medium">R$ {phase.price.toFixed(2)}</span>}
+              </div>
+            )}
+
+            {availableTypes.length > 1 && (
+              <div className="flex gap-2">
+                {availableTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setTicketType(type)}
+                    className={`flex-1 flex flex-col items-center py-2 rounded-xl border transition-all ${
+                      ticketType === type ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-secondary hover:border-primary/30"
+                    }`}
+                  >
+                    <span className="text-xs font-semibold text-foreground">{TICKET_TYPE_LABELS[type]}</span>
+                    <span className="text-[10px] text-muted-foreground">R$ {(tierPrice(type) || 0).toFixed(2)}</span>
+                  </button>
+                ))}
               </div>
             )}
 
