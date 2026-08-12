@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import {
   CheckCircle2, XCircle, AlertTriangle, RotateCcw, Camera, Lock, Ban,
-  Ticket as TicketIcon, User, Mail, Clock, Keyboard, Loader2
+  Ticket as TicketIcon, User, Mail, Clock, Keyboard, Loader2, UserPlus
 } from "lucide-react";
 import moment from "moment";
 import GuestList from "@/components/scan/GuestList";
@@ -14,10 +14,11 @@ import { useDoorScanner } from "@/hooks/useDoorScanner";
 import OfflineBanner from "@/components/scan/OfflineBanner";
 import SyncStatus from "@/components/scan/SyncStatus";
 import ManifestStatus from "@/components/scan/ManifestStatus";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Scan() {
   const { currentUser } = useAuth();
-  const canScan = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
+  const { toast } = useToast();
   const html5Ref = useRef(null);
   const lockedRef = useRef(false);
   const [result, setResult] = useState(null);
@@ -29,19 +30,49 @@ export default function Scan() {
   const [manual, setManual] = useState("");
   const [validating, setValidating] = useState(false);
   const [view, setView] = useState("scanner");
+  const [scannerEmail, setScannerEmail] = useState("");
+  const [addingScanner, setAddingScanner] = useState(false);
 
   const isHTTPS = window.location.protocol === "https:" || window.location.hostname === "localhost";
   const { t } = useLanguage();
   const door = useDoorScanner(eventId, currentUser);
 
+  // Authorization is server-side and per-event (owner, admin, or an
+  // explicitly-added scanner — see manageEventScanner/validateTicket), not a
+  // client-side role guess. This used to gate on `approved_organizer`, which
+  // meant a second staff member's own login could never reach a working
+  // scanner even after being added — the "only one phone works" pilot
+  // blocker. An empty list here is self-explanatory via the existing empty
+  // state below, so there is no separate lockout screen anymore.
   useEffect(() => {
-    if (!canScan) { setLoadingEvents(false); return; }
-    const query = currentUser?.role === "admin" ? {} : { created_by_id: currentUser?.id };
-    base44.entities.Event.filter(query, "-date", 50)
-      .then(setEvents)
+    if (!currentUser?.id) return;
+    setLoadingEvents(true);
+    base44.functions.invoke("getScannableEvents", {})
+      .then((res) => setEvents((res?.data?.events) || []))
       .catch(() => setEvents([]))
       .finally(() => setLoadingEvents(false));
-  }, [canScan, currentUser]);
+  }, [currentUser?.id]);
+
+  const handleAddScanner = async (e) => {
+    e.preventDefault();
+    const email = scannerEmail.trim();
+    if (!email || !eventId) return;
+    setAddingScanner(true);
+    try {
+      const res = await base44.functions.invoke("manageEventScanner", { event_id: eventId, email, action: "add" });
+      const data = res?.data || {};
+      if (data.status === "success") {
+        toast({ title: "Adicionado", description: `${data.user?.name || email} agora pode escanear este evento.` });
+        setScannerEmail("");
+      } else {
+        toast({ title: "Não foi possível adicionar", description: data.message, variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Não foi possível adicionar", description: err.message, variant: "destructive" });
+    } finally {
+      setAddingScanner(false);
+    }
+  };
 
   useEffect(() => {
     return () => { stopCamera(); };
@@ -168,20 +199,6 @@ export default function Scan() {
     runValidation(code);
   };
 
-  if (!canScan) {
-    return (
-      <div className="max-w-md mx-auto text-center py-24 px-4">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-          <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
-        </div>
-        <h2 className="font-heading font-bold text-2xl text-foreground mb-2">Apenas organizadores</h2>
-        <p className="text-muted-foreground text-sm mb-2">O scanner é para organizadores aprovados e equipe de portaria.</p>
-        <p className="text-muted-foreground/60 text-xs mb-6">O acesso é liberado manualmente pela equipe durante o piloto privado.</p>
-        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Voltar ao início</Link>
-      </div>
-    );
-  }
-
   const config = {
     valid:        { icon: CheckCircle2, title: "Ingresso válido",       text: "text-success", border: "border-success/50", badge: "bg-success" },
     used:         { icon: AlertTriangle, title: "Check-in já realizado", text: "text-warning",    border: "border-warning/50",    badge: "bg-warning" },
@@ -241,6 +258,34 @@ export default function Scan() {
             </div>
             <button onClick={changeEvent} className="text-primary text-xs font-medium hover:underline">Trocar evento</button>
           </div>
+
+          {/* Add a scanner — only the event's own owner can grant this, and only
+              for THIS event. The friend needs a FestChain account under the
+              exact email entered; if they sign up afterwards, add them again. */}
+          {String(selectedEvent?.created_by_id) === String(currentUser?.id) && (
+            <form onSubmit={handleAddScanner} className="bg-card border border-border rounded-2xl p-3 shadow-soft space-y-2">
+              <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <UserPlus className="w-3.5 h-3.5 text-primary" strokeWidth={1.75} /> Adicionar scanner pra este evento
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={scannerEmail}
+                  onChange={(e) => setScannerEmail(e.target.value)}
+                  placeholder="email@da-pessoa.com"
+                  className="flex-1 h-9 px-3 rounded-lg bg-secondary border border-border text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50"
+                />
+                <button
+                  type="submit"
+                  disabled={addingScanner || !scannerEmail.trim()}
+                  className="h-9 px-3 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-50 text-white text-xs font-semibold transition-colors"
+                >
+                  {addingScanner ? "..." : "Adicionar"}
+                </button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">A pessoa precisa já ter conta no FestChain com esse e-mail.</p>
+            </form>
+          )}
 
           {/* Offline / manifest status */}
           <ManifestStatus
