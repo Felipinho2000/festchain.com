@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import {
   ArrowLeft, Calendar, MapPin, Music, QrCode, Sparkles, Clock,
   Ticket as TicketIcon, Users, Share2, ShoppingBag, Loader2,
-  ShieldCheck, CheckCircle2, XCircle, RefreshCw,
+  ShieldCheck, CheckCircle2, XCircle, RefreshCw, Send, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import EventShareButtons from "@/components/events/EventShareButtons";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import moment from "moment";
 
 const statusConfig = {
@@ -45,6 +46,15 @@ export default function TicketDetail() {
   const [refundReason, setRefundReason] = useState("");
   const [refundSubmitting, setRefundSubmitting] = useState(false);
 
+  // "Não vou mais ao evento" — a small menu instead of jumping straight to
+  // refund, since transfer is also a real option when the ticket hasn't been
+  // scanned yet.
+  const [showActions, setShowActions] = useState(false);
+  const [transferStep, setTransferStep] = useState(null); // null | "email" | "confirm"
+  const [transferEmail, setTransferEmail] = useState("");
+  const [transferSubmitting, setTransferSubmitting] = useState(false);
+  const [transferDone, setTransferDone] = useState(false);
+
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -53,9 +63,9 @@ export default function TicketDetail() {
         if (!active) return;
         const d = res.data || res;
         if (d.status === "success") setData(d);
-        else setError(d.message || "Could not load ticket");
+        else setError(d.message || "Não foi possível carregar o ingresso");
       })
-      .catch(e => { if (active) setError(e.message || "Could not load ticket"); })
+      .catch(e => { if (active) setError(e.message || "Não foi possível carregar o ingresso"); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [id]);
@@ -92,6 +102,24 @@ export default function TicketDetail() {
       toast({ title: "Erro", description: e.message, variant: "destructive" });
     }
     setRefundSubmitting(false);
+  };
+
+  const submitTransfer = async () => {
+    if (!data?.ticket || !transferEmail.trim()) return;
+    setTransferSubmitting(true);
+    try {
+      const res = await base44.functions.invoke("transferTicket", {
+        ticket_id: data.ticket.id,
+        recipient_email: transferEmail.trim(),
+      });
+      const d = res?.data || res;
+      if (d.status !== "success") throw new Error(d.message || "Não foi possível transferir o ingresso.");
+      setTransferDone(true);
+      toast({ title: "Ingresso transferido", description: `A pessoa já pode ver o ingresso na carteira dela (${transferEmail.trim()}).` });
+    } catch (e) {
+      toast({ title: "Não foi possível transferir", description: e.message, variant: "destructive" });
+    }
+    setTransferSubmitting(false);
   };
 
   if (loading) {
@@ -160,7 +188,7 @@ export default function TicketDetail() {
         <div className="p-6 space-y-5">
           <div>
             <h1 className="font-heading font-bold text-2xl text-foreground mb-1">{ticket.event_title}</h1>
-            {event?.organizer_name && <p className="text-muted-foreground text-sm">by {event.organizer_name}</p>}
+            {event?.organizer_name && <p className="text-muted-foreground text-sm">por {event.organizer_name}</p>}
             {!event && ticket.organizer_id && (
               <p className="text-muted-foreground text-sm italic">Detalhes do evento indisponíveis, mas seu ingresso está salvo.</p>
             )}
@@ -325,7 +353,7 @@ export default function TicketDetail() {
         </>
       )}
 
-      {/* Refund request */}
+      {/* "Não vou mais ao evento" — transfer or refund */}
       {ticket && ticket.status === "active" && !isUsed && (
         <div className="bg-card border border-border rounded-2xl p-5 shadow-soft">
           {refundReq ? (
@@ -344,6 +372,60 @@ export default function TicketDetail() {
                 <p className="text-muted-foreground text-xs">
                   {refundReq.status === "aprovado" ? "O reembolso está sendo processado." : refundReq.status === "recusado" ? (refundReq.organizer_note || "O organizador recusou.") : "Aguardando resposta do organizador."}
                 </p>
+              </div>
+            </div>
+          ) : transferDone ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-success/15 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-success" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1">
+                <p className="font-heading font-semibold text-foreground text-sm">Ingresso transferido</p>
+                <p className="text-muted-foreground text-xs">Este ingresso não aparece mais na sua carteira.</p>
+              </div>
+              <Link to="/wallet"><Button variant="outline" size="sm" className="rounded-xl">Voltar</Button></Link>
+            </div>
+          ) : transferStep === "confirm" ? (
+            <div className="space-y-3">
+              <h3 className="font-heading font-semibold text-foreground text-sm flex items-center gap-2">
+                <Send className="w-4 h-4 text-primary" strokeWidth={1.75} /> Transferir este ingresso para {transferEmail}?
+              </h3>
+              <div className="flex items-start gap-2 bg-warning/10 border border-warning/20 rounded-xl p-3">
+                <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" strokeWidth={1.75} />
+                <p className="text-xs text-muted-foreground">Após a transferência, este ingresso deixará de aparecer na sua carteira e o QR atual deixa de valer. A pessoa precisa já ter uma conta na FestChain.</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setTransferStep("email")} disabled={transferSubmitting}>
+                  Voltar
+                </Button>
+                <Button className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-xl" onClick={submitTransfer} disabled={transferSubmitting}>
+                  {transferSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar transferência"}
+                </Button>
+              </div>
+            </div>
+          ) : transferStep === "email" ? (
+            <div className="space-y-3">
+              <h3 className="font-heading font-semibold text-foreground text-sm flex items-center gap-2">
+                <Send className="w-4 h-4 text-primary" strokeWidth={1.75} /> Transferir ingresso
+              </h3>
+              <Input
+                type="email"
+                value={transferEmail}
+                onChange={e => setTransferEmail(e.target.value)}
+                placeholder="E-mail de quem vai receber"
+                className="bg-secondary border-border text-foreground rounded-xl"
+              />
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 rounded-xl" onClick={() => { setTransferStep(null); setTransferEmail(""); }}>
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-xl"
+                  onClick={() => transferEmail.trim() && setTransferStep("confirm")}
+                  disabled={!transferEmail.trim()}
+                >
+                  Continuar
+                </Button>
               </div>
             </div>
           ) : showRefundForm ? (
@@ -371,18 +453,37 @@ export default function TicketDetail() {
                 </Button>
               </div>
             </div>
+          ) : showActions ? (
+            <div className="space-y-2">
+              <p className="font-heading font-semibold text-foreground text-sm mb-1">Não vou mais ao evento</p>
+              <button
+                onClick={() => setTransferStep("email")}
+                className="w-full flex items-center justify-between bg-secondary border border-border rounded-xl p-3 text-left hover:border-primary/40 transition-colors"
+              >
+                <span className="flex items-center gap-2 text-sm text-foreground"><Send className="w-4 h-4 text-primary" strokeWidth={1.75} /> Transferir ingresso</span>
+                <span className="text-muted-foreground text-xs">Passar pra outra pessoa</span>
+              </button>
+              <button
+                onClick={() => setShowRefundForm(true)}
+                className="w-full flex items-center justify-between bg-secondary border border-border rounded-xl p-3 text-left hover:border-primary/40 transition-colors"
+              >
+                <span className="flex items-center gap-2 text-sm text-foreground"><RefreshCw className="w-4 h-4 text-primary" strokeWidth={1.75} /> Solicitar reembolso</span>
+                <span className="text-muted-foreground text-xs">Organizador aprova ou recusa</span>
+              </button>
+              <button onClick={() => setShowActions(false)} className="text-xs text-muted-foreground hover:text-foreground mt-1">Cancelar</button>
+            </div>
           ) : (
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="font-heading font-semibold text-foreground text-sm">Não vai conseguir ir?</p>
-                <p className="text-muted-foreground text-xs">Solicite reembolso — o organizador aprova ou recusa.</p>
+                <p className="text-muted-foreground text-xs">Transfira o ingresso ou solicite reembolso.</p>
               </div>
               <Button
                 variant="outline"
-                className="rounded-xl border-primary/30 text-primary hover:bg-primary/10"
-                onClick={() => setShowRefundForm(true)}
+                className="rounded-xl border-primary/30 text-primary hover:bg-primary/10 flex-shrink-0"
+                onClick={() => setShowActions(true)}
               >
-                <RefreshCw className="w-4 h-4 mr-1.5" strokeWidth={1.75} /> Solicitar reembolso
+                Não vou mais ao evento
               </Button>
             </div>
           )}
