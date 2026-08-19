@@ -222,7 +222,7 @@ export default function WalletPage() {
   // window before the balance call returns (or if it fails).
   const balance = serverBalance !== null ? serverBalance : pageBalance;
   const totalEarned = validTx.filter(t => ["earned", "transferred_in", "pilot_topup"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
-  const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s - (t.amount || 0), 0);
+  const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
 
   const activeTickets = tickets.filter(t => t.status === "active");
   // "Próximos"/"Anteriores" is grouped by the event's actual date, not by
