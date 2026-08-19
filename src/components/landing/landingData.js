@@ -15,9 +15,9 @@ export const COPY = {
       sub: "A FestChain é a plataforma de ingressos para casas, festas e coletivos. Checkout rápido, portaria que não trava nem sem internet, e crédito que traz a galera de volta na próxima.",
       ctaPrimary: "Quero levar minha festa",
       ctaSecondary: "Ver como funciona",
-      note: "8% por ingresso · Sem mensalidade · Repasse automático em até 24h",
+      note: "8% por ingresso · Sem mensalidade · Repasse acompanhado pela nossa equipe",
     },
-    strip: ["8% por ingresso vendido", "Sem mensalidade", "Portaria funciona offline", "Repasse automático em até 24h"],
+    strip: ["8% por ingresso vendido", "Sem mensalidade", "Portaria funciona offline", "Repasse acompanhado pela nossa equipe"],
     wedge: {
       kicker: "Por que trocar de plataforma",
       title: "Feito pra como a night vende de verdade.",
@@ -51,7 +51,7 @@ export const COPY = {
       items: [
         { q: "Vocês são novos. Por que eu confiaria a bilheteria da minha festa?", a: "Somos. Por isso a primeira festa é acompanhada de perto — eu estou junto no dia, na portaria, do primeiro ingresso ao último. Se algo der errado, você fala comigo, não com um chamado de suporte." },
         { q: "E se travar na entrada?", a: "A lista de quem comprou fica salva no celular do seu staff antes da festa começar. Se a internet cair, a portaria continua lendo QR normalmente e sincroniza sozinha quando a conexão volta." },
-        { q: "Quando eu recebo?", a: "O repasse é automático, em até 24h depois do evento, com o extrato do valor líquido. Você acompanha a data exata no painel desde o dia que publica o evento." },
+        { q: "Quando eu recebo?", a: "Durante o piloto, o repasse é feito via Pix pela nossa equipe depois do evento, com o extrato do valor líquido. Você acompanha o status exato no painel desde o dia que publica o evento." },
       ],
     },
     pricing: {
@@ -86,7 +86,7 @@ export const COPY = {
     },
     footer: {
       tagline: "Plataforma de ingressos para a vida noturna. Feito em São Paulo, Brasil.",
-      rights: "Ticketing seguro · Proteção contra fraude · Repasse automático em até 24h",
+      rights: "Ticketing seguro · Proteção contra fraude · Repasse acompanhado pela nossa equipe",
     },
     contact: {
       kicker: "Comece agora",
@@ -131,9 +131,9 @@ export const COPY = {
       sub: "FestChain is the ticketing platform for clubs, parties and collectives. Fast checkout, a door that doesn't stall even without internet, and credit that brings people back next time.",
       ctaPrimary: "Bring your party",
       ctaSecondary: "See how it works",
-      note: "8% per ticket · No monthly fee · Automatic payout within 24h",
+      note: "8% per ticket · No monthly fee · Payout handled by our team",
     },
-    strip: ["8% per ticket sold", "No monthly fee", "Door works offline", "Automatic payout within 24h"],
+    strip: ["8% per ticket sold", "No monthly fee", "Door works offline", "Payout handled by our team"],
     wedge: {
       kicker: "Why they switch",
       title: "Built for how nightlife actually sells.",
@@ -167,7 +167,7 @@ export const COPY = {
       items: [
         { q: "You're new. Why would I trust you with my party's box office?", a: "We are. That's why the first party is handled close up — I'm there on the day, at the door, from the first ticket to the last. If something goes wrong, you talk to me, not a support ticket." },
         { q: "What if the door stalls?", a: "The list of who bought is saved on your staff's phone before the party starts. If the internet drops, the door keeps scanning QR normally and syncs on its own when the connection comes back." },
-        { q: "When do I get paid?", a: "Payouts are automatic, within 24h after the event, with a statement of the net amount. You can track the exact date in your dashboard from the day you publish the event." },
+        { q: "When do I get paid?", a: "During the pilot, our team handles payouts via Pix after the event, with a statement of the net amount. You can track the exact status in your dashboard from the day you publish the event." },
       ],
     },
     pricing: {
@@ -202,7 +202,7 @@ export const COPY = {
     },
     footer: {
       tagline: "Ticketing platform for nightlife. Made in São Paulo, Brazil.",
-      rights: "Secure ticketing · Fraud protection · Automatic payout within 24h",
+      rights: "Secure ticketing · Fraud protection · Payout handled by our team",
     },
     contact: {
       kicker: "Get started",
