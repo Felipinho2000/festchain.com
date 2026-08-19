@@ -17,7 +17,7 @@
     },
     "active_mode": {
       "type": "string",
-      "description": "Current UI view preference: partygoer or organizer. Does NOT grant permissions.",
+      "description": "Current UI view preference: partygoer or organizer. Does NOT grant permissions. Internal enum value only \u2014 the UI displays 'partygoer' as \"Participante\" in Portuguese / \"Attendee\" in English.",
       "enum": [
         "partygoer",
         "organizer"
