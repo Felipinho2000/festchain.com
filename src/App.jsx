@@ -118,11 +118,16 @@ const AuthenticatedApp = () => {
               they have no events. */}
           <Route path="/scan" element={<Scan />} />
 
+          {/* Event creation/editing is open to any signed-in user — saveEvent
+              enforces server-side that a non-approved organizer can only ever
+              save a 'draft', so a first-time organizer can configure their
+              event before admin review instead of hitting a locked door. */}
+          <Route path="/dashboard/events/new" element={<EventEditor />} />
+          <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
+
           {/* Organizer workspace — approved organizers and admins only. */}
           <Route element={<OrganizerRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/events/new" element={<EventEditor />} />
-            <Route path="/dashboard/events/:id/edit" element={<EventEditor />} />
             <Route path="/pilot-setup" element={<PilotSetup />} />
             <Route path="/organizer/financeiro" element={<OrganizerFinanceiro />} />
             <Route path="/organizer/convidados" element={<Convidados />} />
