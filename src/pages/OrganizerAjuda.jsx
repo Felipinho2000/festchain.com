@@ -90,8 +90,8 @@ const CONTENT = {
 
 export default function OrganizerAjuda() {
   const { currentUser } = useAuth();
-  const { language } = useLanguage();
-  const c = CONTENT[language] || CONTENT["pt-BR"];
+  const { lang } = useLanguage();
+  const c = CONTENT[lang] || CONTENT["pt-BR"];
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -126,7 +126,7 @@ export default function OrganizerAjuda() {
     ),
     payout: (
       <p>
-        O repasse é automático, em até 24h após a janela de acerto (que abre quando o evento acontece). O valor é líquido da taxa. Veja suas datas previstas no{" "}
+        Durante o piloto, o repasse é feito via Pix pela nossa equipe, após a janela de acerto (que abre quando o evento acontece). O valor é líquido da taxa. Veja o status no{" "}
         <Link to="/organizer/financeiro" className="text-primary hover:underline">extrato financeiro →</Link>
       </p>
     ),
