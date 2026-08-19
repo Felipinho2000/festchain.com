@@ -3,6 +3,15 @@ import { base44 } from "@/api/base44Client";
 import { Download, RefreshCw, Ticket as TicketIcon, Check, X, AlertTriangle } from "lucide-react";
 import moment from "moment";
 
+const ticketStatusLabels = {
+  pending: "Pendente",
+  active: "Válido",
+  used: "Usado",
+  transferred: "Transferido",
+  expired: "Expirado",
+  refunded: "Reembolsado",
+};
+
 export default function GuestList({ eventId, eventTitle }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,41 +91,45 @@ export default function GuestList({ eventId, eventTitle }) {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-border text-[10px] uppercase tracking-wider text-[#666] font-semibold">
-            <div className="col-span-5">Ingresso / QR</div>
-            <div className="col-span-3">Status</div>
-            <div className="col-span-4">Check-in</div>
-          </div>
-          <div className="divide-y divide-[#1f1f1f] max-h-[60vh] overflow-y-auto">
-            {tickets.map(t => (
-              <div key={t.id} className="grid grid-cols-12 gap-2 px-4 py-2.5 items-center text-xs">
-                <div className="col-span-5">
-                  <p className="text-white font-medium truncate flex items-center gap-1.5">
-                    {t.id.slice(0, 8)}…
-                    {(t.ticket_phase === '[DEMO]' || (t.event_title || '').startsWith('[DEMO]')) && (
-                      <span className="text-[9px] font-bold uppercase bg-amber-900/40 text-amber-400 px-1.5 py-0.5 rounded">Demo</span>
-                    )}
-                  </p>
-                  <p className="text-[#555] font-mono text-[10px] truncate">{t.qr_code || "—"}</p>
-                </div>
-                <div className="col-span-3">
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${t.status === "active" ? "bg-emerald-900/40 text-emerald-400" : t.status === "used" ? "bg-[#222] text-[#888]" : "bg-red-900/30 text-red-400"}`}>
-                    {t.status}
-                  </span>
-                </div>
-                <div className="col-span-4">
-                  {t.checked_in ? (
-                    <span className="flex items-center gap-1 text-emerald-400">
-                      <Check className="w-3 h-3" /> {t.checked_in_at ? moment(t.checked_in_at).format("D MMM, HH:mm") : "Sim"}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-[#555]">
-                      <X className="w-3 h-3" /> Não
-                    </span>
-                  )}
-                </div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[420px]">
+              <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-border text-[10px] uppercase tracking-wider text-[#666] font-semibold">
+                <div className="col-span-5">Ingresso / QR</div>
+                <div className="col-span-3">Status</div>
+                <div className="col-span-4">Check-in</div>
               </div>
-            ))}
+              <div className="divide-y divide-[#1f1f1f] max-h-[60vh] overflow-y-auto">
+                {tickets.map(t => (
+                  <div key={t.id} className="grid grid-cols-12 gap-2 px-4 py-2.5 items-center text-xs">
+                    <div className="col-span-5">
+                      <p className="text-white font-medium truncate flex items-center gap-1.5">
+                        {t.id.slice(0, 8)}…
+                        {(t.ticket_phase === '[DEMO]' || (t.event_title || '').startsWith('[DEMO]')) && (
+                          <span className="text-[9px] font-bold uppercase bg-amber-900/40 text-amber-400 px-1.5 py-0.5 rounded">Demo</span>
+                        )}
+                      </p>
+                      <p className="text-[#555] font-mono text-[10px] truncate">{t.qr_code || "—"}</p>
+                    </div>
+                    <div className="col-span-3">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${t.status === "active" ? "bg-emerald-900/40 text-emerald-400" : t.status === "used" ? "bg-[#222] text-[#888]" : "bg-red-900/30 text-red-400"}`}>
+                        {ticketStatusLabels[t.status] || t.status}
+                      </span>
+                    </div>
+                    <div className="col-span-4">
+                      {t.checked_in ? (
+                        <span className="flex items-center gap-1 text-emerald-400">
+                          <Check className="w-3 h-3" /> {t.checked_in_at ? moment(t.checked_in_at).format("D MMM, HH:mm") : "Sim"}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[#555]">
+                          <X className="w-3 h-3" /> Não
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
