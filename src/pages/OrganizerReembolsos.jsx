@@ -75,8 +75,8 @@ const CONTENT = {
 
 export default function OrganizerReembolsos() {
   const { currentUser } = useAuth();
-  const { language } = useLanguage();
-  const c = CONTENT[language] || CONTENT["pt-BR"];
+  const { lang } = useLanguage();
+  const c = CONTENT[lang] || CONTENT["pt-BR"];
   const { toast } = useToast();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +124,7 @@ export default function OrganizerReembolsos() {
         toast({ title: c.approveSuccess });
         loadRequests();
       } else {
-        toast({ title: c.approveError, description: data.error || "Unknown error", variant: "destructive" });
+        toast({ title: c.approveError, description: data.error || "Erro desconhecido", variant: "destructive" });
       }
     } catch (e) {
       toast({ title: c.approveError, description: e.message, variant: "destructive" });
