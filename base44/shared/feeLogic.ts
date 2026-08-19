@@ -125,7 +125,7 @@ export function getEventPayoutStatus(event: any, payout: any): string {
   const now = new Date();
   const eventEnd = event.end_date ? new Date(event.end_date) : (event.date ? new Date(event.date) : null);
   if (!eventEnd || eventEnd > now) return 'accruing';
-  const payoutDue = addBusinessDays(eventEnd, 2);
+  const payoutDue = new Date(eventEnd.getTime() + 24 * 60 * 60 * 1000);
   return now < payoutDue ? 'settlement_window' : 'payable';
 }
 
@@ -186,7 +186,7 @@ export async function recalculatePayoutForEvent(base44: any, event: any): Promis
 
   const netPayableCents = grossSalesCents - refundedAmountCents - platformFeeCents;
   const eventEnd = event.end_date ? new Date(event.end_date) : (event.date ? new Date(event.date) : null);
-  const payoutDueAt = eventEnd ? addBusinessDays(eventEnd, 2) : null;
+  const payoutDueAt = eventEnd ? new Date(eventEnd.getTime() + 24 * 60 * 60 * 1000) : null;
 
   const existing = await base44.asServiceRole.entities.EventPayout.filter({ event_id: event.id }, null, 1);
   const payout = existing.length > 0 ? existing[0] : null;

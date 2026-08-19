@@ -126,7 +126,7 @@ export default function OrganizerAjuda() {
     ),
     payout: (
       <p>
-        Durante o piloto, o repasse é feito manualmente pela nossa equipe via Pix, em até 2 dias úteis após a janela de acerto (que abre quando o evento acontece). O valor é líquido da taxa. Veja suas datas previstas no{" "}
+        O repasse é automático, em até 24h após a janela de acerto (que abre quando o evento acontece). O valor é líquido da taxa. Veja suas datas previstas no{" "}
         <Link to="/organizer/financeiro" className="text-primary hover:underline">extrato financeiro →</Link>
       </p>
     ),

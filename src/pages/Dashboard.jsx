@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import {
   Plus, Calendar, TrendingUp,
   Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine, Users,
-  Gift, Package, RefreshCw, HelpCircle, FileText, CheckCircle2, Circle, ArrowRight
+  Gift, Package, RefreshCw, HelpCircle, CheckCircle2, Circle, ArrowRight
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryManager from "@/components/dashboard/InventoryManager";
@@ -180,8 +180,8 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <p className="text-warmgray text-sm mb-1">{new Date().getHours() < 12 ? "Bom dia" : new Date().getHours() < 18 ? "Boa tarde" : "Boa noite"}, {currentUser?.full_name || "Organizador"}</p>
           <h1 className="font-heading font-extrabold text-3xl text-foreground flex items-center gap-2 uppercase">
             Painel <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded">Pilot</span>
@@ -191,33 +191,28 @@ export default function Dashboard() {
               <Settings className="w-3.5 h-3.5" /> Pilot Setup checklist
             </Link>
           )}
-          <Link to="/organizer/financeiro" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <TrendingUp className="w-3.5 h-3.5" /> Financeiro
-          </Link>
-          <Link to="/organizer/convidados" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <Users className="w-3.5 h-3.5" /> Convidados
-          </Link>
-          <Link to="/organizer/recompensas" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <Gift className="w-3.5 h-3.5" /> Recompensas
-          </Link>
-          <Link to="/organizer/validar-recompensa" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <Package className="w-3.5 h-3.5" /> Validar recompensa
-          </Link>
-          <Link to="/organizer/reembolsos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <RefreshCw className="w-3.5 h-3.5" /> Reembolsos
-          </Link>
-          <Link to="/organizer/ajuda" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <HelpCircle className="w-3.5 h-3.5" /> Ajuda
-          </Link>
-          <Link to="/politica-de-precos" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary mt-2 hover:underline">
-            <FileText className="w-3.5 h-3.5" /> Política de Preços
-          </Link>
         </div>
-        <Link to="/dashboard/events/new">
+        <Link to="/dashboard/events/new" className="flex-shrink-0">
           <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl h-10 px-4 font-semibold text-sm">
             <Plus className="w-4 h-4 mr-2" strokeWidth={1.5} /> Criar Evento
           </Button>
         </Link>
+      </div>
+
+      {/* Quick actions */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { to: "/organizer/financeiro", icon: TrendingUp, label: "Financeiro" },
+          { to: "/organizer/convidados", icon: Users, label: "Convidados" },
+          { to: "/organizer/recompensas", icon: Gift, label: "Recompensas" },
+          { to: "/organizer/validar-recompensa", icon: Package, label: "Validar" },
+          { to: "/organizer/reembolsos", icon: RefreshCw, label: "Reembolsos" },
+          { to: "/organizer/ajuda", icon: HelpCircle, label: "Ajuda" },
+        ].map((a) => (
+          <Link key={a.to} to={a.to} className="inline-flex items-center gap-1.5 bg-card border border-border rounded-xl px-3 py-2 text-xs font-medium text-foreground hover:border-primary/40 hover:text-primary transition-colors">
+            <a.icon className="w-3.5 h-3.5" strokeWidth={1.75} /> {a.label}
+          </Link>
+        ))}
       </div>
 
       {focalEvent && (

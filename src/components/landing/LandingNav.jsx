@@ -36,6 +36,10 @@ export default function LandingNav() {
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
             </a>
           ))}
+          <Link to="/whitepaper" className="relative hover:text-white transition-colors duration-200 group">
+            Whitepaper
+            <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -81,6 +85,9 @@ export default function LandingNav() {
               {c.nav.findEvents}
             </Link>
           )}
+          <Link to="/whitepaper" onClick={() => setMenuOpen(false)} className="hover:text-white transition-colors">
+            Whitepaper
+          </Link>
           <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)} className="text-primary font-semibold">
             {c.nav.cta}
           </a>

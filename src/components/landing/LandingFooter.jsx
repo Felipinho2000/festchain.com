@@ -18,6 +18,7 @@ export default function LandingFooter() {
         </div>
         <div className="flex items-center gap-5 text-sm text-white/40">
           <Link to="/legal" className="hover:text-white transition-colors">Confiança &amp; Segurança</Link>
+          <Link to="/whitepaper" className="hover:text-white transition-colors">Whitepaper</Link>
           <a href={waHref} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">WhatsApp</a>
           <a href="#contact" className="hover:text-white transition-colors">{c.contact.kicker}</a>
         </div>

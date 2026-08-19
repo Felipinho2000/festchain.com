@@ -30,6 +30,7 @@ import Landing from '@/pages/Landing';
 import Scan from '@/pages/Scan';
 import Legal from '@/pages/Legal';
 import PilotSetup from '@/pages/PilotSetup';
+import Whitepaper from '@/pages/Whitepaper';
 import OrganizerFinanceiro from '@/pages/OrganizerFinanceiro';
 import Convidados from '@/pages/Convidados';
 import OrganizerRecompensas from '@/pages/OrganizerRecompensas';
@@ -81,6 +82,7 @@ const AuthenticatedApp = () => {
       <Route path="/legal" element={<Legal />} />
       <Route path="/trust-safety" element={<TrustSafety />} />
       <Route path="/politica-de-precos" element={<PoliticaDePrecos />} />
+      <Route path="/whitepaper" element={<Whitepaper />} />
 
       {/* Public storefront — browse events and open a shared event link with
           no account. This is the top of the funnel: every ticket sale starts

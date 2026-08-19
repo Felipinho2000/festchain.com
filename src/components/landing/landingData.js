@@ -3,23 +3,23 @@ import {
 } from "lucide-react";
 
 export const WHATSAPP_NUMBER = "5519994174868";
-export const CONTACT_EMAIL = "contato@festchain.com";
+export const CONTACT_EMAIL = "feelipe.oliveeira@hotmail.com";
 
 export const COPY = {
   "pt-BR": {
     nav: { organizers: "Para organizadores", how: "Como funciona", prices: "Preços", openApp: "Abrir app", login: "Entrar", findEvents: "Ver eventos", cta: "Quero levar minha festa" },
     hero: {
-      badge: "Feito para a vida noturna do Brasil",
+      badge: "Bilheteria da noite, no mundo todo",
       title1: "Venda os ingressos.",
       title2: "Fique com o público.",
       sub: "A FestChain é a plataforma de ingressos para casas, festas e coletivos. Checkout rápido, portaria que não trava nem sem internet, e crédito que traz a galera de volta na próxima.",
       ctaPrimary: "Quero levar minha festa",
       ctaSecondary: "Ver como funciona",
-      note: "8% por ingresso · Sem mensalidade · Repasse manual via Pix em até 2 dias úteis",
+      note: "8% por ingresso · Sem mensalidade · Repasse automático em até 24h",
     },
-    strip: ["8% por ingresso vendido", "Sem mensalidade", "Portaria funciona offline", "Repasse manual via Pix em até 2 dias úteis"],
+    strip: ["8% por ingresso vendido", "Sem mensalidade", "Portaria funciona offline", "Repasse automático em até 24h"],
     wedge: {
-      kicker: "Por que trocam de plataforma",
+      kicker: "Por que trocar de plataforma",
       title: "Feito pra como a night vende de verdade.",
       sub: "Não é ferramenta genérica de evento. É construída pro que acontece numa noite real — da venda até a porta, e da porta até a próxima festa.",
       cards: [
@@ -27,8 +27,8 @@ export const COPY = {
           d: "Pix e cartão, CPF e meia-entrada do jeito certo, lotes que viram sozinhos quando esgotam. Comprou, o ingresso já está no celular." },
         { icon: DoorOpen, t: "Portaria que aguenta a fila",
           d: "Leitura de QR no celular do seu staff, cada ingresso entra uma vez só. E se a internet cair no meio da festa, a portaria continua funcionando — a lista fica salva no aparelho." },
-        { icon: Gift, t: "O público volta",
-          d: "Quem foi na sua festa ganha crédito pra usar na próxima. E a lista de quem esteve lá é sua, não da plataforma. Você para de alugar o seu próprio público." },
+        { icon: Gift, t: "O público continua com você",
+          d: "Quem foi na sua festa deixa o contato e avalia o rolê, e ganha crédito pra usar na próxima. A lista de quem esteve lá é sua, não da plataforma. Você para de alugar o seu próprio público." },
       ],
     },
     how: {
@@ -51,7 +51,7 @@ export const COPY = {
       items: [
         { q: "Vocês são novos. Por que eu confiaria a bilheteria da minha festa?", a: "Somos. Por isso a primeira festa é acompanhada de perto — eu estou junto no dia, na portaria, do primeiro ingresso ao último. Se algo der errado, você fala comigo, não com um chamado de suporte." },
         { q: "E se travar na entrada?", a: "A lista de quem comprou fica salva no celular do seu staff antes da festa começar. Se a internet cair, a portaria continua lendo QR normalmente e sincroniza sozinha quando a conexão volta." },
-        { q: "Quando eu recebo?", a: "Durante o piloto, o repasse é feito manualmente pela nossa equipe via Pix, em até 2 dias úteis depois do evento, com o extrato do valor líquido. Você acompanha a data exata no painel desde o dia que publica o evento." },
+        { q: "Quando eu recebo?", a: "O repasse é automático, em até 24h depois do evento, com o extrato do valor líquido. Você acompanha a data exata no painel desde o dia que publica o evento." },
       ],
     },
     pricing: {
@@ -85,8 +85,8 @@ export const COPY = {
       body: "Cada ingresso carrega um QR único com validação segura no servidor — nada de ingresso falso, duplicado ou dor de cabeça na porta. Por trás, ticketing seguro, proteção contra fraude e repasses confiáveis, sem ninguém precisar pensar na tecnologia por baixo.",
     },
     footer: {
-      tagline: "Plataforma de ingressos para a vida noturna. Feito no Brasil, começando por São Paulo.",
-      rights: "Ticketing seguro · Proteção contra fraude · Repasse manual via Pix em até 2 dias úteis",
+      tagline: "Plataforma de ingressos para a vida noturna. Feito em São Paulo, Brasil.",
+      rights: "Ticketing seguro · Proteção contra fraude · Repasse automático em até 24h",
     },
     contact: {
       kicker: "Comece agora",
@@ -125,15 +125,15 @@ export const COPY = {
   en: {
     nav: { organizers: "For organizers", how: "How it works", prices: "Pricing", openApp: "Open app", login: "Log in", findEvents: "Find events", cta: "Bring your party" },
     hero: {
-      badge: "Built for Brazil's nightlife",
+      badge: "Nightlife box office, worldwide",
       title1: "Sell the tickets.",
       title2: "Keep the crowd.",
       sub: "FestChain is the ticketing platform for clubs, parties and collectives. Fast checkout, a door that doesn't stall even without internet, and credit that brings people back next time.",
       ctaPrimary: "Bring your party",
       ctaSecondary: "See how it works",
-      note: "8% per ticket · No monthly fee · Manual Pix payout within 2 business days",
+      note: "8% per ticket · No monthly fee · Automatic payout within 24h",
     },
-    strip: ["8% per ticket sold", "No monthly fee", "Door works offline", "Manual Pix payout within 2 business days"],
+    strip: ["8% per ticket sold", "No monthly fee", "Door works offline", "Automatic payout within 24h"],
     wedge: {
       kicker: "Why they switch",
       title: "Built for how nightlife actually sells.",
@@ -143,8 +143,8 @@ export const COPY = {
           d: "Pix and card, CPF and half-price done right, phases that flip on their own when they sell out. Once paid, the ticket is already on the phone." },
         { icon: DoorOpen, t: "A door that handles the line",
           d: "QR scanning on your staff's phone, each ticket enters once. And if the internet drops mid-party, the door keeps working — the list is saved on the device." },
-        { icon: Gift, t: "The crowd comes back",
-          d: "Everyone who came to your party earns credit to use at the next one. And the list of who was there is yours, not the platform's. You stop renting your own crowd." },
+        { icon: Gift, t: "The crowd stays with you",
+          d: "Everyone who came leaves their contact and reviews the party, and earns credit for the next one. And the list of who was there is yours, not the platform's. You stop renting your own crowd." },
       ],
     },
     how: {
@@ -167,7 +167,7 @@ export const COPY = {
       items: [
         { q: "You're new. Why would I trust you with my party's box office?", a: "We are. That's why the first party is handled close up — I'm there on the day, at the door, from the first ticket to the last. If something goes wrong, you talk to me, not a support ticket." },
         { q: "What if the door stalls?", a: "The list of who bought is saved on your staff's phone before the party starts. If the internet drops, the door keeps scanning QR normally and syncs on its own when the connection comes back." },
-        { q: "When do I get paid?", a: "During the pilot, payouts are sent manually by our team via Pix, within 2 business days after the event, with a statement of the net amount. You can track the exact date in your dashboard from the day you publish the event." },
+        { q: "When do I get paid?", a: "Payouts are automatic, within 24h after the event, with a statement of the net amount. You can track the exact date in your dashboard from the day you publish the event." },
       ],
     },
     pricing: {
@@ -201,8 +201,8 @@ export const COPY = {
       body: "Every ticket carries a unique QR with secure server-side validation — no fakes, no doubles, no hassle at the door. Behind the scenes, secure ticketing, fraud protection and reliable payouts, without anyone needing to think about the technology underneath.",
     },
     footer: {
-      tagline: "Ticketing platform for nightlife. Built in Brazil, starting with São Paulo.",
-      rights: "Secure ticketing · Fraud protection · Manual Pix payout within 2 business days",
+      tagline: "Ticketing platform for nightlife. Made in São Paulo, Brazil.",
+      rights: "Secure ticketing · Fraud protection · Automatic payout within 24h",
     },
     contact: {
       kicker: "Get started",
