@@ -20,11 +20,11 @@ Deno.serve(async (req) => {
     let body = {};
     try { body = await req.json(); } catch (_) {}
     const event_id = body && body.event_id;
-    if (!event_id) return Response.json({ status: 'error', message: 'Missing event id' }, { status: 400 });
+    if (!event_id) return Response.json({ status: 'error', message: 'Evento não informado' }, { status: 400 });
 
     let event = null;
     try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
-    if (!event) return Response.json({ status: 'not_found', message: 'Event not found' }, { status: 404 });
+    if (!event) return Response.json({ status: 'not_found', message: 'Evento não encontrado' }, { status: 404 });
 
     const isPublicOpen = event.visibility === 'public' && ['published', 'live'].includes(event.status);
     const isCreator = !!user && String(event.created_by_id || '') === String(user.id || '');
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       return Response.json({
         status: 'denied',
         http_status: 403,
-        message: 'This is a private event. You need an invitation or a valid ticket to view the details.'
+        message: 'Este é um evento privado. Você precisa de um convite ou de um ingresso válido para ver os detalhes.'
       });
     }
 
