@@ -7,24 +7,24 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user) return Response.json({ status: 'error', message: 'Sign in required' }, { status: 401 });
+    if (!user) return Response.json({ status: 'error', message: 'Entre na sua conta para continuar' }, { status: 401 });
 
     let body = {};
     try { body = await req.json(); } catch (_) {}
     const ticket_id = body && body.ticket_id;
-    if (!ticket_id) return Response.json({ status: 'error', message: 'Missing ticket id' }, { status: 400 });
+    if (!ticket_id) return Response.json({ status: 'error', message: 'Ingresso não informado' }, { status: 400 });
 
     // 1. Load ticket (service role bypasses Ticket read RLS)
     let ticket = null;
     try { ticket = await base44.asServiceRole.entities.Ticket.get(ticket_id); } catch (_) {}
-    if (!ticket) return Response.json({ status: 'error', message: 'Ticket not found' }, { status: 404 });
+    if (!ticket) return Response.json({ status: 'error', message: 'Ingresso não encontrado' }, { status: 404 });
 
     // 2. Access control: owner, organizer of the event, or admin
     const isOwner = String(ticket.created_by_id) === String(user.id);
     const isOrganizer = ticket.organizer_id && String(ticket.organizer_id) === String(user.id);
     const isAdmin = user.role === 'admin';
     if (!isOwner && !isOrganizer && !isAdmin) {
-      return Response.json({ status: 'error', message: 'Not authorized for this ticket' }, { status: 403 });
+      return Response.json({ status: 'error', message: 'Você não tem autorização para ver este ingresso' }, { status: 403 });
     }
 
     // 3. Load linked event (service role — works for private events)
