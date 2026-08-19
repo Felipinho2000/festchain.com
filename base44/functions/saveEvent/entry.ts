@@ -128,13 +128,12 @@ Deno.serve(async (req) => {
 
     const isAdmin = user.role === 'admin';
     const isApprovedOrganizer = user.approved_organizer === true;
-    if (!isAdmin && !isApprovedOrganizer) {
-      return Response.json({
-        status: 'error',
-        code: 'not_approved_organizer',
-        message: 'Your account is not approved to publish events. Organizer access is granted manually during the private pilot.',
-      }, { status: 403 });
-    }
+    // Any signed-in user may draft an event during the pilot — this is what
+    // lets a first-time organizer configure their event before admin review
+    // instead of hitting a hard wall. Only an approved organizer/admin may
+    // move it out of 'draft' (see the status-escalation guards below in the
+    // create/update branches). A non-approved user can never reach a status
+    // that createCheckoutSession/Event RLS will actually sell tickets on.
 
     let body = {};
     try { body = await req.json(); } catch (_) {}
@@ -187,12 +186,22 @@ Deno.serve(async (req) => {
         tickets_sold: 0,
       });
 
-      const target = VALID_STATUS.includes(requestedStatus) ? requestedStatus : 'draft';
+      // A non-approved user can save every field of their event, but the
+      // status can never leave 'draft' under their own request — that is the
+      // actual publish gate. It is enforced here server-side, not just hidden
+      // in the UI.
+      const canPublish = isAdmin || isApprovedOrganizer;
+      const target = canPublish && VALID_STATUS.includes(requestedStatus) ? requestedStatus : 'draft';
       if (target !== 'draft') {
         await base44.asServiceRole.entities.Event.update(created.id, { status: target });
       }
 
-      return Response.json({ status: 'success', event_id: created.id, event_status: target });
+      return Response.json({
+        status: 'success',
+        event_id: created.id,
+        event_status: target,
+        pending_approval: !canPublish,
+      });
     }
 
     // ── UPDATE ──────────────────────────────────────────────────────────────
@@ -223,8 +232,17 @@ Deno.serve(async (req) => {
       delete clean.refund_policy;
     }
 
+    const canPublish = isAdmin || isApprovedOrganizer;
     const patch = { ...clean };
-    if (VALID_STATUS.includes(requestedStatus)) patch.status = requestedStatus;
+    if (canPublish && VALID_STATUS.includes(requestedStatus)) {
+      patch.status = requestedStatus;
+    } else if (!canPublish && existing.status !== 'draft') {
+      // A user who lost/never had organizer approval cannot use an update
+      // call to keep an already-live event published, but editing content
+      // on their own draft must still work — that is the whole point of
+      // letting a first-timer configure before review.
+      patch.status = 'draft';
+    }
 
     await base44.asServiceRole.entities.Event.update(eventId, patch);
 
@@ -233,6 +251,7 @@ Deno.serve(async (req) => {
       event_id: eventId,
       event_status: patch.status || existing.status,
       refund_policy_locked: sold > 0,
+      pending_approval: !canPublish,
     });
   } catch (error) {
     console.error('saveEvent error:', error.message);
