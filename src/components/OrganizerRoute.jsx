@@ -1,6 +1,6 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 
 // Route guard for the organizer workspace.
@@ -31,21 +31,34 @@ export default function OrganizerRoute() {
 
   const canOrganize = currentUser.role === 'admin' || currentUser.approved_organizer === true;
   if (!canOrganize) {
+    // Not a rejection screen: a first-time organizer can already configure an
+    // event (saveEvent accepts drafts from any signed-in user) — this just
+    // means the full operator console (finanças, resgates, convidados) opens
+    // once FestChain reviews the account. Point them at the one thing they
+    // actually can do right now instead of a locked door.
     return (
       <div className="max-w-md mx-auto text-center py-24 px-4">
         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-          <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
+          <Sparkles className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
-        <h2 className="font-heading font-bold text-2xl text-foreground mb-2">Apenas organizadores</h2>
-        <p className="text-muted-foreground text-sm mb-2">
-          Esta área é do painel de organizadores aprovados.
+        <h2 className="font-heading font-bold text-2xl text-foreground mb-2">Quer criar seu próprio evento?</h2>
+        <p className="text-muted-foreground text-sm mb-2 leading-relaxed">
+          A FestChain te ajuda a começar do zero. Crie seu evento, configure seus ingressos e publique quando estiver pronto.
         </p>
-        <p className="text-muted-foreground/60 text-xs mb-6">
-          A aprovação é concedida manualmente pela equipe durante o piloto privado.
+        <p className="text-muted-foreground/60 text-xs mb-6 leading-relaxed">
+          Estamos validando novos organizadores antes da primeira publicação. Você pode configurar seu evento agora e nós liberamos a publicação após a revisão.
         </p>
-        <Link to="/app" className="text-primary font-semibold text-sm hover:underline">
-          Voltar ao início
-        </Link>
+        <div className="flex flex-col items-center gap-3">
+          <Link
+            to="/dashboard/events/new"
+            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold text-sm h-11 px-6 rounded-xl transition-colors"
+          >
+            Começar como organizador
+          </Link>
+          <Link to="/app" className="text-muted-foreground text-sm hover:text-foreground hover:underline">
+            Voltar ao início
+          </Link>
+        </div>
       </div>
     );
   }
