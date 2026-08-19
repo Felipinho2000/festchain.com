@@ -79,7 +79,7 @@ export default function EventDetail() {
           setServerPhase(data.active_phase ?? null);
           setServerSpotsLeft(typeof data.spots_left === "number" ? data.spots_left : null);
         } else if (data.status === "denied") {
-          setDeniedMessage(data.message || "This is a private event. You need an invitation or a valid ticket to view the details.");
+          setDeniedMessage(data.message || "Este é um evento privado. Você precisa de um convite ou de um ingresso válido para ver os detalhes.");
         } else {
           setNotFound(true);
         }
@@ -103,7 +103,7 @@ export default function EventDetail() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") === "cancelled") {
-      toast({ title: "Payment cancelled", description: "Your ticket was not purchased." });
+      toast({ title: "Pagamento cancelado", description: "Seu ingresso não foi comprado." });
     }
   }, [toast]);
 
@@ -123,9 +123,9 @@ export default function EventDetail() {
         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
           <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
         </div>
-        <h1 className="font-heading font-bold text-2xl text-foreground mb-2">Private Event</h1>
+        <h1 className="font-heading font-bold text-2xl text-foreground mb-2">Evento privado</h1>
         <p className="text-muted-foreground text-sm mb-6">{deniedMessage}</p>
-        <Link to="/events"><Button variant="outline">Back to Events</Button></Link>
+        <Link to="/events"><Button variant="outline">Voltar para eventos</Button></Link>
       </div>
     );
   }
@@ -133,8 +133,8 @@ export default function EventDetail() {
   if (notFound || !event) {
     return (
       <div className="text-center py-24">
-        <p className="text-muted-foreground mb-4">Event not found.</p>
-        <Link to="/events"><Button variant="outline">Back to Events</Button></Link>
+        <p className="text-muted-foreground mb-4">Evento não encontrado.</p>
+        <Link to="/events"><Button variant="outline">Voltar para eventos</Button></Link>
       </div>
     );
   }
@@ -187,7 +187,7 @@ export default function EventDetail() {
             </Badge>
           </div>
           <h1 className="font-heading font-extrabold text-3xl lg:text-5xl text-white mb-2 leading-[1.05] tracking-tight text-balance drop-shadow-lg">{event.title}</h1>
-          {event.organizer_name && <p className="text-muted-foreground text-sm">by {event.organizer_name}</p>}
+          {event.organizer_name && <p className="text-muted-foreground text-sm">por {event.organizer_name}</p>}
         </div>
       </div>
 
