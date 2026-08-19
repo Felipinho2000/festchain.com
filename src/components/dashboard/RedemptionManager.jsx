@@ -31,7 +31,7 @@ export default function RedemptionManager({ events }) {
   };
 
   const exportCSV = () => {
-    const headers = ["Item", "Redemption Code", "Status", "FTC Cost", "Created Date", "User ID"];
+    const headers = ["Produto", "Código de resgate", "Status", "Custo em FTC", "Data de criação", "ID do usuário"];
     const rows = redemptions.map(r => [
       r.item_name || "",
       r.redemption_code || "",
@@ -68,6 +68,12 @@ export default function RedemptionManager({ events }) {
     pending: "bg-amber-900/30 text-amber-400",
     cancelled: "bg-red-900/30 text-red-400",
   };
+  const redemptionStatusLabels = {
+    redeemed: "Resgatado",
+    claimed: "Coletado",
+    pending: "Pendente",
+    cancelled: "Cancelado",
+  };
 
   return (
     <div className="space-y-4">
@@ -97,46 +103,53 @@ export default function RedemptionManager({ events }) {
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-border text-[10px] uppercase tracking-wider text-[#666] font-semibold">
-            <div className="col-span-3">Produto</div>
-            <div className="col-span-3">Código</div>
-            <div className="col-span-2">Status</div>
-            <div className="col-span-1 text-right">FTC</div>
-            <div className="col-span-2">Data</div>
-            <div className="col-span-1 text-right">Ações</div>
-          </div>
-          <div className="divide-y divide-[#1f1f1f] max-h-[60vh] overflow-y-auto">
-            {redemptions.map(r => (
-              <div key={r.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-xs">
-                <div className="col-span-3">
-                  <p className="text-white font-medium truncate">{r.item_emoji} {r.item_name}</p>
-                </div>
-                <div className="col-span-3">
-                  <p className="text-[#aaa] font-mono truncate">{r.redemption_code || "—"}</p>
-                </div>
-                <div className="col-span-2">
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${statusColors[r.status] || "bg-[#222] text-[#888]"}`}>
-                    {r.status}
-                  </span>
-                </div>
-                <div className="col-span-1 text-right text-primary font-semibold">{r.ftc_cost || 0}</div>
-                <div className="col-span-2 text-[#888]">{r.created_date ? moment(r.created_date).format("D MMM, HH:mm") : "—"}</div>
-                <div className="col-span-1 flex items-center justify-end gap-1">
-                  {r.status === "redeemed" && (
-                    <button onClick={() => markClaimed(r.id)} title="Marcar como coletado"
-                      className="p-1.5 text-emerald-400 hover:bg-emerald-900/20 rounded-lg transition-colors">
-                      <Check className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  {!["cancelled", "claimed"].includes(r.status) && (
-                    <button onClick={() => cancelRedemption(r.id)} title="Cancelar resgate"
-                      className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
-                      <Ban className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
+          {/* Six real data columns crammed into fixed 12ths get unreadable
+              below ~600px — scope the horizontal scroll to this table only,
+              never the page, so narrow phones still see full values. */}
+          <div className="overflow-x-auto">
+            <div className="min-w-[560px]">
+              <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-border text-[10px] uppercase tracking-wider text-[#666] font-semibold">
+                <div className="col-span-3">Produto</div>
+                <div className="col-span-3">Código</div>
+                <div className="col-span-2">Status</div>
+                <div className="col-span-1 text-right">FTC</div>
+                <div className="col-span-2">Data</div>
+                <div className="col-span-1 text-right">Ações</div>
               </div>
-            ))}
+              <div className="divide-y divide-[#1f1f1f] max-h-[60vh] overflow-y-auto">
+                {redemptions.map(r => (
+                  <div key={r.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-xs">
+                    <div className="col-span-3">
+                      <p className="text-white font-medium truncate">{r.item_emoji} {r.item_name}</p>
+                    </div>
+                    <div className="col-span-3">
+                      <p className="text-[#aaa] font-mono truncate">{r.redemption_code || "—"}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${statusColors[r.status] || "bg-[#222] text-[#888]"}`}>
+                        {redemptionStatusLabels[r.status] || r.status}
+                      </span>
+                    </div>
+                    <div className="col-span-1 text-right text-primary font-semibold">{r.ftc_cost || 0}</div>
+                    <div className="col-span-2 text-[#888]">{r.created_date ? moment(r.created_date).format("D MMM, HH:mm") : "—"}</div>
+                    <div className="col-span-1 flex items-center justify-end gap-1">
+                      {r.status === "redeemed" && (
+                        <button onClick={() => markClaimed(r.id)} title="Marcar como coletado"
+                          className="p-1.5 text-emerald-400 hover:bg-emerald-900/20 rounded-lg transition-colors">
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {!["cancelled", "claimed"].includes(r.status) && (
+                        <button onClick={() => cancelRedemption(r.id)} title="Cancelar resgate"
+                          className="p-1.5 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors">
+                          <Ban className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
