@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Plus, Calendar, TrendingUp,
-  Ticket, Music, Pencil, Trash2, Lock, Settings, UserCheck, ScanLine, Users,
+  Ticket, Music, Pencil, Trash2, Settings, UserCheck, ScanLine, Users,
   Gift, Package, RefreshCw, HelpCircle, CheckCircle2, Circle, ArrowRight
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -24,6 +24,14 @@ const statusColors = {
   live: "bg-red-900/30 text-red-400",
   ended: "bg-[#222] text-[#666]",
   cancelled: "bg-red-900/30 text-red-400"
+};
+
+const eventStatusLabels = {
+  draft: "Rascunho",
+  published: "Publicado",
+  live: "Ao vivo",
+  ended: "Encerrado",
+  cancelled: "Cancelado",
 };
 
 const tabClass = "rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 text-sm font-medium text-[#888] data-[state=active]:text-white";
@@ -123,24 +131,10 @@ export default function Dashboard() {
       .finally(() => setVenueItemsLoaded(true));
   }, [focalEvent?.id]);
 
-  // This gate used to be `!!currentUser`, i.e. every signed-in account saw the
-  // organizer workspace and could reach the event editor. Match the same rule
-  // the scanner and ModeSwitcher already use — and that `saveEvent` now
-  // enforces server-side, which is the real boundary.
-  const canOrganize = currentUser?.role === "admin" || currentUser?.approved_organizer === true;
-  if (!canOrganize) {
-    return (
-      <div className="max-w-md mx-auto text-center py-20">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-          <Lock className="w-8 h-8 text-primary" strokeWidth={1.5} />
-        </div>
-        <h2 className="font-heading font-bold text-2xl text-white mb-2">Apenas organizadores</h2>
-        <p className="text-[#888] text-sm mb-2">Esta área é para organizadores e administradores aprovados.</p>
-        <p className="text-[#555] text-xs mb-6">A aprovação é concedida manualmente pela equipe durante o piloto privado.</p>
-        <Link to="/" className="text-primary font-semibold text-sm hover:underline">Voltar ao início</Link>
-      </div>
-    );
-  }
+  // No local gate here: this page only renders behind <OrganizerRoute>,
+  // which already enforces approved_organizer/admin and shows the
+  // first-time-organizer invitation otherwise. Re-checking here would be
+  // dead code that can drift out of sync with the real boundary.
 
   // Exclude demo tickets (tagged ticket_phase:'[DEMO]' or [DEMO] event title)
   // from KPIs and charts so synthetic data never inflates real analytics.
@@ -304,12 +298,12 @@ export default function Dashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <Link to={`/events/${event.id}`} className="font-heading font-semibold text-sm text-white truncate hover:text-primary transition-colors">{event.title}</Link>
-                          <Badge className={`text-[10px] px-2 py-0 border-0 ${statusColors[event.status]}`}>{event.status}</Badge>
-                          <Badge className={`text-[10px] px-2 py-0 border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>{event.visibility === "private" ? "Private" : "Public"}</Badge>
+                          <Badge className={`text-[10px] px-2 py-0 border-0 ${statusColors[event.status]}`}>{eventStatusLabels[event.status] || event.status}</Badge>
+                          <Badge className={`text-[10px] px-2 py-0 border-0 ${event.visibility === "private" ? "bg-amber-900/30 text-amber-400" : "bg-primary/10 text-primary"}`}>{event.visibility === "private" ? "Privado" : "Público"}</Badge>
                         </div>
-                        <p className="text-xs text-warmgray">{moment(event.date).format("MMM D, YYYY")} · {event.location_name}</p>
+                        <p className="text-xs text-warmgray">{moment(event.date).format("D MMM, YYYY")} · {event.location_name}</p>
                         <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-xs text-warmgray">{event.tickets_sold || 0}/{event.total_capacity} sold</span>
+                          <span className="text-xs text-warmgray">{event.tickets_sold || 0}/{event.total_capacity} vendidos</span>
                           <div className="flex-1 max-w-24 h-1.5 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-primary rounded-full transition-all" style={{ width: `${soldPct}%` }} /></div>
                           <span className="text-xs font-medium text-primary">{soldPct}%</span>
                         </div>
