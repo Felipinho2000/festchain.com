@@ -222,7 +222,7 @@ export default function WalletPage() {
   // window before the balance call returns (or if it fails).
   const balance = serverBalance !== null ? serverBalance : pageBalance;
   const totalEarned = validTx.filter(t => ["earned", "transferred_in", "pilot_topup"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
-  const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s + (t.amount || 0), 0);
+  const totalSpent  = validTx.filter(t => ["spent", "transferred_out"].includes(t.type)).reduce((s, t) => s - (t.amount || 0), 0);
 
   const activeTickets = tickets.filter(t => t.status === "active");
   // "Próximos"/"Anteriores" is grouped by the event's actual date, not by
@@ -280,7 +280,10 @@ export default function WalletPage() {
             <span className="font-heading font-bold text-5xl text-foreground tracking-tight">{balance.toLocaleString()}</span>
             <span className="text-muted-foreground text-sm">FTC</span>
           </div>
-          <p className="text-[10px] text-muted-foreground mb-4">{ftcToBrlString(balance, ftcRate)} em consumação · não é resgatável em dinheiro</p>
+          <p className="text-[10px] text-muted-foreground mb-1">{ftcToBrlString(balance, ftcRate)} em consumação · não é resgatável em dinheiro</p>
+          <p className="text-[10px] text-muted-foreground/80 mb-4">
+            Durante o programa piloto, seu saldo é usado para benefícios e compras disponíveis nos eventos participantes. <Link to="/buy-ftc" className="text-primary hover:underline">Como funciona</Link>
+          </p>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-background/60 border border-border rounded-xl p-3">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Ativos</p>
