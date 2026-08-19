@@ -8,35 +8,35 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user) return Response.json({ status: 'unauthorized', message: 'Sign in required' }, { status: 401 });
+    if (!user) return Response.json({ status: 'unauthorized', message: 'Entre na sua conta para escanear' }, { status: 401 });
 
     let body = {};
     try { body = await req.json(); } catch (_) {}
     const qr_code = body && body.qr_code;
     const event_id = body && body.event_id;
-    if (!qr_code) return Response.json({ status: 'invalid', message: 'No QR code provided' });
-    if (!event_id) return Response.json({ status: 'invalid', message: 'Select an event before scanning' });
+    if (!qr_code) return Response.json({ status: 'invalid', message: 'Nenhum código QR informado' });
+    if (!event_id) return Response.json({ status: 'invalid', message: 'Selecione um evento antes de escanear' });
 
     // Load event and verify the caller is allowed to scan for it
     let event = null;
     try { event = await base44.asServiceRole.entities.Event.get(event_id); } catch (_) {}
-    if (!event) return Response.json({ status: 'invalid', message: 'Event not found' });
+    if (!event) return Response.json({ status: 'invalid', message: 'Evento não encontrado' });
 
     // SECURITY: admin, the event creator, or an explicitly-added per-event
     // scanner — not any approved organizer globally, and not a role guessed
     // from the client.
     if (!canScanEvent(event, user)) {
-      return Response.json({ status: 'unauthorized', message: 'You are not authorized to scan for this event' }, { status: 403 });
+      return Response.json({ status: 'unauthorized', message: 'Você não está autorizado a escanear ingressos deste evento' }, { status: 403 });
     }
 
     const tickets = await base44.asServiceRole.entities.Ticket.filter({ qr_code });
     if (!tickets || tickets.length === 0) {
-      return Response.json({ status: 'invalid', message: 'Ticket not found' });
+      return Response.json({ status: 'invalid', message: 'Ingresso não encontrado' });
     }
     const ticket = tickets[0];
 
     if (ticket.event_id !== event_id) {
-      return Response.json({ status: 'invalid', message: 'This ticket does not belong to this event' });
+      return Response.json({ status: 'invalid', message: 'Este ingresso pertence a outro evento' });
     }
 
     // Resolve attendee (the ticket owner)
@@ -53,13 +53,14 @@ Deno.serve(async (req) => {
     if (ticket.status === 'pending') {
       return Response.json({
         status: 'invalid',
-        message: 'This ticket has not been paid for yet. Ask the guest to complete checkout.',
+        message: 'Este ingresso ainda não foi pago. Peça pro convidado concluir o pagamento.',
       });
     }
     if (['expired', 'refunded', 'transferred'].includes(ticket.status)) {
+      const statusLabelPt = { expired: 'expirado', refunded: 'reembolsado', transferred: 'transferido' };
       return Response.json({
         status: 'invalid',
-        message: `This ticket is ${ticket.status} and cannot be used for entry.`,
+        message: `Este ingresso está ${statusLabelPt[ticket.status] || ticket.status} e não pode ser usado para entrada.`,
       });
     }
 
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
       }
       return Response.json({
         status: 'used',
-        message: 'This ticket was already used for entry',
+        message: 'Este ingresso já foi usado na entrada',
         ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location, is_complimentary: ticket.is_complimentary || false, comp_category: ticket.comp_category || null },
         attendee,
         previous_scan: {
@@ -128,7 +129,7 @@ Deno.serve(async (req) => {
           scan_claim_token: claimToken,
         });
       } catch (e) {
-        return Response.json({ status: 'error', message: 'Could not record the check-in. Try again.' }, { status: 500 });
+        return Response.json({ status: 'error', message: 'Não foi possível registrar o check-in. Tente de novo.' }, { status: 500 });
       }
     }
 
@@ -137,7 +138,7 @@ Deno.serve(async (req) => {
     try { confirmed = await base44.asServiceRole.entities.Ticket.get(ticket.id); } catch (_) {}
 
     if (!confirmed) {
-      return Response.json({ status: 'error', message: 'Could not confirm the check-in. Try again.' }, { status: 500 });
+      return Response.json({ status: 'error', message: 'Não foi possível confirmar o check-in. Tente de novo.' }, { status: 500 });
     }
 
     if (confirmed.scan_claim_token !== claimToken) {
@@ -151,7 +152,7 @@ Deno.serve(async (req) => {
       }
       return Response.json({
         status: 'used',
-        message: 'This ticket was just scanned on another device',
+        message: 'Este ingresso acabou de ser escaneado em outro aparelho',
         ticket: { event_title: ticket.event_title, event_date: ticket.event_date, event_location: ticket.event_location, is_complimentary: ticket.is_complimentary || false, comp_category: ticket.comp_category || null },
         attendee,
         previous_scan: {
@@ -165,12 +166,12 @@ Deno.serve(async (req) => {
     if (confirmed.status !== 'used' || !confirmed.checked_in) {
       // Our token is on the row but the state did not persist — never report a
       // green door on an unverified write.
-      return Response.json({ status: 'error', message: 'Check-in did not persist. Scan again.' }, { status: 500 });
+      return Response.json({ status: 'error', message: 'O check-in não foi salvo. Escaneie de novo.' }, { status: 500 });
     }
 
     return Response.json({
       status: 'valid',
-      message: 'Entry approved',
+      message: 'Entrada liberada',
       ticket: {
         event_title: ticket.event_title,
         event_date: ticket.event_date,
