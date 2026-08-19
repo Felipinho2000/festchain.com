@@ -158,6 +158,14 @@
     "fee_reversed": {
       "type": "boolean",
       "default": false
+    },
+    "transferred_from_user_id": {
+      "type": "string",
+      "description": "Set by transferTicket when this ticket's created_by_id was reassigned to a new owner."
+    },
+    "transferred_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
