@@ -22,10 +22,10 @@ export default function PilotTopupCard({ onSuccess }) {
         toast({ title: t("ftc.successTitle"), description: `+${data.added} FTC · ${t("ftc.successDesc")}` });
         onSuccess && onSuccess(data);
       } else {
-        toast({ title: "Error", description: data.message || data.error, variant: "destructive" });
+        toast({ title: "Erro", description: data.message || data.error, variant: "destructive" });
       }
     } catch (e) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      toast({ title: "Erro", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
