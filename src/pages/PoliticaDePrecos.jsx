@@ -24,7 +24,7 @@ const CONTENT = {
     s02Title: "02 · Quem paga a taxa",
     s02Body: "Por padrão, a taxa é deduzida da sua receita — o cliente paga apenas o valor do ingresso. Opcionalmente, você pode repassar a taxa ao comprador, mostrada com clareza no checkout. O processamento de pagamento é feito por um provedor licenciado (Stripe); a FestChain absorve esse custo — os 8% é a única coisa deduzida do seu repasse. A FestChain nunca armazena dados de cartão.",
     s03Title: "03 · Reembolsos",
-    s03Body: "Reembolso integral ao comprador; a taxa da FestChain sobre essa venda é revertida — você nunca paga taxa sobre uma venda desfeita. Se o organizador cancelar o evento inteiro, todos os ingressos são reembolsados automaticamente.",
+    s03Body: "Reembolso integral ao comprador; a taxa da FestChain sobre essa venda é revertida — você nunca paga taxa sobre uma venda desfeita. Se o organizador cancelar o evento inteiro, a equipe FestChain processa o reembolso de cada ingresso individualmente.",
     s04Title: "04 · Quando você recebe",
     step1: "Ingresso vendido",
     step1Desc: "A venda é registrada e o valor fica acumulado no seu extrato.",
@@ -32,8 +32,8 @@ const CONTENT = {
     step2Desc: "O evento acontece e a janela de acerto começa.",
     step3: "Janela de acerto",
     step3Desc: "Os valores são consolidados — reembolsos são deduzidos, taxas calculadas.",
-    step4: "Repasse automático",
-    step4Desc: "O repasse é automático, em até 24h após o acerto, líquido da taxa.",
+    step4: "Repasse enviado",
+    step4Desc: "Durante o piloto, o repasse é feito via Pix pela nossa equipe após o acerto, líquido da taxa.",
     s05Title: "05 · Exemplo prático",
     exampleGross: "Receita bruta",
     exampleFee: "Taxa FestChain (8%)",
@@ -60,7 +60,7 @@ const CONTENT = {
     s02Title: "02 · Who pays the fee",
     s02Body: "By default, the fee is deducted from your proceeds — the buyer pays only the ticket price. Optionally, you can pass the fee to the buyer, shown clearly at checkout. Payment processing is handled by a licensed provider (Stripe); FestChain absorbs that cost — the 8% is the only thing deducted from your payout. FestChain never stores card data.",
     s03Title: "03 · Refunds",
-    s03Body: "Full refund to the buyer; FestChain's fee on that sale is reversed — you never pay a fee on a sale that was undone. If the organizer cancels the whole event, all tickets are automatically refunded.",
+    s03Body: "Full refund to the buyer; FestChain's fee on that sale is reversed — you never pay a fee on a sale that was undone. If the organizer cancels the whole event, our team processes the refund for each ticket individually.",
     s04Title: "04 · When you get paid",
     step1: "Ticket sold",
     step1Desc: "The sale is recorded and the amount accrues in your statement.",
@@ -68,8 +68,8 @@ const CONTENT = {
     step2Desc: "The event takes place and the settlement window opens.",
     step3: "Settlement window",
     step3Desc: "Amounts are consolidated — refunds deducted, fees calculated.",
-    step4: "Automatic payout",
-    step4Desc: "Payouts are automatic, within 24h after settlement, net of fee.",
+    step4: "Payout sent",
+    step4Desc: "During the pilot, our team sends the payout via Pix after settlement, net of fee.",
     s05Title: "05 · Worked example",
     exampleGross: "Gross revenue",
     exampleFee: "FestChain fee (8%)",
@@ -97,8 +97,8 @@ function StepCard({ num, title, desc }) {
 }
 
 export default function PoliticaDePrecos() {
-  const { language } = useLanguage();
-  const c = CONTENT[language] || CONTENT["pt-BR"];
+  const { lang } = useLanguage();
+  const c = CONTENT[lang] || CONTENT["pt-BR"];
 
   return (
     <div className="min-h-screen bg-background">
